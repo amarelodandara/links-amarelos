@@ -20,7 +20,7 @@ O que já funciona:
 | Schema e validação do `edition.json` | ✅ |
 | 3 compositions nas resoluções certas | ✅ (com placeholder no lugar do design) |
 | Render de vídeo e de stills | ✅ testado ponta a ponta |
-| MCP do Paper conectado | ✅ `.mcp.json` |
+| MCP do Paper conectado | ✅ escopo de usuário |
 | Design real das peças | ⏸ aguardando Paper |
 | `settings.json` (tokens/cores) | ⏸ nasce depois do Paper |
 | Painel de edição dentro do Studio | ⏸ etapa 8 |
@@ -98,7 +98,13 @@ Uma composition vertical só cobre Stories + Twitter + BlueSky: as três aceitam
 
 1. Jogue as logos em `/brand` (ver `brand/README.md`).
 2. Abra o arquivo no **Paper Desktop** — isso sobe o MCP sozinho na porta 29979.
-   Confira com `/mcp` aqui dentro do Claude Code; deve listar `paper`.
+   Confira com `claude mcp list`; `paper` deve aparecer como `✔ Connected`.
+
+   O MCP está registrado em **escopo de usuário** (`~/.claude.json`), não no
+   repositório — é o que a doc do Paper recomenda, e evita o pedido de
+   aprovação a cada sessão que o escopo de projeto (`.mcp.json`) exige.
+   Como é uma ferramenta local de uma máquina só, não faz falta versionar.
+   Se um dia precisar: `claude mcp add paper --transport http http://127.0.0.1:29979/mcp --scope user`.
 3. Explore à vontade as direções visuais das 4 peças (Stories, Feed, Social,
    Carrossel), sem pressa e sem se preocupar com o que é implementável.
 4. Quando estiver satisfeita, é só avisar: o HTML+CSS aprovado vem do Paper via
