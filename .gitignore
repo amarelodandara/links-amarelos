@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+*.log
+
+# Assets renderizados — sobem manualmente pro Google Drive dedicado (seção 8)
+/outputs/
+
+# Remotion
+.remotion/
