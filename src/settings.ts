@@ -16,6 +16,9 @@ export const FEED = settings.formats.feed;
 export const CAROUSEL = settings.formats.carousel;
 export const CAROUSEL_SLIDE_COUNT = settings.formats.carouselSlideCount;
 
+/** Tela do form da composition `Editor` — ferramenta, não formato de saída. */
+export const EDITOR = settings.formats.editor;
+
 /** Duração de cada cena do vídeo, em frames. Soma = DURATION_IN_FRAMES. */
 export const SCENES = {
   opening: Math.round(settings.timing.openingSeconds * FPS),

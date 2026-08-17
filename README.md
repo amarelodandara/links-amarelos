@@ -8,9 +8,10 @@ Plano completo: `plano-teaser-studio.md`.
 
 ## Estado atual
 
-Etapas 1–5 da ordem de construção prontas: o design aprovado no Paper virou
-`settings.json` + componentes Remotion, e a composition `Stories` está
-implementada com o visual final dos dois temas — ver
+Etapas 1–5 e 8 da ordem de construção prontas: o design aprovado no Paper virou
+`settings.json` + componentes Remotion, a composition `Stories` está
+implementada com o visual final dos dois temas, e o `edition.json` já não precisa
+ser editado à mão — ver [Editor de edições](#editor-de-edições) e
 [Próximo passo](#próximo-passo).
 
 O que já funciona:
@@ -25,21 +26,24 @@ O que já funciona:
 | Design real das peças | ✅ aprovado no Paper (arquivo "Crayola") |
 | `settings.json` (tokens/cores) | ✅ extraído do Paper via MCP |
 | `Stories` com design final | ✅ abertura + 4 tabs + CTA, dois temas |
+| Form de criação dentro do Studio | ✅ composition `Editor` (etapa 8) |
 | `Feed` e `CarouselSlide` com design final | ⏸ etapas 6 e 7 (ainda placeholder) |
-| Painel de edição dentro do Studio | ⏸ etapa 8 |
 
 ## Comandos
 
 ```bash
-npm run studio        # preview com hot-reload e timeline (npx remotion studio)
+npm run studio        # Studio + watch de /content (é aqui que vive o Editor)
 npm run render Stories-links-ondas-042 outputs/stories.mp4
 npm run render:all links-ondas/042-edicao-de-exemplo   # pacote completo
 npm run render:all    # todas as edições
 npm run sync          # revalida /content e regenera o índice de edições
+npm run watch         # só o watch, sem o Studio
 npm run typecheck
 ```
 
-`sync` roda sozinho antes de `studio` e de `render`.
+`sync` roda sozinho antes de `studio` e de `render`. O `studio` sobe dois
+processos (watch + Studio) sob um supervisor pequeno, `scripts/studio.mjs`, pra
+que Ctrl-C derrube os dois.
 
 ## Estrutura
 
@@ -57,9 +61,13 @@ settings.json                # config global: resoluções, timing, cores, tipog
   settings.ts                # acesso tipado ao settings.json
   design/                    # tema, fundo dithered, textura, fontes, marcas SVG
   compositions/stories/      # Stories com o design final (abertura, tabs, CTA)
+  editor/                    # composition Editor: form + gravação do edition.json
   editions.generated.ts      # gerado por npm run sync, não editar
 /scripts
-  sync-editions.mjs          # valida /content, gera o índice
+  lib/editions.mjs           # varredura e validação de /content (compartilhada)
+  sync-editions.mjs          # valida /content, gera o índice — falha se inválido
+  watch-editions.mjs         # regenera o índice a cada mudança em /content
+  studio.mjs                 # sobe watch + Studio juntos
   render-all.mjs             # render em lote
 ```
 
@@ -86,13 +94,46 @@ abertura (parâmetro que emergiu do design no Paper).
 A validação recusa rodar se faltar tab, faltar autor, ou se alguma imagem
 apontada não existir no disco.
 
-Hoje o `edition.json` é editado à mão; o form de criação é a etapa 8 do plano e
-vai viver como painel dentro do próprio Remotion Studio.
+Dá pra editar esse arquivo à mão, mas o caminho normal é o Editor.
+
+## Editor de edições
+
+`npm run studio` e escolha a composition **`Editor`**, no topo do seletor. É um
+form: tipo da edição, número, nome, data, tema (só Hyperlinks) e as 4 tabs com
+nome do autor e imagem. Ele grava o `edition.json` e copia as imagens pra
+`/assets` — as compositions da edição aparecem no seletor sozinhas, sem
+reiniciar nada.
+
+O ciclo completo: o form grava via API do Studio → o watch de `/content`
+regenera `editions.generated.ts` → o hot-reload do Remotion registra as
+compositions novas.
+
+Detalhes que valem saber:
+
+- **A pasta sai do número + nome** (`042-nome-da-edicao`) e é definida na
+  criação. Editando uma edição que já existe, o nome aparece só como referência:
+  a API do Studio grava e apaga arquivos, mas não renomeia pastas, então trocar
+  número ou nome ali mexe apenas no conteúdo do `edition.json`.
+- **As imagens vão antes do `edition.json`**, de propósito — o watch revalida a
+  cada gravação, e um `edition.json` apontando pra imagem que ainda não existe
+  apareceria como edição inválida no meio do caminho.
+- **As pendências só aparecem depois da primeira tentativa de gravar**, pra que
+  um form em branco não abra com uma parede de erros.
+- Trocar a extensão da imagem de uma tab (png → jpg) apaga o arquivo antigo, pra
+  não deixar órfão em `/assets`.
+- O Editor é ferramenta, não peça de saída: o `render:all` percorre as edições
+  por id, então ele nunca entra no pacote renderizado.
+
+A edição interativa do canvas do Studio (arrastar elemento no preview e gravar o
+CSS de volta no fonte) está **desligada** em `remotion.config.ts` — um arrasto
+acidental injetava estilo no fonte, tanto no form quanto nas peças de vídeo. Se
+quiser esse comportamento de volta, é `Config.setInteractivityEnabled(true)`.
 
 ## Compositions
 
 | Composition | Formato | Serve |
 |---|---|---|
+| `Editor` | 1000×1400 | ferramenta: form das edições, não renderiza saída |
 | `Stories-<tipo>-<num>` | 1080×1920, 8s | Instagram Stories, Twitter/X, BlueSky |
 | `Feed-<tipo>-<num>` | 1080×1350, 8s | Instagram feed (4:5) |
 | `CarouselSlide-<tipo>-<num>` | 1456×1040, 6 stills | carrossel do Substack (14:10) |
@@ -106,10 +147,10 @@ Uma composition vertical só cobre Stories + Twitter + BlueSky: as três aceitam
 1. Revisar o `Stories` no Studio (`npm run studio`) — timing das cenas e
    entradas são ajustáveis em `settings.json` (`timing`) e nas cenas em
    `src/compositions/stories/`.
-2. Etapa 6: adaptar o layout aprovado pro `Feed` (4:5).
-3. Etapa 7: `CarouselSlide` (6 stills, 14:10 horizontal) — o Paper ainda não
+2. Rodar uma edição de verdade pelo `Editor`, pra ver se falta algum campo.
+3. Etapa 6: adaptar o layout aprovado pro `Feed` (4:5).
+4. Etapa 7: `CarouselSlide` (6 stills, 14:10 horizontal) — o Paper ainda não
    tem artboards desse formato; explorar lá primeiro se quiser layout próprio.
-4. Etapa 8: form de criação como painel dentro do Remotion Studio.
 
 `src/compositions/PreDesignPlaceholder.tsx` segue vivo só como andaime do
 `Feed` e do `CarouselSlide`; morre nas etapas 6 e 7.
@@ -117,3 +158,8 @@ Uma composition vertical só cobre Stories + Twitter + BlueSky: as três aceitam
 O fundo usa um shader WebGL (`@paper-design/shaders-react`, o mesmo do Paper);
 o render headless precisa do OpenGL "angle", já configurado em
 `remotion.config.ts`.
+
+O Studio avisa que o Remotion 4.0.507 espera `zod` 4.4.3 e o projeto tem 3.25.76.
+É só aviso — nada aqui usa `@remotion/zod-types`. Só vale resolver (`npx remotion
+add zod`) se um dia quiser o form automático de schema do Studio, que depende
+dele.

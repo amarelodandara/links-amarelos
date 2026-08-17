@@ -6,7 +6,9 @@
     "stories": { "width": 1080, "height": 1920 },
     "feed": { "width": 1080, "height": 1350 },
     "carousel": { "width": 1456, "height": 1040 },
-    "carouselSlideCount": 6
+    "carouselSlideCount": 6,
+    "$comment_editor": "Não é formato de saída — só o tamanho da tela do form da composition Editor.",
+    "editor": { "width": 1000, "height": 1400 }
   },
   "timing": {
     "$comment": "abertura + 4 tabs + CTA = durationInSeconds. Ajustar aqui rebalanceia as cenas.",

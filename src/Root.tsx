@@ -2,10 +2,12 @@ import { Composition, Folder } from "remotion";
 import { editions } from "./editions.generated";
 import { PreDesignPlaceholder } from "./compositions/PreDesignPlaceholder";
 import { Stories } from "./compositions/stories/Stories";
+import { EditionEditor } from "./editor/EditionEditor";
 import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
   DURATION_IN_FRAMES,
+  EDITOR,
   FEED,
   FPS,
   STORIES,
@@ -22,6 +24,20 @@ import {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/*
+       * Ferramenta, não peça de saída: o form de criação/edição das edições.
+       * O render em lote percorre as edições por id, então esta composition
+       * nunca entra no pacote renderizado.
+       */}
+      <Composition
+        id="Editor"
+        component={EditionEditor}
+        durationInFrames={1}
+        fps={FPS}
+        width={EDITOR.width}
+        height={EDITOR.height}
+      />
+
       {editions.map((entry) => {
         const id = `${entry.edition.type}-${String(entry.edition.editionNumber).padStart(3, "0")}`;
 

@@ -8,7 +8,8 @@
   "scripts": {
     "sync": "node scripts/sync-editions.mjs",
     "prestudio": "npm run sync",
-    "studio": "remotion studio",
+    "studio": "node scripts/studio.mjs",
+    "watch": "node scripts/watch-editions.mjs",
     "prerender": "npm run sync",
     "render": "remotion render",
     "prerender:all": "npm run sync",

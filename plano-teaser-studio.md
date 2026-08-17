@@ -79,11 +79,39 @@ localmente, dentro do próprio projeto) onde ela:
 
 **Decisão:** o form vive na mesma tela em que ela está vendo a timeline do
 vídeo — editar os dados (imagem, nome do autor) e ver o efeito na composição
-acontece no mesmo lugar, ao vivo. Na prática isso aponta pra um **painel
-customizado dentro do próprio Remotion Studio** (via `@remotion/studio`,
-que suporta painéis laterais/customizados junto ao preview), em vez de uma
-tela separada — assim editar o `edition.json` e ver o resultado no player
-acontece sem trocar de contexto.
+acontece no mesmo lugar, ao vivo, sem trocar de contexto.
+
+#### Correção (verificada no Remotion 4.0.507)
+
+A redação anterior desta seção dizia que o form seria um "painel lateral
+customizado" do Studio, via `@remotion/studio`. **Isso não existe.** Não há API
+de registro de painel, aba ou plugin no Studio — `@remotion/studio` expõe um
+conjunto de funções para _interagir_ com o Studio, não para estendê-lo com
+superfícies de UI próprias. O que existe de fato:
+
+| Recurso | Serve pra |
+|---|---|
+| `schema` na `<Composition>` | Studio gera um form automático a partir do schema Zod (inputs, dropdown de enum, arrays com add/remove, date picker, `zColor`, `zTextarea`) |
+| `writeStaticFile` / `deleteStaticFile` / `getStaticFiles` / `watchStaticFile` | ler e gravar arquivos dentro da publicDir — que neste projeto é `/content` |
+| `saveDefaultProps` / `focusDefaultPropsPath` | gravar valores de volta no `defaultProps` do arquivo raiz |
+| `visualControl` | expor uma constante do código como controle editável ao vivo, com save de volta pro fonte |
+| `play` / `pause` / `seek` / `goToComposition` / `restartStudio` | dirigir o player e o Studio por código |
+
+Duas consequências práticas:
+
+1. **UI própria só roda dentro de uma composition.** Sem API de painel, o form
+   precisa ser uma composition que renderiza um form de verdade (aparece na
+   área do canvas, ao lado da timeline) — o que ainda atende a intenção
+   original de editar e ver o resultado na mesma tela. Confirmado que os
+   atalhos de teclado do Studio são ignorados enquanto um `<input>` ou
+   `<textarea>` tem foco, então digitar no form não dispara play/pause.
+2. **O form automático de schema grava no lugar errado.** Ele salva em
+   `defaultProps` no `Root.tsx` — mas a fonte da verdade aqui é o
+   `edition.json`, e o `Root.tsx` é gerado a partir dele pelo `npm run sync`.
+   Edições feitas pelo form de schema seriam sobrescritas no próximo sync. Por
+   isso a gravação usa `writeStaticFile`, que escreve direto no `edition.json`
+   e nos assets (cria as pastas que faltarem e recusa escrever fora da
+   publicDir).
 
 ### 3.1 Config global (`settings.json`) — separado do `edition.json`
 
@@ -266,7 +294,8 @@ server do Figma/Paper configurado desde o início (não é uma etapa "depois",
 6. Replicar pras outras composições de vídeo (Feed; Twitter/BlueSky
    reaproveitando a composition vertical, seção 4).
 7. Composition `CarouselSlide` (stills, seção 5).
-8. Form de criação como painel dentro do Remotion Studio (seção 3), editando
-   `edition.json` com efeito ao vivo na composição.
+8. Form de criação como **composition `Editor`** dentro do Remotion Studio
+   (seção 3 e sua correção), gravando `edition.json` e os assets via
+   `writeStaticFile`, com efeito ao vivo nas compositions da edição.
 9. Script de render em lote + validação de que assets obrigatórios existem
    antes de rodar.
