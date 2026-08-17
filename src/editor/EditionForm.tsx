@@ -1,8 +1,13 @@
 import { useCallback, useMemo, useState } from "react";
 import { staticFile } from "remotion";
-import type { EditionEntry, EditionType } from "../schema/edition";
+import { Button } from "@base-ui/react/button";
+import { Field } from "@base-ui/react/field";
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
+import { type EditionEntry, type EditionType, editionTypeSchema } from "../schema/edition";
 import { SANS } from "../design/fonts";
-import { settings } from "../settings";
+import "../design/tokens.generated.css";
+import "../design/controls.css";
 import {
   type Draft,
   type EditionWriter,
@@ -21,90 +26,70 @@ import {
 
 const NEW = "__new__";
 
-const c = settings.colors;
-
+/**
+ * Cores como custom property, não hex: o mesmo token vale no style inline e no
+ * controls.css. Os `--ui-*` saem do controls.css; o resto, do settings.json via
+ * tokens.generated.css.
+ */
 export const formColors = {
-  bg: "#FFFFFF",
-  ink: c.brandBlack,
-  muted: "#6B6B6B",
-  line: "#E4E4E4",
-  field: "#FAFAFA",
-  danger: "#B42318",
-  ok: "#0A7A3D",
+  bg: "var(--background)",
+  ink: "var(--foreground)",
+  muted: "var(--ui-muted)",
+  line: "var(--ui-line)",
+  field: "var(--ui-field)",
+  danger: "var(--ui-danger)",
+  ok: "var(--ui-ok)",
 };
 
 const ui = formColors;
 
+/** Hyperlinks é azul, Links + Ondas é amarelo. */
 export const accentFor = (type: EditionType) =>
-  type === "hyperlinks" ? c.code : c.sunDark;
+  type === "hyperlinks" ? "var(--code)" : "var(--sun-dark)";
 
-const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <span
-    style={{
-      fontSize: 13,
-      fontWeight: 600,
-      letterSpacing: "0.04em",
-      textTransform: "uppercase",
-      color: ui.muted,
-    }}
-  >
-    {children}
-  </span>
+/** Título de um grupo de controles — não rotula um campo só. */
+const GroupLabel: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <span className="ui-field-label">{children}</span>
 );
 
-const inputStyle: React.CSSProperties = {
-  fontFamily: SANS,
-  fontSize: 17,
-  fontWeight: 500,
-  color: ui.ink,
-  padding: "12px 14px",
-  borderRadius: 10,
-  border: `1px solid ${ui.line}`,
-  backgroundColor: ui.field,
-  width: "100%",
-  boxSizing: "border-box",
-};
-
-const Field: React.FC<{
+/**
+ * Campo de texto. O `Field.Root` do Base UI amarra label e controle pelo id
+ * sozinho, então o clique no rótulo cai no input certo sem `htmlFor` na mão.
+ */
+const TextField: React.FC<{
   label: string;
   value: string;
   placeholder?: string;
   onChange: (value: string) => void;
 }> = ({ label, value, placeholder, onChange }) => (
-  <label style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1, minWidth: 0 }}>
-    <Label>{label}</Label>
-    <input
-      style={inputStyle}
+  <Field.Root className="ui-field">
+    <Field.Label className="ui-field-label">{label}</Field.Label>
+    <Field.Control
+      className="ui-input"
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
     />
-  </label>
+  </Field.Root>
 );
 
+/**
+ * Chip do form. Cada um pode ter o próprio acento (amarelo/azul, por tipo de
+ * edição), então a cor entra como custom property em vez de style direto — o
+ * estado pressionado é do `data-pressed`, que o CSS lê.
+ */
 const Chip: React.FC<{
-  active: boolean;
+  value: string;
   accent: string;
-  onClick: () => void;
   children: React.ReactNode;
-}> = ({ active, accent, onClick, children }) => (
-  <button
-    type="button"
-    onClick={onClick}
-    style={{
-      fontFamily: SANS,
-      fontSize: 15,
-      fontWeight: 600,
-      padding: "9px 14px",
-      borderRadius: 999,
-      cursor: "pointer",
-      color: active ? "#FFFFFF" : ui.ink,
-      backgroundColor: active ? accent : "#F2F2F2",
-      border: `1px solid ${active ? accent : ui.line}`,
-    }}
+}> = ({ value, accent, children }) => (
+  <Toggle
+    className="ui-chip"
+    value={value}
+    style={{ "--ui-accent": accent }}
   >
     {children}
-  </button>
+  </Toggle>
 );
 
 export const EditionForm: React.FC<{
@@ -213,7 +198,9 @@ export const EditionForm: React.FC<{
 
   return (
     <div
+      // O acento padrão é o amarelo; aqui ele segue o tipo da edição aberta.
       style={{
+        "--ui-accent": accent,
         fontFamily: SANS,
         color: ui.ink,
         display: "flex",
@@ -223,58 +210,69 @@ export const EditionForm: React.FC<{
       }}
     >
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <Label>Edição</Label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-          <Chip active={isNew} accent={accent} onClick={() => selectTarget(NEW)}>
+        <GroupLabel>Edição</GroupLabel>
+        {/* O ToggleGroup garante escolha única e navegação por setas; clicar no
+            chip já ativo não desmarca porque a seleção nunca pode ficar vazia. */}
+        <ToggleGroup
+          className="ui-chip-group"
+          aria-label="Edição"
+          value={[target]}
+          onValueChange={(next) => {
+            if (next[0] != null) selectTarget(next[0]);
+          }}
+        >
+          <Chip value={NEW} accent={accent}>
             + Nova
           </Chip>
           {editions.map((entry) => (
             <Chip
               key={entry.dir}
-              active={target === entry.dir}
+              value={entry.dir}
               accent={accentFor(entry.edition.type)}
-              onClick={() => selectTarget(entry.dir)}
             >
               {entry.edition.type === "hyperlinks" ? "HL" : "LO"} #
               {entry.edition.editionNumber}
             </Chip>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <Label>Tipo</Label>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+        <GroupLabel>Tipo</GroupLabel>
+        <ToggleGroup
+          className="ui-chip-group"
+          aria-label="Tipo"
+          value={[draft.type]}
+          onValueChange={(next) => {
+            const type = editionTypeSchema.safeParse(next[0]);
+            if (type.success) patch({ type: type.data });
+          }}
+        >
           {(["links-ondas", "hyperlinks"] as const).map((type) => (
-            <Chip
-              key={type}
-              active={draft.type === type}
-              accent={accentFor(type)}
-              onClick={() => patch({ type })}
-            >
+            <Chip key={type} value={type} accent={accentFor(type)}>
               {type === "links-ondas" ? "Links + Ondas Amarelas" : "Hyperlinks"}
             </Chip>
           ))}
-        </div>
+        </ToggleGroup>
       </div>
 
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <div style={{ width: 130, flexShrink: 0 }}>
-          <Field
+          <TextField
             label="Número"
             value={draft.editionNumber}
             placeholder="42"
             onChange={(editionNumber) => patch({ editionNumber })}
           />
         </div>
-        <Field
+        <TextField
           label={isNew ? "Nome (monta a pasta)" : "Nome (pasta já criada)"}
           value={draft.name}
           placeholder="nome da edição"
           onChange={(name) => patch({ name })}
         />
         <div style={{ width: 170, flexShrink: 0 }}>
-          <Field
+          <TextField
             label="Lançamento"
             value={draft.airDate}
             placeholder="2026-08-15"
@@ -284,7 +282,7 @@ export const EditionForm: React.FC<{
       </div>
 
       {draft.type === "hyperlinks" ? (
-        <Field
+        <TextField
           label="Tema (aparece na abertura)"
           value={draft.theme}
           placeholder="tema aqui"
@@ -293,7 +291,7 @@ export const EditionForm: React.FC<{
       ) : null}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-        <Label>4 tabs</Label>
+        <GroupLabel>4 tabs</GroupLabel>
         {draft.tabs.map((tab, index) => {
           const preview = tab.file
             ? URL.createObjectURL(tab.file)
@@ -333,12 +331,15 @@ export const EditionForm: React.FC<{
               >
                 {preview ? null : "sem imagem"}
               </div>
-              <input
-                style={{ ...inputStyle, flex: 1, minWidth: 0 }}
-                value={tab.author}
-                placeholder={`Nome do autor da tab ${index + 1}`}
-                onChange={(e) => patchTab(index, { author: e.target.value })}
-              />
+              <Field.Root style={{ flex: 1, minWidth: 0 }}>
+                <Field.Control
+                  className="ui-input"
+                  aria-label={`Autor da tab ${index + 1}`}
+                  value={tab.author}
+                  placeholder={`Nome do autor da tab ${index + 1}`}
+                  onChange={(e) => patchTab(index, { author: e.target.value })}
+                />
+              </Field.Root>
               <input
                 type="file"
                 accept="image/*"
@@ -372,24 +373,9 @@ export const EditionForm: React.FC<{
         ) : null}
 
         <div style={{ display: "flex", alignItems: "center", gap: 14, flexWrap: "wrap" }}>
-          <button
-            type="button"
-            disabled={saving}
-            onClick={save}
-            style={{
-              fontFamily: SANS,
-              fontSize: 18,
-              fontWeight: 700,
-              padding: "14px 26px",
-              borderRadius: 12,
-              border: "none",
-              color: "#FFFFFF",
-              backgroundColor: saving ? "#C9C9C9" : accent,
-              cursor: saving ? "default" : "pointer",
-            }}
-          >
+          <Button className="ui-action ui-action--lg" disabled={saving} onClick={save}>
             {saving ? "Gravando…" : isNew ? "Criar edição" : "Salvar alterações"}
-          </button>
+          </Button>
           <span style={{ fontSize: 14, color: ui.muted }}>
             {dir ? `content/${dir}` : "a pasta sai do número + nome"}
           </span>

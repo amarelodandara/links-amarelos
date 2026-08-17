@@ -1,43 +1,65 @@
+import { Toggle } from "@base-ui/react/toggle";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
 import { SANS } from "../src/design/fonts";
-import { settings } from "../src/settings";
+import "../src/design/tokens.generated.css";
+import "../src/design/controls.css";
 
-/** Átomos de UI do app. Tom neutro de ferramenta; o amarelo é o acento. */
-
+/**
+ * Átomos de UI do app. Tom neutro de ferramenta; o amarelo é o acento.
+ *
+ * As cores são as custom properties, não hex: o mesmo token vale no style
+ * inline daqui e nas regras do controls.css, então os dois nunca divergem.
+ */
 export const colors = {
-  surface: "#FFFFFF",
-  ground: "#F4F4F4",
-  ink: settings.colors.brandBlack,
-  muted: "#6B6B6B",
-  line: "#E4E4E4",
-  accent: settings.colors.sunDark,
-  danger: "#B42318",
-  ok: "#0A7A3D",
+  surface: "var(--background)",
+  ground: "var(--ui-ground)",
+  ink: "var(--foreground)",
+  muted: "var(--ui-muted)",
+  line: "var(--ui-line)",
+  accent: "var(--sun-dark)",
+  danger: "var(--ui-danger)",
+  ok: "var(--ui-ok)",
 };
 
-export const Chip: React.FC<{
-  active?: boolean;
-  disabled?: boolean;
-  onClick: () => void;
+/**
+ * Grupo de chips de escolha única. O Base UI cuida da interação: só um fica
+ * pressionado, e as setas do teclado andam entre eles com foco roving.
+ *
+ * `value`/`onChange` são de um item só — o `multiple` fica desligado, então o
+ * array do ToggleGroup tem no máximo um elemento. Voltar a clicar no chip ativo
+ * o despressiona; aqui isso é ignorado, porque a coluna precisa de uma seleção.
+ */
+export const ChipGroup = <Value extends string>({
+  value,
+  onChange,
+  ariaLabel,
+  children,
+}: {
+  value: Value;
+  onChange: (value: Value) => void;
+  ariaLabel: string;
   children: React.ReactNode;
-}> = ({ active, disabled, onClick, children }) => (
-  <button
-    type="button"
-    disabled={disabled}
-    onClick={onClick}
-    style={{
-      fontFamily: SANS,
-      fontSize: 14,
-      fontWeight: 600,
-      padding: "8px 13px",
-      borderRadius: 999,
-      cursor: disabled ? "default" : "pointer",
-      color: active ? "#FFFFFF" : disabled ? "#AAAAAA" : colors.ink,
-      backgroundColor: active ? colors.accent : "#F2F2F2",
-      border: `1px solid ${active ? colors.accent : colors.line}`,
+}) => (
+  <ToggleGroup
+    className="ui-chip-group"
+    aria-label={ariaLabel}
+    value={[value]}
+    onValueChange={(next) => {
+      if (next[0] != null) onChange(next[0]);
     }}
   >
     {children}
-  </button>
+  </ToggleGroup>
+);
+
+export const Chip: React.FC<{
+  value: string;
+  disabled?: boolean;
+  children: React.ReactNode;
+}> = ({ value, disabled, children }) => (
+  <Toggle className="ui-chip ui-chip--sm" value={value} disabled={disabled}>
+    {children}
+  </Toggle>
 );
 
 export const Column: React.FC<{
@@ -73,7 +95,7 @@ export const Column: React.FC<{
           fontFamily: SANS,
           fontSize: 13,
           fontWeight: 700,
-          color: "#FFFFFF",
+          color: colors.surface,
           backgroundColor: colors.ink,
           borderRadius: 999,
           width: 22,

@@ -1,0 +1,207 @@
+/*
+ * Estilo dos controles do Base UI.
+ *
+ * O resto do projeto é style inline, mas o Base UI entrega os componentes sem
+ * estilo e expõe o estado por data-attribute (`data-pressed`, `data-checked`,
+ * `data-disabled`, `data-status`) — que style inline não alcança. Então os
+ * controles interativos moram aqui, e só eles.
+ *
+ * Depende do tokens.generated.css, que traz a paleta do settings.json.
+ */
+
+:root {
+  /* Papéis, ligados na paleta da marca. O acento padrão é o amarelo; a
+     composition de Hyperlinks troca `--ui-accent` pro azul no elemento dela. */
+  --ui-ink: var(--foreground);
+  --ui-surface: var(--background);
+  --ui-accent: var(--sun-dark);
+  --ui-on-accent: var(--background);
+
+  /* Neutros de ferramenta. A paleta da marca não cobre cinza de chrome nem
+     erro/sucesso — são cores de interface, não de peça publicada. */
+  --ui-ground: #f4f4f4;
+  --ui-muted: #6b6b6b;
+  --ui-line: #e4e4e4;
+  --ui-field: #fafafa;
+  --ui-track: #ededed;
+  --ui-off: #f2f2f2;
+  --ui-disabled: #c9c9c9;
+  --ui-danger: #b42318;
+  --ui-ok: #0a7a3d;
+}
+
+/* Foco visível igual em todos os controles — teclado é o caminho principal
+   aqui, porque o Base UI dá navegação por setas dentro dos grupos. */
+.ui-chip:focus-visible,
+.ui-input:focus-visible,
+.ui-checkbox:focus-visible,
+.ui-action:focus-visible {
+  outline: 2px solid var(--ui-accent);
+  outline-offset: 2px;
+}
+
+/* ── Chips (ToggleGroup + Toggle) ─────────────────────────────────────── */
+
+.ui-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ui-chip {
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 9px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--ui-ink);
+  background-color: var(--ui-off);
+  border: 1px solid var(--ui-line);
+}
+
+.ui-chip[data-pressed] {
+  color: var(--ui-on-accent);
+  background-color: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.ui-chip[data-disabled] {
+  cursor: default;
+  color: #aaaaaa;
+}
+
+/* O chip pequeno é o do app (seletor de peça e de slide). */
+.ui-chip--sm {
+  font-size: 14px;
+  padding: 8px 13px;
+}
+
+/* ── Campos de texto (Field) ──────────────────────────────────────────── */
+
+.ui-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ui-field-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ui-muted);
+}
+
+.ui-input {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ui-ink);
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--ui-line);
+  background-color: var(--ui-field);
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ui-input:focus-visible {
+  border-color: var(--ui-accent);
+}
+
+/* ── Checkbox ─────────────────────────────────────────────────────────── */
+
+.ui-check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--ui-ink);
+  cursor: pointer;
+}
+
+.ui-check-row:has(.ui-checkbox[data-disabled]) {
+  cursor: default;
+  color: var(--ui-muted);
+}
+
+.ui-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  padding: 0;
+  border-radius: 5px;
+  border: 1px solid var(--ui-line);
+  background-color: var(--ui-surface);
+  cursor: inherit;
+}
+
+.ui-checkbox[data-checked] {
+  background-color: var(--ui-accent);
+  border-color: var(--ui-accent);
+}
+
+.ui-checkbox[data-disabled] {
+  background-color: var(--ui-off);
+  border-color: var(--ui-line);
+}
+
+.ui-checkbox[data-checked][data-disabled] {
+  background-color: var(--ui-disabled);
+  border-color: var(--ui-disabled);
+}
+
+.ui-checkbox-indicator {
+  display: flex;
+  color: var(--ui-on-accent);
+}
+
+/* ── Barra de progresso (Progress) ────────────────────────────────────── */
+
+.ui-progress-track {
+  position: relative;
+  height: 6px;
+  border-radius: 999px;
+  background-color: var(--ui-track);
+  overflow: hidden;
+}
+
+/* O Base UI escreve `width` inline no indicador a partir do valor. */
+.ui-progress-indicator {
+  position: absolute;
+  background-color: var(--ui-accent);
+}
+
+.ui-progress--error .ui-progress-indicator {
+  background-color: var(--ui-danger);
+}
+
+/* ── Botão de ação (Button) ───────────────────────────────────────────── */
+
+.ui-action {
+  font: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  padding: 14px 22px;
+  border-radius: 12px;
+  border: none;
+  color: var(--ui-on-accent);
+  background-color: var(--ui-accent);
+  cursor: pointer;
+}
+
+.ui-action[data-disabled] {
+  background-color: var(--ui-disabled);
+  cursor: default;
+}
+
+.ui-action--lg {
+  font-size: 18px;
+  padding: 14px 26px;
+}

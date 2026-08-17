@@ -33,7 +33,7 @@
   },
   "dithering": {
     "$comment": "Shader de fundo (@paper-design/shaders-react), mesmo preset nos dois temas.",
-    "shape": "sphere",
+    "figure": "sphere",
     "type": "4x4",
     "size": 6,
     "scale": 2.14,

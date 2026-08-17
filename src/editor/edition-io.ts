@@ -45,7 +45,7 @@ export const nameFromSlug = (slug: string): string =>
 
 const extensionOf = (fileName: string): string => {
   const ext = fileName.split(".").pop()?.toLowerCase() ?? "";
-  return (IMAGE_EXTENSIONS as readonly string[]).includes(ext) ? ext : "png";
+  return IMAGE_EXTENSIONS.some((known) => known === ext) ? ext : "png";
 };
 
 /** Caminho do asset de uma tab, relativo à pasta da edição. */
@@ -168,11 +168,15 @@ export const saveEdition = async ({
     editionNumber: Number(draft.editionNumber),
     type: draft.type,
     airDate: draft.airDate,
-    ...(draft.type === "hyperlinks" && draft.theme.trim()
-      ? { theme: draft.theme.trim() }
-      : {}),
     tabs,
   };
+
+  // Só o Hyperlinks tem tema, e o schema recusa `theme: ""` — nesses casos o
+  // campo não entra no arquivo em vez de entrar vazio.
+  const theme = draft.theme.trim();
+  if (draft.type === "hyperlinks" && theme) {
+    edition.theme = theme;
+  }
 
   await writer.writeFile(
     `${dir}/edition.json`,

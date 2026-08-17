@@ -1,6 +1,6 @@
 import { Dithering } from "@paper-design/shaders-react";
 import { AbsoluteFill, useCurrentFrame, useVideoConfig } from "remotion";
-import { settings } from "../settings";
+import { DITHERING, settings } from "../settings";
 import type { Theme } from "./theme";
 import { textureDataUri } from "./texture";
 
@@ -13,7 +13,6 @@ import { textureDataUri } from "./texture";
 export const Background: React.FC<{ theme: Theme }> = ({ theme }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const d = settings.dithering;
 
   return (
     <AbsoluteFill style={{ backgroundColor: theme.background }}>
@@ -25,17 +24,19 @@ export const Background: React.FC<{ theme: Theme }> = ({ theme }) => {
           backgroundRepeat: "repeat",
         }}
       />
+      {/* eslint-disable anti-slop/no-shape-in-symbol-names -- `shape` é o nome da prop na lib, não escolha nossa. */}
       <Dithering
         speed={0}
         frame={(frame / fps) * 1000}
-        shape="sphere"
-        type={d.type as "4x4"}
-        size={d.size}
-        scale={d.scale}
+        shape={DITHERING.figure}
+        type={DITHERING.pattern}
+        size={DITHERING.size}
+        scale={DITHERING.scale}
         colorBack="#00000000"
-        colorFront={d.colorFront}
-        style={{ position: "absolute", inset: 0, opacity: d.opacity }}
+        colorFront={DITHERING.colorFront}
+        style={{ position: "absolute", inset: 0, opacity: DITHERING.opacity }}
       />
+      {/* eslint-enable anti-slop/no-shape-in-symbol-names */}
     </AbsoluteFill>
   );
 };

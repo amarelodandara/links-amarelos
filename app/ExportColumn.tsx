@@ -1,4 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
+import { Button } from "@base-ui/react/button";
+import { Checkbox } from "@base-ui/react/checkbox";
+import { CheckboxGroup } from "@base-ui/react/checkbox-group";
+import { Progress } from "@base-ui/react/progress";
 import { SANS } from "../src/design/fonts";
 import type { EditionEntry } from "../src/schema/edition";
 import { PIECES, type PieceId } from "./pieces";
@@ -28,6 +32,26 @@ interface Job {
   outputDir?: string;
   steps: Step[];
 }
+
+/**
+ * O grupo de checkbox devolve os `name` dos itens marcados como `string[]`; só
+ * os ids das peças interessam, e é aqui que eles voltam a ser `PieceId`.
+ */
+const isPieceId = (value: string): value is PieceId =>
+  PIECES.some((piece) => piece.id === value);
+
+/** O tique do checkbox. O Base UI só monta o indicador quando está marcado. */
+const CheckMark: React.FC = () => (
+  <svg viewBox="0 0 12 12" width="11" height="11" fill="none" aria-hidden>
+    <path
+      d="M1.5 6.2 4.4 9 10.5 2.8"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
+  </svg>
+);
 
 const statusLabel = (step: Step) => {
   if (step.status === "done") return "pronto";
@@ -64,12 +88,6 @@ export const ExportColumn: React.FC<{ entry: EditionEntry | null }> = ({ entry }
     setError(null);
   }, [entry?.dir]);
 
-  const toggle = useCallback((piece: PieceId) => {
-    setSelected((prev) =>
-      prev.includes(piece) ? prev.filter((p) => p !== piece) : [...prev, piece],
-    );
-  }, []);
-
   const start = useCallback(async () => {
     if (!entry) return;
     setError(null);
@@ -95,54 +113,38 @@ export const ExportColumn: React.FC<{ entry: EditionEntry | null }> = ({ entry }
 
   return (
     <div style={{ fontFamily: SANS, display: "flex", flexDirection: "column", gap: 18 }}>
-      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <CheckboxGroup
+        aria-label="Peças do pacote"
+        disabled={running}
+        value={selected}
+        onValueChange={(value) => setSelected(value.filter(isPieceId))}
+        style={{ display: "flex", flexDirection: "column", gap: 10 }}
+      >
         {PIECES.map((piece) => (
-          <label
-            key={piece.id}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              fontSize: 15,
-              color: colors.ink,
-              cursor: running ? "default" : "pointer",
-            }}
-          >
-            <input
-              type="checkbox"
-              checked={selected.includes(piece.id)}
-              disabled={running}
-              onChange={() => toggle(piece.id)}
-              style={{ width: 17, height: 17, accentColor: colors.accent }}
-            />
+          <label key={piece.id} className="ui-check-row">
+            {/* O `name` é o que entra no array de valor do grupo. */}
+            <Checkbox.Root className="ui-checkbox" name={piece.id}>
+              <Checkbox.Indicator className="ui-checkbox-indicator">
+                <CheckMark />
+              </Checkbox.Indicator>
+            </Checkbox.Root>
             <span style={{ fontWeight: 600 }}>{piece.label}</span>
             <span style={{ fontSize: 13, color: colors.muted }}>{piece.format}</span>
           </label>
         ))}
-      </div>
+      </CheckboxGroup>
 
-      <button
-        type="button"
+      <Button
+        className="ui-action"
         disabled={running || selected.length === 0}
         onClick={start}
-        style={{
-          fontFamily: SANS,
-          fontSize: 17,
-          fontWeight: 700,
-          padding: "14px 22px",
-          borderRadius: 12,
-          border: "none",
-          color: "#FFFFFF",
-          backgroundColor: running || selected.length === 0 ? "#C9C9C9" : colors.accent,
-          cursor: running || selected.length === 0 ? "default" : "pointer",
-        }}
       >
         {running
           ? "Renderizando…"
           : selected.length === PIECES.length
             ? "Exportar pacote completo"
             : `Exportar ${selected.length} peça(s)`}
-      </button>
+      </Button>
 
       {error ? (
         <div style={{ fontSize: 14, color: colors.danger }}>{error}</div>
@@ -167,22 +169,19 @@ export const ExportColumn: React.FC<{ entry: EditionEntry | null }> = ({ entry }
                   {statusLabel(step)}
                 </span>
               </div>
-              <div
-                style={{
-                  height: 6,
-                  borderRadius: 999,
-                  backgroundColor: "#EDEDED",
-                  overflow: "hidden",
-                }}
+              {/* O Progress do Base UI escreve a largura do indicador e o
+                  aria-valuenow a partir de `value` — a barra vira informação
+                  pro leitor de tela, não só pixel. */}
+              <Progress.Root
+                className={step.status === "error" ? "ui-progress--error" : undefined}
+                value={Math.round(step.progress * 100)}
+                aria-label={step.label}
+                getAriaValueText={() => statusLabel(step)}
               >
-                <div
-                  style={{
-                    height: "100%",
-                    width: `${Math.round(step.progress * 100)}%`,
-                    backgroundColor: step.status === "error" ? colors.danger : colors.accent,
-                  }}
-                />
-              </div>
+                <Progress.Track className="ui-progress-track">
+                  <Progress.Indicator className="ui-progress-indicator" />
+                </Progress.Track>
+              </Progress.Root>
               {step.error ? (
                 <span style={{ fontSize: 13, color: colors.danger }}>{step.error}</span>
               ) : null}

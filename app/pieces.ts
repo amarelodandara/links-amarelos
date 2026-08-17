@@ -15,6 +15,19 @@ import { CAROUSEL, CAROUSEL_SLIDE_COUNT, DURATION_IN_FRAMES, FEED, FPS, STORIES 
 
 export type PieceId = "stories" | "feed" | "carousel";
 
+/**
+ * O que toda peça recebe no player e no render. `type` e não `interface`: o
+ * `inputProps` do Player do Remotion pede algo indexável por string, e só o
+ * alias ganha a index signature implícita.
+ *
+ * O `label` é o nome da peça pro placeholder desenhar; as compositions com
+ * design próprio ignoram, mas mandar sempre mantém um contrato só pras três.
+ */
+export type PieceProps = {
+  entry: EditionEntry;
+  label: string;
+};
+
 export interface Piece {
   id: PieceId;
   label: string;
@@ -23,8 +36,8 @@ export interface Piece {
   height: number;
   fps: number;
   durationInFrames: number;
-  component: ComponentType<any>;
-  props: (entry: EditionEntry) => Record<string, unknown>;
+  component: ComponentType<PieceProps>;
+  props: (entry: EditionEntry) => PieceProps;
   /** Peça estática: o player mostra frame a frame, sem play contínuo. */
   isStills?: boolean;
   /**
@@ -45,7 +58,7 @@ export const PIECES: Piece[] = [
     fps: FPS,
     durationInFrames: DURATION_IN_FRAMES,
     component: Stories,
-    props: (entry) => ({ entry }),
+    props: (entry) => ({ entry, label: "Stories" }),
     posterFrame: 60,
   },
   {

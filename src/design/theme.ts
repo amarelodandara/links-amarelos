@@ -36,7 +36,7 @@ export interface Theme {
   };
 }
 
-export const themes: Record<EditionType, Theme> = {
+export const themes = {
   "links-ondas": {
     background: c.sunLighter,
     textureColor: c.sun,
@@ -79,4 +79,4 @@ export const themes: Record<EditionType, Theme> = {
       dateBlendMode: "normal",
     },
   },
-};
+} satisfies Record<EditionType, Theme>;

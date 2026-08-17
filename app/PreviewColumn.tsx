@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Player, type PlayerRef } from "@remotion/player";
 import type { EditionEntry } from "../src/schema/edition";
 import { PIECES, type PieceId } from "./pieces";
-import { Chip, Empty, colors } from "./ui";
+import { Chip, ChipGroup, Empty, colors } from "./ui";
 
 /**
  * Coluna 2: o preview. Roda o mesmo componente que o render usa, então é
@@ -41,13 +41,13 @@ export const PreviewColumn: React.FC<{
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 14, height: "100%" }}>
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <ChipGroup ariaLabel="Peça" value={pieceId} onChange={setPieceId}>
         {PIECES.map((p) => (
-          <Chip key={p.id} active={p.id === pieceId} onClick={() => setPieceId(p.id)}>
+          <Chip key={p.id} value={p.id}>
             {p.label}
           </Chip>
         ))}
-      </div>
+      </ChipGroup>
 
       <div style={{ fontSize: 13, color: colors.muted }}>{piece.format}</div>
 
@@ -90,11 +90,17 @@ export const PreviewColumn: React.FC<{
       {piece.isStills ? (
         <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
           <span style={{ fontSize: 13, color: colors.muted, marginRight: 4 }}>Slide</span>
-          {Array.from({ length: piece.durationInFrames }, (_, i) => (
-            <Chip key={i} active={i === slide} onClick={() => setSlide(i)}>
-              {i + 1}
-            </Chip>
-          ))}
+          <ChipGroup
+            ariaLabel="Slide"
+            value={String(slide)}
+            onChange={(next) => setSlide(Number(next))}
+          >
+            {Array.from({ length: piece.durationInFrames }, (_, i) => (
+              <Chip key={i} value={String(i)}>
+                {i + 1}
+              </Chip>
+            ))}
+          </ChipGroup>
         </div>
       ) : null}
     </div>
