@@ -105,6 +105,7 @@ Duas consequências práticas:
    original de editar e ver o resultado na mesma tela. Confirmado que os
    atalhos de teclado do Studio são ignorados enquanto um `<input>` ou
    `<textarea>` tem foco, então digitar no form não dispara play/pause.
+   **Isso virou o caminho secundário** — ver a seção 3.3.
 2. **O form automático de schema grava no lugar errado.** Ele salva em
    `defaultProps` no `Root.tsx` — mas a fonte da verdade aqui é o
    `edition.json`, e o `Root.tsx` é gerado a partir dele pelo `npm run sync`.
@@ -112,6 +113,45 @@ Duas consequências práticas:
    isso a gravação usa `writeStaticFile`, que escreve direto no `edition.json`
    e nos assets (cria as pastas que faltarem e recusa escrever fora da
    publicDir).
+
+### 3.3 App de 3 colunas — o shell definitivo
+
+Depois de usar a composition `Editor`, ficou claro que o Studio traz junto um
+monte de coisa que não serve pra este fluxo: timeline, scrubbing, seletor de
+composition, inspector. O trabalho real é sempre a mesma sequência de três
+passos, e o pedido virou esse: **input → preview → export**, uma coluna por
+passo.
+
+Dois limites do Studio decidem a arquitetura:
+
+- não existe opção de esconder timeline ou sidebar (`setMaxTimelineTracks`
+  limita faixas, nada esconde painel);
+- não existe API cliente pra disparar um render — `@remotion/studio` expõe
+  `play`/`pause`/`seek`/`goToComposition` e operações de arquivo, nada que
+  comece um export.
+
+Ou seja: a coluna de export não pode existir dentro de uma composition. O app
+tem que ser o shell.
+
+Forma final (`npm run app`):
+
+| Coluna | Como funciona |
+|---|---|
+| 1 · Input | O mesmo `EditionForm` do Studio, gravando por HTTP no servidor local |
+| 2 · Preview | `@remotion/player` rodando o mesmo componente do render — WYSIWYG, sem timeline, alternando entre as 3 peças |
+| 3 · Export | Dispara o mesmo `remotion render` da CLI no servidor local, com progresso por peça |
+
+Decisões que sustentam isso:
+
+- **O render fica na CLI, não em `@remotion/renderer` programático.** Além de
+  menos código, a CLI lê o `remotion.config.ts` — onde mora o OpenGL "angle"
+  que o shader do fundo precisa. O arquivo que sai do app é igual ao do
+  `npm run render`.
+- **O form é um só**, hospedado nos dois shells; só o transporte de gravação
+  muda (`EditionWriter`). As regras de ordem das gravações moram em
+  `edition-io.ts`.
+- **O Studio continua existindo** pra debugar composition com timeline e
+  scrubbing — é o único lugar onde isso existe.
 
 ### 3.1 Config global (`settings.json`) — separado do `edition.json`
 

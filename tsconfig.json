@@ -15,5 +15,5 @@
     "noEmit": true,
     "types": ["node"]
   },
-  "include": ["src", "remotion.config.ts", "scripts"]
+  "include": ["src", "app", "remotion.config.ts", "vite.config.ts", "scripts"]
 }

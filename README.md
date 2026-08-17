@@ -10,8 +10,8 @@ Plano completo: `plano-teaser-studio.md`.
 
 Etapas 1–5 e 8 da ordem de construção prontas: o design aprovado no Paper virou
 `settings.json` + componentes Remotion, a composition `Stories` está
-implementada com o visual final dos dois temas, e o `edition.json` já não precisa
-ser editado à mão — ver [Editor de edições](#editor-de-edições) e
+implementada com o visual final dos dois temas, e o fluxo de trabalho já é o app
+de 3 colunas — ver [O app](#o-app-input--preview--export) e
 [Próximo passo](#próximo-passo).
 
 O que já funciona:
@@ -26,13 +26,15 @@ O que já funciona:
 | Design real das peças | ✅ aprovado no Paper (arquivo "Crayola") |
 | `settings.json` (tokens/cores) | ✅ extraído do Paper via MCP |
 | `Stories` com design final | ✅ abertura + 4 tabs + CTA, dois temas |
-| Form de criação dentro do Studio | ✅ composition `Editor` (etapa 8) |
+| Form de criação | ✅ etapa 8 — no app e no Studio |
+| App de 3 colunas (input → preview → export) | ✅ `npm run app` |
 | `Feed` e `CarouselSlide` com design final | ⏸ etapas 6 e 7 (ainda placeholder) |
 
 ## Comandos
 
 ```bash
-npm run studio        # Studio + watch de /content (é aqui que vive o Editor)
+npm run app           # o fluxo em 3 colunas: input → preview → export
+npm run studio        # Studio + watch de /content (timeline, scrubbing, debug)
 npm run render Stories-links-ondas-042 outputs/stories.mp4
 npm run render:all links-ondas/042-edicao-de-exemplo   # pacote completo
 npm run render:all    # todas as edições
@@ -41,9 +43,9 @@ npm run watch         # só o watch, sem o Studio
 npm run typecheck
 ```
 
-`sync` roda sozinho antes de `studio` e de `render`. O `studio` sobe dois
-processos (watch + Studio) sob um supervisor pequeno, `scripts/studio.mjs`, pra
-que Ctrl-C derrube os dois.
+`sync` roda sozinho antes de `app`, `studio` e `render`. Tanto o `app` quanto o
+`studio` sobem vários processos sob um supervisor pequeno
+(`scripts/app.mjs`, `scripts/studio.mjs`), pra que Ctrl-C derrube todos.
 
 ## Estrutura
 
@@ -56,17 +58,21 @@ que Ctrl-C derrube os dois.
 /outputs                     # saída — gitignored, sobe manual pro Drive
 /brand                       # logos de cada tema (ver brand/README.md)
 settings.json                # config global: resoluções, timing, cores, tipografia
+/app                         # o app de 3 colunas (input → preview → export)
+vite.config.ts               # serve /app; /api e /content vão pro servidor local
 /src
   schema/edition.ts          # schema do edition.json
   settings.ts                # acesso tipado ao settings.json
   design/                    # tema, fundo dithered, textura, fontes, marcas SVG
   compositions/stories/      # Stories com o design final (abertura, tabs, CTA)
-  editor/                    # composition Editor: form + gravação do edition.json
+  editor/                    # EditionForm (compartilhado) + a composition Editor
   editions.generated.ts      # gerado por npm run sync, não editar
 /scripts
   lib/editions.mjs           # varredura e validação de /content (compartilhada)
   sync-editions.mjs          # valida /content, gera o índice — falha se inválido
   watch-editions.mjs         # regenera o índice a cada mudança em /content
+  server.mjs                 # servidor local do app: grava arquivos, dispara render
+  app.mjs                    # sobe servidor + watch + Vite
   studio.mjs                 # sobe watch + Studio juntos
   render-all.mjs             # render em lote
 ```
@@ -94,26 +100,38 @@ abertura (parâmetro que emergiu do design no Paper).
 A validação recusa rodar se faltar tab, faltar autor, ou se alguma imagem
 apontada não existir no disco.
 
-Dá pra editar esse arquivo à mão, mas o caminho normal é o Editor.
+Dá pra editar esse arquivo à mão, mas o caminho normal é o app.
 
-## Editor de edições
+## O app: input → preview → export
 
-`npm run studio` e escolha a composition **`Editor`**, no topo do seletor. É um
-form: tipo da edição, número, nome, data, tema (só Hyperlinks) e as 4 tabs com
-nome do autor e imagem. Ele grava o `edition.json` e copia as imagens pra
-`/assets` — as compositions da edição aparecem no seletor sozinhas, sem
-reiniciar nada.
+`npm run app` e abra `http://localhost:3020`. São três colunas, uma por passo:
 
-O ciclo completo: o form grava via API do Studio → o watch de `/content`
-regenera `editions.generated.ts` → o hot-reload do Remotion registra as
-compositions novas.
+1. **Input** — o form da edição: tipo, número, nome, data, tema (só Hyperlinks)
+   e as 4 tabs com nome do autor e imagem. Grava o `edition.json` e copia as
+   imagens pra `/assets`.
+2. **Preview** — o mesmo componente que o render usa, então é WYSIWYG de
+   verdade. Alterna entre Stories, Feed e Carrossel; o carrossel navega slide a
+   slide. Sem timeline.
+3. **Export** — renderiza o pacote completo em `/outputs`, com barra de
+   progresso por peça. Os checkboxes servem pra não esperar o render de uma peça
+   que você não vai usar naquela rodada.
+
+Por dentro: o app sobe três processos (`scripts/app.mjs`) — o servidor local
+que grava arquivos e dispara renders, o watch de `/content`, e o Vite da
+interface. O export chama a mesma CLI do `npm run render`, então o arquivo que
+sai do app é igual ao da linha de comando.
+
+O Remotion Studio continua valendo (`npm run studio`) pra quando algo estiver
+estranho no meio do vídeo: é o único lugar com timeline e scrubbing frame a
+frame. A composition `Editor` de lá hospeda o mesmo form do app.
 
 Detalhes que valem saber:
 
 - **A pasta sai do número + nome** (`042-nome-da-edicao`) e é definida na
   criação. Editando uma edição que já existe, o nome aparece só como referência:
-  a API do Studio grava e apaga arquivos, mas não renomeia pastas, então trocar
-  número ou nome ali mexe apenas no conteúdo do `edition.json`.
+  trocar número ou nome ali mexe apenas no conteúdo do `edition.json`, a pasta
+  fica com o slug original. (Renomear pasta é possível — o servidor do app pode
+  mover arquivo — mas ainda não está implementado.)
 - **As imagens vão antes do `edition.json`**, de propósito — o watch revalida a
   cada gravação, e um `edition.json` apontando pra imagem que ainda não existe
   apareceria como edição inválida no meio do caminho.

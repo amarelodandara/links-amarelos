@@ -1,15 +1,22 @@
-import { deleteStaticFile, writeStaticFile } from "@remotion/studio";
 import type { Edition, EditionEntry, EditionType } from "../schema/edition";
 
 /**
- * Gravação do `edition.json` e dos assets de uma edição, direto na publicDir
- * (= /content) através da API do Studio.
+ * Regras de gravação de uma edição, sem transporte: o mesmo `edition.json` e os
+ * mesmos assets são gravados de dois lugares — pela API do Studio (composition
+ * `Editor`) e por HTTP (app de 3 colunas). Só o `EditionWriter` muda; a ordem
+ * das operações, que é o que importa, vive aqui.
  *
  * Por que não o form automático de schema do Studio: ele salva em
  * `defaultProps` no `Root.tsx`, que é gerado a partir do `edition.json` pelo
  * `npm run sync` — a edição seria sobrescrita no próximo sync. Ver a correção da
  * seção 3 do plano.
  */
+
+/** Transporte de gravação. Caminhos são relativos a /content. */
+export interface EditionWriter {
+  writeFile: (path: string, contents: ArrayBuffer | string) => Promise<void>;
+  deleteFile: (path: string) => Promise<void>;
+}
 
 const IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"] as const;
 
@@ -132,9 +139,11 @@ export const validateDraft = (
 export const saveEdition = async ({
   dir,
   draft,
+  writer,
 }: {
   dir: string;
   draft: Draft;
+  writer: EditionWriter;
 }): Promise<Edition> => {
   const tabs: Edition["tabs"] = [];
 
@@ -145,14 +154,11 @@ export const saveEdition = async ({
     }
 
     const image = assetPathForTab(index, tab.file.name);
-    await writeStaticFile({
-      filePath: `${dir}/${image}`,
-      contents: await tab.file.arrayBuffer(),
-    });
+    await writer.writeFile(`${dir}/${image}`, await tab.file.arrayBuffer());
 
     // Trocar png por jpg na mesma tab deixaria o arquivo antigo órfão em /assets.
     if (tab.image && tab.image !== image) {
-      await deleteStaticFile(`${dir}/${tab.image}`);
+      await writer.deleteFile(`${dir}/${tab.image}`);
     }
 
     tabs.push({ author: tab.author.trim(), image });
@@ -168,10 +174,10 @@ export const saveEdition = async ({
     tabs,
   };
 
-  await writeStaticFile({
-    filePath: `${dir}/edition.json`,
-    contents: `${JSON.stringify(edition, null, 2)}\n`,
-  });
+  await writer.writeFile(
+    `${dir}/edition.json`,
+    `${JSON.stringify(edition, null, 2)}\n`,
+  );
 
   return edition;
 };
