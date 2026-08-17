@@ -30,6 +30,11 @@ export const editionSchema = z.object({
   airDate: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/, "airDate deve estar no formato YYYY-MM-DD"),
+  /**
+   * Tema da edição, exibido na abertura como "{tema aqui}" — parâmetro que
+   * emergiu do design no Paper. Só o Hyperlinks usa; opcional.
+   */
+  theme: z.string().min(1).optional(),
   tabs: z.array(tabSchema).length(4, "toda edição precisa de exatamente 4 tabs"),
 });
 

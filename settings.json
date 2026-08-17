@@ -1,0 +1,67 @@
+{
+  "$comment": "Config global do projeto (seção 3.1 do plano). Nasceu da exploração no Paper — valores extraídos do arquivo 'Crayola' via MCP. Tudo que muda por edição vive no edition.json, não aqui.",
+  "fps": 30,
+  "durationInSeconds": 8,
+  "formats": {
+    "stories": { "width": 1080, "height": 1920 },
+    "feed": { "width": 1080, "height": 1350 },
+    "carousel": { "width": 1456, "height": 1040 },
+    "carouselSlideCount": 6
+  },
+  "timing": {
+    "$comment": "abertura + 4 tabs + CTA = durationInSeconds. Ajustar aqui rebalanceia as cenas.",
+    "openingSeconds": 2.5,
+    "secondsPerTab": 1.0,
+    "ctaSeconds": 1.5
+  },
+  "colors": {
+    "brandBlack": "#110A03",
+    "brandWhite": "#FFFBEB",
+    "brandWhiteCode": "#F7FAFF",
+    "sunLighter": "#FEF3C7",
+    "sunLight": "#FDE68A",
+    "sun": "#FFCC00",
+    "sunDark": "#F59E0B",
+    "codeLighter": "#EFF6FF",
+    "codeLight": "#DBEAFE",
+    "code": "#3B82F6",
+    "codeDark": "#1E40AF",
+    "substack": "#FF6719",
+    "spotify": "#1DB954"
+  },
+  "dithering": {
+    "$comment": "Shader de fundo (@paper-design/shaders-react), mesmo preset nos dois temas.",
+    "shape": "sphere",
+    "type": "4x4",
+    "size": 6,
+    "scale": 2.14,
+    "opacity": 0.43,
+    "colorFront": "#FFCC00"
+  },
+  "texture": {
+    "$comment": "Tile de + e círculos (brand/textures/bg-texture-soft*.svg), repetido no fundo.",
+    "tileSizePx": 144
+  },
+  "typography": {
+    "sans": "Manrope",
+    "mono": "Space Mono",
+    "openingTitle": { "sizePx": 76, "weight": 500, "trackingEm": -0.02, "lineHeightPx": 84 },
+    "openingByline": { "sizePx": 36, "weight": 500, "trackingEm": 0.01, "lineHeightPx": 38 },
+    "hyperlinksTheme": { "sizePx": 82, "weight": 700, "trackingEm": 0.01, "underlinePx": 5 },
+    "tabTitle": { "sizePx": 30, "weight": 600, "trackingEm": -0.01, "lineHeightPx": 38 },
+    "ctaHandle": { "sizePx": 48, "weight": 700 },
+    "ctaKicker": { "sizePx": 40, "weight": 600, "trackingEm": -0.04 },
+    "ctaDate": { "sizePx": 88, "weight": 700, "trackingEm": -0.04 }
+  },
+  "browserWindow": {
+    "$comment": "Janela da metáfora de aba (cena das tabs), valores do Paper em px.",
+    "width": 900,
+    "height": 1260,
+    "left": 90,
+    "top": 330,
+    "radius": 20,
+    "borderWidth": 3,
+    "contentPadding": 64
+  },
+  "handle": "@linksamarelos"
+}

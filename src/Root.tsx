@@ -1,6 +1,7 @@
 import { Composition, Folder } from "remotion";
 import { editions } from "./editions.generated";
 import { PreDesignPlaceholder } from "./compositions/PreDesignPlaceholder";
+import { Stories } from "./compositions/stories/Stories";
 import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
@@ -8,12 +9,15 @@ import {
   FEED,
   FPS,
   STORIES,
-} from "./settings.provisional";
+} from "./settings";
 
 /**
  * Uma pasta por edição no seletor lateral do Studio, com as três compositions
  * de saída dentro (seção 4). `Stories` cobre Instagram Stories + Twitter +
  * BlueSky; `Feed` cobre o 4:5 do Instagram; `CarouselSlide` sai como stills.
+ *
+ * `Stories` já usa o design final do Paper; `Feed` e `CarouselSlide` ainda são
+ * placeholder (etapas 6 e 7 da ordem de construção).
  */
 export const RemotionRoot: React.FC = () => {
   return (
@@ -25,12 +29,12 @@ export const RemotionRoot: React.FC = () => {
           <Folder name={id} key={entry.dir}>
             <Composition
               id={`Stories-${id}`}
-              component={PreDesignPlaceholder}
+              component={Stories}
               durationInFrames={DURATION_IN_FRAMES}
               fps={FPS}
               width={STORIES.width}
               height={STORIES.height}
-              defaultProps={{ entry, label: "Stories / Twitter / BlueSky" }}
+              defaultProps={{ entry }}
             />
             <Composition
               id={`Feed-${id}`}

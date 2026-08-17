@@ -8,9 +8,10 @@ Plano completo: `plano-teaser-studio.md`.
 
 ## Estado atual
 
-Bootstrap pronto (etapas 1 e 2 da ordem de construção). **A implementação dos
-componentes visuais está pausada de propósito**, esperando a exploração no
-Paper — ver [Próximo passo](#próximo-passo).
+Etapas 1–5 da ordem de construção prontas: o design aprovado no Paper virou
+`settings.json` + componentes Remotion, e a composition `Stories` está
+implementada com o visual final dos dois temas — ver
+[Próximo passo](#próximo-passo).
 
 O que já funciona:
 
@@ -18,11 +19,13 @@ O que já funciona:
 |---|---|
 | Estrutura `/content` + `/outputs` | ✅ |
 | Schema e validação do `edition.json` | ✅ |
-| 3 compositions nas resoluções certas | ✅ (com placeholder no lugar do design) |
+| 3 compositions nas resoluções certas | ✅ |
 | Render de vídeo e de stills | ✅ testado ponta a ponta |
 | MCP do Paper conectado | ✅ escopo de usuário |
-| Design real das peças | ⏸ aguardando Paper |
-| `settings.json` (tokens/cores) | ⏸ nasce depois do Paper |
+| Design real das peças | ✅ aprovado no Paper (arquivo "Crayola") |
+| `settings.json` (tokens/cores) | ✅ extraído do Paper via MCP |
+| `Stories` com design final | ✅ abertura + 4 tabs + CTA, dois temas |
+| `Feed` e `CarouselSlide` com design final | ⏸ etapas 6 e 7 (ainda placeholder) |
 | Painel de edição dentro do Studio | ⏸ etapa 8 |
 
 ## Comandos
@@ -48,10 +51,12 @@ npm run typecheck
   /hyperlinks/017-.../
 /outputs                     # saída — gitignored, sobe manual pro Drive
 /brand                       # logos de cada tema (ver brand/README.md)
+settings.json                # config global: resoluções, timing, cores, tipografia
 /src
   schema/edition.ts          # schema do edition.json
-  settings.provisional.ts    # resoluções e duração — vira settings.json pós-Paper
-  compositions/              # só o placeholder por enquanto
+  settings.ts                # acesso tipado ao settings.json
+  design/                    # tema, fundo dithered, textura, fontes, marcas SVG
+  compositions/stories/      # Stories com o design final (abertura, tabs, CTA)
   editions.generated.ts      # gerado por npm run sync, não editar
 /scripts
   sync-editions.mjs          # valida /content, gera o índice
@@ -74,7 +79,9 @@ npm run typecheck
 ```
 
 Sempre exatamente 4 tabs, cada uma só com o nome do autor. `type` (`links-ondas`
-ou `hyperlinks`) decide tema e CTA final — não existe campo separado de tema.
+ou `hyperlinks`) decide o tema visual e o CTA final. Edições `hyperlinks` podem
+ter um campo opcional `"theme"` — o texto que aparece como `{tema aqui}` na
+abertura (parâmetro que emergiu do design no Paper).
 
 A validação recusa rodar se faltar tab, faltar autor, ou se alguma imagem
 apontada não existir no disco.
@@ -96,20 +103,17 @@ Uma composition vertical só cobre Stories + Twitter + BlueSky: as três aceitam
 
 ## Próximo passo
 
-1. Jogue as logos em `/brand` (ver `brand/README.md`).
-2. Abra o arquivo no **Paper Desktop** — isso sobe o MCP sozinho na porta 29979.
-   Confira com `claude mcp list`; `paper` deve aparecer como `✔ Connected`.
+1. Revisar o `Stories` no Studio (`npm run studio`) — timing das cenas e
+   entradas são ajustáveis em `settings.json` (`timing`) e nas cenas em
+   `src/compositions/stories/`.
+2. Etapa 6: adaptar o layout aprovado pro `Feed` (4:5).
+3. Etapa 7: `CarouselSlide` (6 stills, 14:10 horizontal) — o Paper ainda não
+   tem artboards desse formato; explorar lá primeiro se quiser layout próprio.
+4. Etapa 8: form de criação como painel dentro do Remotion Studio.
 
-   O MCP está registrado em **escopo de usuário** (`~/.claude.json`), não no
-   repositório — é o que a doc do Paper recomenda, e evita o pedido de
-   aprovação a cada sessão que o escopo de projeto (`.mcp.json`) exige.
-   Como é uma ferramenta local de uma máquina só, não faz falta versionar.
-   Se um dia precisar: `claude mcp add paper --transport http http://127.0.0.1:29979/mcp --scope user`.
-3. Explore à vontade as direções visuais das 4 peças (Stories, Feed, Social,
-   Carrossel), sem pressa e sem se preocupar com o que é implementável.
-4. Quando estiver satisfeita, é só avisar: o HTML+CSS aprovado vem do Paper via
-   MCP, o `settings.json` nasce dos tokens que sobraram do design, e aí os
-   componentes Remotion são implementados de verdade.
+`src/compositions/PreDesignPlaceholder.tsx` segue vivo só como andaime do
+`Feed` e do `CarouselSlide`; morre nas etapas 6 e 7.
 
-`src/compositions/PreDesignPlaceholder.tsx` é andaime — existe só pra provar que
-os dados e as imagens carregam nas proporções certas. Ele é descartado na etapa 5.
+O fundo usa um shader WebGL (`@paper-design/shaders-react`, o mesmo do Paper);
+o render headless precisa do OpenGL "angle", já configurado em
+`remotion.config.ts`.

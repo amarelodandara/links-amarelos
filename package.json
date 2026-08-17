@@ -16,7 +16,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@paper-design/shaders-react": "^0.0.80",
     "@remotion/cli": "^4.0.507",
+    "@remotion/google-fonts": "^4.0.507",
     "@remotion/studio": "^4.0.507",
     "@remotion/zod-types": "^4.0.507",
     "react": "^19.2.0",
