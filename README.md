@@ -140,7 +140,8 @@ quiser esse comportamento de volta, é `Config.setInteractivityEnabled(true)`.
 
 Uma composition vertical só cobre Stories + Twitter + BlueSky: as três aceitam
 9:16 nativo, sem crop nem barra preta. O carrossel sai como 6 PNGs numerados
-(`--sequence`), não como recorte do vídeo.
+(`--sequence`), não como recorte do vídeo — os arquivos saem como
+`carrossel/element-0.png` … `element-5.png`, na ordem capa, 4 tabs, CTA.
 
 ## Próximo passo
 

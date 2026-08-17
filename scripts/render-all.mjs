@@ -10,17 +10,22 @@
  * nenhuma edição com assets faltando chegue até aqui.
  */
 import { spawnSync } from "node:child_process";
-import { mkdirSync, readFileSync } from "node:fs";
-import { join, dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
+import { collectEditions, root } from "./lib/editions.mjs";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+// Lê /content direto pela mesma varredura do sync. A versão anterior fatiava o
+// array de dentro do editions.generated.ts, mas o primeiro "[" do arquivo é o da
+// anotação de tipo (`EditionEntry[]`), não o do array — o JSON.parse sempre
+// falhava.
+const { entries: editions, errors } = collectEditions();
 
-// editions.generated.ts é TypeScript; o array literal é lido direto do arquivo.
-const generated = readFileSync(join(root, "src", "editions.generated.ts"), "utf8");
-const editions = JSON.parse(
-  generated.slice(generated.indexOf("["), generated.lastIndexOf("]") + 1),
-);
+if (errors.length > 0) {
+  console.error("\nEdições inválidas — corrija antes de renderizar:\n");
+  for (const e of errors) console.error(`  • ${e}`);
+  console.error("");
+  process.exit(1);
+}
 
 const filter = process.argv[2];
 const targets = filter ? editions.filter((e) => e.dir === filter) : editions;
