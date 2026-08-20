@@ -31,6 +31,8 @@ export interface Theme {
     pillSurface: string;
     pillText: string;
     dateText: string;
+    /** Paleta do quique da data, na ordem em que aparece. */
+    dateColors: readonly string[];
     /** "vem aí + data" usa multiply no tema amarelo; nenhum no azul. */
     dateBlendMode: "multiply" | "normal";
   };
@@ -55,6 +57,7 @@ export const themes = {
       pillSurface: c.brandWhite,
       pillText: c.sunDark,
       dateText: c.sunDark,
+      dateColors: settings.ctaDateColors["links-ondas"],
       dateBlendMode: "multiply",
     },
   },
@@ -76,6 +79,7 @@ export const themes = {
       pillSurface: c.brandWhiteCode,
       pillText: c.codeDark,
       dateText: "#FFFFFF",
+      dateColors: settings.ctaDateColors.hyperlinks,
       dateBlendMode: "normal",
     },
   },

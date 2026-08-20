@@ -1,18 +1,149 @@
-import { AbsoluteFill, interpolate, spring, useCurrentFrame, useVideoConfig } from "remotion";
+import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import type { Edition } from "../../schema/edition";
 import { MONO, SANS } from "../../design/fonts";
 import type { Theme } from "../../design/theme";
-import { settings } from "../../settings";
+import { SCENES, settings, STORIES } from "../../settings";
 
 /**
  * Cena de encerramento (artboards "links + ondas - CTA" / "Hyperlinks — CTA"):
- * "vem aí" + data no canto superior direito, pill com o @ centralizada.
+ * "vem aí" + data quicando pela tela no estilo do logo de DVD, e os canais
+ * entrando um a um como caixas de diálogo espalhadas, por cima da data.
  */
 
-/** "2026-08-15" → "15/08" (o design mostra só dia/mês). */
-const formatAirDate = (airDate: string): string => {
-  const [, month, day] = airDate.split("-");
-  return `${day}/${month}`;
+const WEEKDAYS = [
+  "domingo",
+  "segunda",
+  "terça",
+  "quarta",
+  "quinta",
+  "sexta",
+  "sábado",
+] as const;
+
+/**
+ * `airDate` é uma data civil, não um instante: `new Date("2026-08-22")` é lido
+ * como meia-noite UTC e volta um dia atrás em fuso negativo. Daí o parse manual.
+ */
+const parseAirDate = (airDate: string) => {
+  const [year, month, day] = airDate.split("-").map(Number);
+  return { year, month, day, weekday: WEEKDAYS[new Date(Date.UTC(year, month - 1, day)).getUTCDay()] };
+};
+
+/**
+ * Um eixo do quique, resolvido direto do frame — sem estado acumulado, porque
+ * o Remotion pode renderizar qualquer frame fora de ordem.
+ *
+ * A trajetória é uma onda triangular: a distância percorrida dobra sobre o
+ * intervalo `[0, span]`. `bounces` conta quantas paredes já foram batidas, e é
+ * ele que decide a cor.
+ */
+const axis = (start: number, speed: number, frame: number, span: number) => {
+  const travelled = start + speed * frame;
+  const period = span * 2;
+  const wrapped = ((travelled % period) + period) % period;
+
+  return {
+    position: wrapped <= span ? wrapped : period - wrapped,
+    bounces: Math.floor(travelled / span),
+  };
+};
+
+const b = settings.ctaDateBounce;
+const SPAN_X = STORIES.width - b.boxWidthPx;
+const SPAN_Y = STORIES.height - b.boxHeightPx;
+
+const boxAt = (frame: number) => ({
+  x: axis(b.startXPx, b.speedXPerFrame, frame, SPAN_X),
+  y: axis(b.startYPx, b.speedYPerFrame, frame, SPAN_Y),
+});
+
+/**
+ * "Canto" com folga: exigir as duas paredes no mesmo frame é raro demais para
+ * acontecer dentro da cena. Vale como canto estar a `cornerNearPx` de uma
+ * parede vertical e de uma horizontal ao mesmo tempo.
+ */
+const isNearCorner = (frame: number): boolean => {
+  const { x, y } = boxAt(frame);
+  return (
+    Math.min(x.position, SPAN_X - x.position) <= b.cornerNearPx &&
+    Math.min(y.position, SPAN_Y - y.position) <= b.cornerNearPx
+  );
+};
+
+/**
+ * Frames em que a caixa *entra* num canto. Só a borda de subida conta — dentro
+ * de um canto ela fica perto por vários frames seguidos, e isso é um evento só.
+ * O frame 0 nasce num canto (é a posição do artboard), então não vira evento.
+ */
+const CORNER_FRAMES = Array.from({ length: SCENES.cta }, (_, frame) => frame).filter(
+  (frame) => frame > 0 && isNearCorner(frame) && !isNearCorner(frame - 1),
+);
+
+const D = settings.ctaDialogs;
+
+/**
+ * Caixa de CTA. O bevel (claro em cima/à esquerda, escuro embaixo/à direita)
+ * é o que faz ler como diálogo de sistema antigo em vez de card.
+ */
+const CtaDialog: React.FC<{
+  link: (typeof settings.ctaLinks)[number];
+  theme: Theme;
+}> = ({ link, theme }) => {
+  const t = settings.typography;
+
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: link.leftPx,
+        top: link.topPx,
+        width: D.widthPx,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 24,
+        paddingTop: 34,
+        paddingBottom: 26,
+        paddingLeft: 32,
+        paddingRight: 32,
+        backgroundColor: theme.window.surface,
+        border: `2px solid ${theme.cta.pillText}`,
+        boxShadow: `#FFFFFFE6 2px 2px 0px inset, ${theme.cta.pillText}33 -2px -2px 0px inset, #110A0338 0px 16px 40px`,
+      }}
+    >
+      <span
+        style={{
+          fontFamily: MONO,
+          fontWeight: t.ctaLink.weight,
+          fontSize: t.ctaLink.sizePx,
+          lineHeight: `${t.ctaLink.lineHeightPx}px`,
+          color: theme.cta.pillText,
+          whiteSpace: "nowrap",
+        }}
+      >
+        {link.label}
+      </span>
+      <span
+        style={{
+          paddingTop: 8,
+          paddingBottom: 8,
+          paddingLeft: 34,
+          paddingRight: 34,
+          fontFamily: MONO,
+          fontWeight: t.ctaDialogButton.weight,
+          fontSize: t.ctaDialogButton.sizePx,
+          letterSpacing: `${t.ctaDialogButton.trackingEm}em`,
+          lineHeight: 1,
+          color: theme.cta.pillText,
+          backgroundColor: theme.window.inactiveTabSurface,
+          border: `2px solid ${theme.cta.pillText}`,
+          boxShadow: "#FFFFFFE6 2px 2px 0px inset",
+        }}
+      >
+        OK
+      </span>
+    </div>
+  );
 };
 
 export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
@@ -23,32 +154,43 @@ export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
   const { fps } = useVideoConfig();
   const t = settings.typography;
 
-  const dateIn = {
-    opacity: interpolate(frame, [0, 12], [0, 1], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    }),
-    transform: `translateY(${interpolate(frame, [0, 12], [-24, 0], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    })}px)`,
-  };
-  const pillPop = spring({ frame: frame - 6, fps, config: { damping: 13, mass: 0.7 } });
+  const { x, y } = boxAt(frame);
+  const palette = theme.cta.dateColors;
+  const color = palette[(x.bounces + y.bounces) % palette.length];
+
+  // Cada canto batido troca data ↔ dia da semana e dá um pulso de escala.
+  const cornersHit = CORNER_FRAMES.filter((corner) => corner <= frame).length;
+  const showsWeekday = cornersHit % 2 === 1;
+  const lastCorner = CORNER_FRAMES[cornersHit - 1] ?? -Infinity;
+  const cornerPop = interpolate(frame - lastCorner, [0, 4, 10], [1.22, 1.06, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
+
+  const date = parseAirDate(edition.airDate);
+  const dateOpacity = interpolate(frame, [0, 12], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
 
   return (
     <AbsoluteFill>
       <div
         style={{
           position: "absolute",
-          left: 789,
-          top: 74,
+          left: x.position,
+          top: y.position,
+          width: b.boxWidthPx,
+          height: b.boxHeightPx,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          justifyContent: "center",
           gap: 7,
-          color: theme.cta.dateText,
-          mixBlendMode: theme.cta.dateBlendMode,
-          ...dateIn,
+          // Cor viva fora da paleta: blend mode aqui só lavaria o efeito.
+          color,
+          opacity: dateOpacity,
+          transform: `scale(${cornerPop})`,
         }}
       >
         <div
@@ -65,42 +207,35 @@ export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
         <div
           style={{
             fontFamily: SANS,
-            fontWeight: t.ctaDate.weight,
-            fontSize: t.ctaDate.sizePx,
-            letterSpacing: `${t.ctaDate.trackingEm}em`,
+            fontWeight: showsWeekday ? t.ctaWeekday.weight : t.ctaDate.weight,
+            fontSize: showsWeekday ? t.ctaWeekday.sizePx : t.ctaDate.sizePx,
+            letterSpacing: `${showsWeekday ? t.ctaWeekday.trackingEm : t.ctaDate.trackingEm}em`,
             lineHeight: 1,
-          }}
-        >
-          {formatAirDate(edition.airDate)}
-        </div>
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: "50%",
-          top: "50%",
-          translate: "-50% -50%",
-          padding: 64,
-          borderRadius: 20,
-          backgroundColor: theme.cta.pillSurface,
-          opacity: Math.min(1, pillPop * 1.4),
-          transform: `scale(${interpolate(pillPop, [0, 1], [0.85, 1])})`,
-        }}
-      >
-        <div
-          style={{
-            fontFamily: MONO,
-            fontWeight: t.ctaHandle.weight,
-            fontSize: t.ctaHandle.sizePx,
-            lineHeight: "34px",
-            opacity: 0.7,
-            color: theme.cta.pillText,
             whiteSpace: "nowrap",
           }}
         >
-          {settings.handle}
+          {showsWeekday
+            ? date.weekday
+            : `${String(date.day).padStart(2, "0")}/${String(date.month).padStart(2, "0")}`}
         </div>
       </div>
+      {settings.ctaLinks.map((link, index) => {
+        /**
+         * Snap puro: ou a janela está lá, ou não está. Nada de spring nem fade
+         * — caixa de erro de sistema antigo aparece inteira de um frame pro
+         * outro, e é isso que vende a referência.
+         */
+        const appearsAt =
+          Math.round(D.startSeconds * fps) + Math.round(index * D.stepSeconds * fps);
+
+        if (frame < appearsAt) {
+          return null;
+        }
+
+        return (
+          <CtaDialog key={link.label} link={link} theme={theme} />
+        );
+      })}
     </AbsoluteFill>
   );
 };

@@ -1,7 +1,7 @@
 {
   "$comment": "Config global do projeto (seção 3.1 do plano). Nasceu da exploração no Paper — valores extraídos do arquivo 'Crayola' via MCP. Tudo que muda por edição vive no edition.json, não aqui.",
   "fps": 30,
-  "durationInSeconds": 8,
+  "durationInSeconds": 16.5,
   "formats": {
     "stories": { "width": 1080, "height": 1920 },
     "feed": { "width": 1080, "height": 1350 },
@@ -13,8 +13,8 @@
   "timing": {
     "$comment": "abertura + 4 tabs + CTA = durationInSeconds. Ajustar aqui rebalanceia as cenas.",
     "openingSeconds": 2.5,
-    "secondsPerTab": 1.0,
-    "ctaSeconds": 1.5
+    "secondsPerTab": 2.0,
+    "ctaSeconds": 6.0
   },
   "colors": {
     "brandBlack": "#110A03",
@@ -53,7 +53,21 @@
     "tabTitle": { "sizePx": 30, "weight": 600, "trackingEm": -0.01, "lineHeightPx": 38 },
     "ctaHandle": { "sizePx": 48, "weight": 700 },
     "ctaKicker": { "sizePx": 40, "weight": 600, "trackingEm": -0.04 },
-    "ctaDate": { "sizePx": 88, "weight": 700, "trackingEm": -0.04 }
+    "ctaDate": { "sizePx": 88, "weight": 700, "trackingEm": -0.04 },
+    "$comment_ctaWeekday": "Menor que ctaDate porque \"domingo\"/\"segunda\" são bem mais largos que \"22/08\" e precisam caber na mesma caixa de colisão.",
+    "ctaWeekday": { "sizePx": 58, "weight": 700, "trackingEm": -0.03 },
+    "ctaLink": { "sizePx": 40, "weight": 700, "lineHeightPx": 50 },
+    "ctaDialogButton": { "sizePx": 24, "weight": 700, "trackingEm": 0.04 }
+  },
+  "ctaDateBounce": {
+    "$comment": "Data do CTA quicando estilo logo de DVD. Bate 6 paredes e 3 cantos (frames 47/108/168) nos 6s da cena — as 6 cores aparecem uma vez cada, e cada canto troca data <-> dia da semana — mexer em speed*/start* muda essa contagem, então vale reconferir. box* é a caixa usada na colisão (o texto é auto-width, a colisão precisa de número fixo); speed em px/frame; colors são fora da paleta de marca de propósito.",
+    "boxWidthPx": 360,
+    "boxHeightPx": 170,
+    "startXPx": 230,
+    "startYPx": 300,
+    "speedXPerFrame": 12,
+    "speedYPerFrame": 29,
+    "cornerNearPx": 90
   },
   "browserWindow": {
     "$comment": "Janela da metáfora de aba (cena das tabs), valores do Paper em px.",
@@ -65,5 +79,22 @@
     "borderWidth": 3,
     "contentPadding": 64
   },
-  "handle": "@linksamarelos"
+  "handle": "@linksamarelos",
+  "ctaDateColors": {
+    "$comment": "Paleta da data quicando, uma por tema. Precisa ser separada por tema, e medida sobre o fundo *renderizado*, não sobre a cor nominal: o dithering mistura #FFCC00 no fundo dos dois temas e muda a luminância real (no tema azul ela sobe de 0.24 para ~0.31, o que derruba cor clara). Contraste mínimo aqui: creme >= 4.4:1, azul >= 2.8:1. Ordem = ordem de aparição.",
+    "links-ondas": ["#E0004D", "#006E2E", "#0A1FA8", "#D10000", "#7B00E0", "#110A03"],
+    "hyperlinks": ["#7A0025", "#FFFFFF", "#4B0082", "#003D3A", "#04165E", "#110A03"]
+  },
+  "ctaDialogs": {
+    "$comment": "Cada CTA é uma caixa estilo diálogo do Windows 95: entram uma por vez, espalhadas. Sem easing de propósito — dialog antigo não anima, ele aparece de um frame pro outro.",
+    "startSeconds": 1.6,
+    "stepSeconds": 0.55,
+    "widthPx": 560
+  },
+  "$comment_ctaLinks": "leftPx/topPx espalham as caixas por cantos diferentes. A tela tem 1080 de largura e a caixa 560, então só cabe uma por faixa horizontal — é isso que garante que nenhuma cubra a outra.",
+  "ctaLinks": [
+    { "label": "leia no substack", "leftPx": 70, "topPx": 300 },
+    { "label": "ouça no spotify", "leftPx": 450, "topPx": 980 },
+    { "label": "siga no instagram", "leftPx": 110, "topPx": 1560 }
+  ]
 }
