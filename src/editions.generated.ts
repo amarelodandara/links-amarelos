@@ -3,6 +3,33 @@ import type { EditionEntry } from "./schema/edition";
 
 export const editions: EditionEntry[] = [
   {
+    "slug": "009-abracadabra",
+    "dir": "links-ondas/009-abracadabra",
+    "edition": {
+      "editionNumber": 9,
+      "type": "links-ondas",
+      "airDate": "2026-08-22",
+      "tabs": [
+        {
+          "author": "Daniel Primata",
+          "image": "assets/01.png"
+        },
+        {
+          "author": "Marco Reis",
+          "image": "assets/02.png"
+        },
+        {
+          "author": "Brandon Sanderson",
+          "image": "assets/03.png"
+        },
+        {
+          "author": "Roberto Barreto",
+          "image": "assets/04.webp"
+        }
+      ]
+    }
+  },
+  {
     "slug": "017-edicao-de-exemplo",
     "dir": "hyperlinks/017-edicao-de-exemplo",
     "edition": {
