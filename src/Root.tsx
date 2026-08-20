@@ -1,6 +1,7 @@
 import { Composition, Folder } from "remotion";
 import { editions } from "./editions.generated";
-import { CarouselSlide } from "./compositions/CarouselSlide";
+import { InstagramFeed } from "./compositions/InstagramFeed";
+import { SubstackCarrossel } from "./compositions/SubstackCarrossel";
 import { Square } from "./compositions/Square";
 import { Stories } from "./compositions/Stories";
 import { EditionEditor } from "./editor/EditionEditor";
@@ -16,9 +17,9 @@ import {
 
 /**
  * Uma pasta por edição no seletor lateral do Studio, com as três compositions
- * de saída dentro (seção 4). `Stories` cobre só o Story do Instagram;
- * `Square` cobre feed do Instagram + X + BlueSky; `CarouselSlide` sai como
- * stills no 14:10 do Substack.
+ * de saída dentro (seção 4), uma por plataforma: `InstagramStories` é vídeo
+ * 9:16; `XBlueSky` é vídeo quadrado; `InstagramFeed` e `SubstackCarrossel`
+ * saem como stills, o primeiro quadrado e o segundo em 14:10.
  *
  * As três compartilham as cenas de `compositions/scenes` e só diferem no
  * layout. `CarouselSlide` roda a 1 fps: cada frame é um slide, congelado.
@@ -46,7 +47,7 @@ export const RemotionRoot: React.FC = () => {
         return (
           <Folder name={id} key={entry.dir}>
             <Composition
-              id={`Stories-${id}`}
+              id={`InstagramStories-${id}`}
               component={Stories}
               durationInFrames={DURATION_IN_FRAMES}
               fps={FPS}
@@ -55,7 +56,7 @@ export const RemotionRoot: React.FC = () => {
               defaultProps={{ entry }}
             />
             <Composition
-              id={`Square-${id}`}
+              id={`XBlueSky-${id}`}
               component={Square}
               durationInFrames={DURATION_IN_FRAMES}
               fps={FPS}
@@ -63,10 +64,22 @@ export const RemotionRoot: React.FC = () => {
               height={SQUARE.height}
               defaultProps={{ entry }}
             />
-            {/* fps=1 e 1 frame por slide: cada frame vira um still do carrossel. */}
+            {/*
+             * fps=1 e 1 frame por slide: cada frame vira um still. Vale pras
+             * duas peças estáticas — feed do Instagram e carrossel do Substack.
+             */}
             <Composition
-              id={`CarouselSlide-${id}`}
-              component={CarouselSlide}
+              id={`InstagramFeed-${id}`}
+              component={InstagramFeed}
+              durationInFrames={CAROUSEL_SLIDE_COUNT}
+              fps={1}
+              width={SQUARE.width}
+              height={SQUARE.height}
+              defaultProps={{ entry }}
+            />
+            <Composition
+              id={`SubstackCarrossel-${id}`}
+              component={SubstackCarrossel}
               durationInFrames={CAROUSEL_SLIDE_COUNT}
               fps={1}
               width={CAROUSEL.width}

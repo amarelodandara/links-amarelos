@@ -191,11 +191,12 @@ Isso muda a ordem da seção 11 (Ordem sugerida de construção) — reflita lá
 Cada formato é uma **Composition** separada, todas lendo o mesmo
 `edition.json`:
 
-| Composition | Uso |
-|---|---|
-| `Stories` | Story do Instagram — e só ele |
-| `Square` | feed do Instagram + X + BlueSky |
-| `CarouselSlide` | as 6 imagens estáticas do carrossel do Substack (renderizada como stills, não vídeo) |
+| Composition | Uso | Saída |
+|---|---|---|
+| `InstagramStories` | Story do Instagram — e só ele | `instagram-stories.mp4` |
+| `XBlueSky` | X + BlueSky | `x-bluesky.mp4` |
+| `InstagramFeed` | feed do Instagram, como 6 stills quadrados | `instagram-feed/01…06.png` |
+| `SubstackCarrossel` | as 6 imagens do carrossel do Substack | `substack-carrossel/01…06.png` |
 
 **Resoluções pesquisadas (2026), viáveis como padrão do projeto:**
 
@@ -207,14 +208,18 @@ Cada formato é uma **Composition** separada, todas lendo o mesmo
 | BlueSky | exibe no formato nativo do arquivo (não força crop) — 9:16 ou 16:9 funcionam | recomendo também reaproveitar o vertical 1080×1920 | até 3 min, mas arquivo limitado a 100MB |
 
 **Decisão (2026-08-20), que substitui a recomendação anterior:** o vertical
-1080×1920 fica **só** com o Story do Instagram. Feed do Instagram, X e
-BlueSky passam a dividir um **quadrado 1080×1080** — X e BlueSky exibem no
-formato nativo do arquivo, então aceitam 1:1 sem crop, e assim o feed do
-Instagram não precisa de uma proporção só dele.
+1080×1920 fica **só** com o Story do Instagram. O quadrado **1080×1080** cobre
+o resto — X e BlueSky exibem no formato nativo do arquivo, então aceitam 1:1
+sem crop.
 
-Continuam sendo duas compositions de vídeo, não três. A troca em relação ao
-plano original: antes o vertical servia três plataformas e o 4:5 servia uma;
-agora o vertical serve uma e o quadrado serve três. O custo é abrir mão dos
+**Correção no mesmo dia:** o feed do Instagram fica no quadrado, mas como
+**6 stills**, não como vídeo. Qualquer vídeo postado no feed do Instagram é
+convertido em Reels, que é outro produto — não é o que a peça quer ser. O
+vídeo quadrado continua existindo, agora só pro X e pro BlueSky. Então a
+mesma proporção 1:1 tem duas peças: uma animada e uma estática.
+
+São duas compositions de vídeo e duas de stills. A troca em relação ao
+plano original: antes o vertical servia três plataformas e o 4:5 servia uma. O custo é abrir mão dos
 4:5 no feed do Instagram, que ocupa mais tela que o 1:1 — foi uma escolha
 consciente, pra ter uma peça só cobrindo as três plataformas de feed.
 
@@ -341,7 +346,7 @@ server do Figma/Paper configurado desde o início (não é uma etapa "depois",
 5. Puxar o HTML+CSS do Paper via MCP e implementar a Composition `Stories`
    sozinha, com dados mockados — validar timing, tema/logo, tipografia via
    preview no Remotion Studio.
-6. Replicar pras outras composições de vídeo (Square: feed do Instagram, X, BlueSky
+6. Replicar pras outras composições (XBlueSky: vídeo quadrado; InstagramFeed: stills quadrados
    reaproveitando a composition vertical, seção 4).
 7. Composition `CarouselSlide` (stills, seção 5).
 8. Form de criação como **composition `Editor`** dentro do Remotion Studio

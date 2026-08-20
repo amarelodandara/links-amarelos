@@ -57,6 +57,9 @@ export const DITHERING = {
  */
 export type Layout = (typeof settings.layouts)[keyof typeof settings.layouts];
 
+/** Layouts que rendem baralho de stills — só esses têm frame de congelamento. */
+export type StillLayout = Extract<Layout, { ctaStillFrame: number }>;
+
 export const LAYOUTS = settings.layouts;
 
 /** Tela do form da composition `Editor` — ferramenta, não formato de saída. */

@@ -1,19 +1,24 @@
 import type { ComponentType } from "react";
 import type { EditionEntry } from "../src/schema/edition";
-import { CarouselSlide } from "../src/compositions/CarouselSlide";
+import { InstagramFeed } from "../src/compositions/InstagramFeed";
+import { SubstackCarrossel } from "../src/compositions/SubstackCarrossel";
 import { Square } from "../src/compositions/Square";
 import { Stories } from "../src/compositions/Stories";
 import { CAROUSEL, CAROUSEL_SLIDE_COUNT, DURATION_IN_FRAMES, FPS, SQUARE, STORIES } from "../src/settings";
 
 /**
- * As 3 peças de saída, do ponto de vista do preview: qual componente, em que
+ * As 4 peças de saída, do ponto de vista do preview: qual componente, em que
  * proporção e por quantos frames. Os ids batem com os do servidor (`PIECES` em
  * scripts/server.mjs), que é quem sabe renderizar cada uma.
  *
  * As três já têm design próprio; nenhuma aponta mais pro andaime.
  */
 
-export type PieceId = "stories" | "square" | "carousel";
+export type PieceId =
+  | "instagram-stories"
+  | "instagram-feed"
+  | "x-bluesky"
+  | "substack-carrossel";
 
 /**
  * O que toda peça recebe no player e no render. `type` e não `interface`: o
@@ -50,39 +55,53 @@ export interface Piece {
 
 export const PIECES: Piece[] = [
   {
-    id: "stories",
-    label: "Stories",
-    format: "9:16 · Story do Instagram",
+    id: "instagram-stories",
+    label: "Story do Instagram",
+    format: "9:16 · vídeo",
     width: STORIES.width,
     height: STORIES.height,
     fps: FPS,
     durationInFrames: DURATION_IN_FRAMES,
     component: Stories,
-    props: (entry) => ({ entry, label: "Stories" }),
+    props: (entry) => ({ entry, label: "Story do Instagram" }),
     posterFrame: 60,
   },
   {
-    id: "square",
-    label: "Quadrado",
-    format: "1:1 · feed do Instagram, X, BlueSky",
+    id: "x-bluesky",
+    label: "X / BlueSky",
+    format: "1:1 · vídeo",
     width: SQUARE.width,
     height: SQUARE.height,
     fps: FPS,
     durationInFrames: DURATION_IN_FRAMES,
     component: Square,
-    props: (entry) => ({ entry, label: "Quadrado" }),
+    props: (entry) => ({ entry, label: "X / BlueSky" }),
     posterFrame: 60,
   },
   {
-    id: "carousel",
-    label: "Carrossel",
-    format: "14:10 · 6 stills do Substack",
+    /* Still e não vídeo: vídeo no feed do Instagram é convertido em Reels. */
+    id: "instagram-feed",
+    label: "Feed do Instagram",
+    format: "1:1 · 6 stills",
+    width: SQUARE.width,
+    height: SQUARE.height,
+    fps: 1,
+    durationInFrames: CAROUSEL_SLIDE_COUNT,
+    component: InstagramFeed,
+    props: (entry) => ({ entry, label: "Feed do Instagram" }),
+    isStills: true,
+    posterFrame: 0,
+  },
+  {
+    id: "substack-carrossel",
+    label: "Carrossel do Substack",
+    format: "14:10 · 6 stills",
     width: CAROUSEL.width,
     height: CAROUSEL.height,
     fps: 1,
     durationInFrames: CAROUSEL_SLIDE_COUNT,
-    component: CarouselSlide,
-    props: (entry) => ({ entry, label: "Carrossel Substack" }),
+    component: SubstackCarrossel,
+    props: (entry) => ({ entry, label: "Carrossel do Substack" }),
     isStills: true,
     posterFrame: 0,
   },

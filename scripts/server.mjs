@@ -14,6 +14,7 @@ import { createReadStream, existsSync, mkdirSync, statSync, unlinkSync, writeFil
 import { extname, join, relative, resolve } from "node:path";
 import { randomUUID } from "node:crypto";
 import { collectEditions, contentDir, root } from "./lib/editions.mjs";
+import { renumberSequence } from "./lib/sequence.mjs";
 
 const PORT = Number(process.env.APP_API_PORT ?? 3010);
 
@@ -28,23 +29,31 @@ const MIME = {
 
 /** As 3 peças de uma edição, e como cada uma é renderizada. */
 const PIECES = {
-  stories: {
+  "instagram-stories": {
     label: "Story do Instagram",
-    composition: (id) => `Stories-${id}`,
-    output: "stories.mp4",
+    composition: (id) => `InstagramStories-${id}`,
+    output: "instagram-stories.mp4",
     extraArgs: [],
   },
-  square: {
-    label: "Quadrado (feed do Instagram, X, BlueSky)",
-    composition: (id) => `Square-${id}`,
-    output: "square.mp4",
-    extraArgs: [],
-  },
-  carousel: {
-    label: "Carrossel Substack",
-    composition: (id) => `CarouselSlide-${id}`,
-    output: "carrossel",
+  "instagram-feed": {
+    label: "Feed do Instagram",
+    composition: (id) => `InstagramFeed-${id}`,
+    output: "instagram-feed",
     extraArgs: ["--sequence", "--image-format=png"],
+    isSequence: true,
+  },
+  "x-bluesky": {
+    label: "X / BlueSky",
+    composition: (id) => `XBlueSky-${id}`,
+    output: "x-bluesky.mp4",
+    extraArgs: [],
+  },
+  "substack-carrossel": {
+    label: "Carrossel do Substack",
+    composition: (id) => `SubstackCarrossel-${id}`,
+    output: "substack-carrossel",
+    extraArgs: ["--sequence", "--image-format=png"],
+    isSequence: true,
   },
 };
 
@@ -141,14 +150,17 @@ const startRender = async (job, entry, pieces) => {
 
     for (const step of job.steps) {
       const piece = PIECES[step.piece];
+      const outputPath = join(outDir, piece.output);
       await runPiece({
         job,
         step,
         compositionId: piece.composition(compositionId),
-        outputPath: join(outDir, piece.output),
+        outputPath,
         extraArgs: piece.extraArgs,
       });
       if (job.error) break;
+      // `--sequence` grava element-0.png…; renomeia pra 01.png… antes de seguir.
+      if (piece.isSequence) renumberSequence(outputPath);
     }
   } catch (err) {
     job.error = err instanceof Error ? err.message : String(err);

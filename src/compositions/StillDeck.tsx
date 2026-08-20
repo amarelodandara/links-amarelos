@@ -3,14 +3,19 @@ import { AbsoluteFill, Sequence, useCurrentFrame } from "remotion";
 import type { EditionEntry } from "../schema/edition";
 import { Background } from "../design/Background";
 import { themes } from "../design/theme";
-import { LAYOUTS, SCENES } from "../settings";
+import type { StillLayout } from "../settings";
+import { SCENES } from "../settings";
 import { CtaScene } from "./scenes/CtaScene";
 import { OpeningScene } from "./scenes/OpeningScene";
 import { TabsScene } from "./scenes/TabsScene";
 
 /**
- * Os 6 stills do carrossel do Substack, em 14:10 horizontal (seção 5 do plano):
- * capa → 4 tabs → CTA. Renderizado com `--sequence`, um PNG por frame.
+ * Baralho de 6 stills: capa → 4 tabs → CTA. Renderizado com `--sequence`, um
+ * PNG por frame.
+ *
+ * Duas peças usam isto, em proporções diferentes: o carrossel do Substack
+ * (14:10) e o feed do Instagram (1:1). O feed é still e não vídeo porque
+ * qualquer vídeo postado no feed do Instagram vira Reels.
  *
  * A composition roda a 1 fps, então `useCurrentFrame()` aqui é o número do
  * slide, não tempo. Cada slide reaproveita a cena correspondente do vídeo,
@@ -18,8 +23,6 @@ import { TabsScene } from "./scenes/TabsScene";
  * serem a mesma coisa que o vídeo, e não um segundo desenho que teria que ser
  * mantido em paralelo.
  */
-
-const layout = LAYOUTS.carousel;
 
 /**
  * Mostra uma cena parada num frame específico.
@@ -45,7 +48,10 @@ const AtFrame: React.FC<{ slide: number; frame: number; children: ReactNode }> =
 const SETTLED_OPENING = SCENES.opening - 1;
 const settledTab = (tabIndex: number) => tabIndex * SCENES.perTab + SCENES.perTab - 1;
 
-export const CarouselSlide: React.FC<{ entry: EditionEntry }> = ({ entry }) => {
+export const StillDeck: React.FC<{ entry: EditionEntry; layout: StillLayout }> = ({
+  entry,
+  layout,
+}) => {
   const slide = useCurrentFrame();
   const theme = themes[entry.edition.type];
 

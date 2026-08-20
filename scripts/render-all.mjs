@@ -12,6 +12,7 @@
 import { spawnSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
+import { renumberSequence } from "./lib/sequence.mjs";
 import { collectEditions, root } from "./lib/editions.mjs";
 
 // Lê /content direto pela mesma varredura do sync. A versão anterior fatiava o
@@ -46,16 +47,18 @@ for (const entry of targets) {
   const outDir = join(root, "outputs", entry.dir);
   mkdirSync(outDir, { recursive: true });
 
-  run(["render", `Stories-${id}`, join(outDir, "stories.mp4")]);
-  run(["render", `Square-${id}`, join(outDir, "square.mp4")]);
-  // Carrossel sai como 6 PNGs numerados, não como vídeo.
-  run([
-    "render",
-    `CarouselSlide-${id}`,
-    join(outDir, "carrossel"),
-    "--sequence",
-    "--image-format=png",
-  ]);
+  run(["render", `InstagramStories-${id}`, join(outDir, "instagram-stories.mp4")]);
+  run(["render", `XBlueSky-${id}`, join(outDir, "x-bluesky.mp4")]);
+
+  // As duas peças estáticas saem como 6 PNGs numerados, não como vídeo.
+  for (const [composition, folder] of [
+    [`InstagramFeed-${id}`, "instagram-feed"],
+    [`SubstackCarrossel-${id}`, "substack-carrossel"],
+  ]) {
+    const target = join(outDir, folder);
+    run(["render", composition, target, "--sequence", "--image-format=png"]);
+    renumberSequence(target);
+  }
 
   console.log(`\n✓ ${entry.dir} → outputs/${entry.dir}`);
 }

@@ -3,7 +3,7 @@
   "fps": 30,
   "durationInSeconds": 16.5,
   "formats": {
-    "$comment_formats": "Uma peça por proporção, não por plataforma: stories só serve o Story do Instagram; square serve feed do Instagram + X + BlueSky (as duas últimas exibem no formato nativo do arquivo, sem crop); carousel são os 6 stills do Substack, no 14:10 que é a especificação deles.",
+    "$comment_formats": "stories: Story do Instagram (vídeo 9:16). square: usado por duas peças diferentes na mesma proporção — vídeo pro X e BlueSky, e 6 stills pro feed do Instagram, porque vídeo no feed do Instagram vira Reels. carousel: os 6 stills do Substack, no 14:10 que é a especificação deles.",
     "stories": { "width": 1080, "height": 1920 },
     "carousel": {
       "$comment": "14:10 horizontal (1456x1040) — os 6 stills do Substack. É a proporção mais diferente das três: sobra largura e falta altura, então a janela do browser fica larga e baixa e as caixas de CTA cabem duas por faixa.",
@@ -40,6 +40,45 @@
         "boxHeightPx": 170,
         "startXPx": 490,
         "startYPx": 250,
+        "speedXPerFrame": 18,
+        "speedYPerFrame": 15,
+        "cornerNearPx": 100
+      }
+    },
+    "instagramFeed": {
+      "$comment": "Os 6 stills quadrados do feed do Instagram. Compartilha abertura e janela com o vídeo quadrado, mas as caixas de CTA são arrumadas de outro jeito: no vídeo elas ficam espalhadas pra data quicando passar entre elas, e num still isso só deixa a composição apertada. Aqui elas empilham abaixo de uma faixa livre no topo, que é onde a data fica.",
+      "opening": {
+        "insetXPx": 72,
+        "align": "center",
+        "topPx": 0,
+        "stackGapPx": 56,
+        "scale": 0.72
+      },
+      "browserWindow": {
+        "width": 920,
+        "height": 780,
+        "left": 80,
+        "top": 150,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 40
+      },
+      "ctaDialogs": {
+        "widthPx": 520,
+        "positions": [
+          { "leftPx": 60, "topPx": 320 },
+          { "leftPx": 500, "topPx": 570 },
+          { "leftPx": 90, "topPx": 820 }
+        ]
+      },
+      "$comment_ctaStillFrame": "Frame em que o slide de CTA congela. start*/frame foram resolvidos juntos por busca: nesse ponto a data cai em (360,105) — centrada na horizontal, dentro da faixa livre do topo, 45px acima da primeira caixa — e no índice de cor 2, que é forte nos dois temas (#0A1FA8 no creme, #4B0082 no azul).",
+      "ctaStillFrame": 175,
+      "ctaDateBounce": {
+        "$comment": "Still: o quique nunca roda. Estes valores são só o jeito de posicionar a data no frame acima.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 90,
+        "startYPx": 1120,
         "speedXPerFrame": 18,
         "speedYPerFrame": 15,
         "cornerNearPx": 100
@@ -183,6 +222,45 @@
         "boxHeightPx": 170,
         "startXPx": 490,
         "startYPx": 250,
+        "speedXPerFrame": 18,
+        "speedYPerFrame": 15,
+        "cornerNearPx": 100
+      }
+    },
+    "instagramFeed": {
+      "$comment": "Os 6 stills quadrados do feed do Instagram. Compartilha abertura e janela com o vídeo quadrado, mas as caixas de CTA são arrumadas de outro jeito: no vídeo elas ficam espalhadas pra data quicando passar entre elas, e num still isso só deixa a composição apertada. Aqui elas empilham abaixo de uma faixa livre no topo, que é onde a data fica.",
+      "opening": {
+        "insetXPx": 72,
+        "align": "center",
+        "topPx": 0,
+        "stackGapPx": 56,
+        "scale": 0.72
+      },
+      "browserWindow": {
+        "width": 920,
+        "height": 780,
+        "left": 80,
+        "top": 150,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 40
+      },
+      "ctaDialogs": {
+        "widthPx": 520,
+        "positions": [
+          { "leftPx": 60, "topPx": 320 },
+          { "leftPx": 500, "topPx": 570 },
+          { "leftPx": 90, "topPx": 820 }
+        ]
+      },
+      "$comment_ctaStillFrame": "Frame em que o slide de CTA congela. start*/frame foram resolvidos juntos por busca: nesse ponto a data cai em (360,105) — centrada na horizontal, dentro da faixa livre do topo, 45px acima da primeira caixa — e no índice de cor 2, que é forte nos dois temas (#0A1FA8 no creme, #4B0082 no azul).",
+      "ctaStillFrame": 175,
+      "ctaDateBounce": {
+        "$comment": "Still: o quique nunca roda. Estes valores são só o jeito de posicionar a data no frame acima.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 90,
+        "startYPx": 1120,
         "speedXPerFrame": 18,
         "speedYPerFrame": 15,
         "cornerNearPx": 100

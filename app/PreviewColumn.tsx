@@ -16,7 +16,7 @@ export const PreviewColumn: React.FC<{
   /** Muda quando a edição é regravada, pra forçar o player a recarregar. */
   revision: number;
 }> = ({ entry, revision }) => {
-  const [pieceId, setPieceId] = useState<PieceId>("stories");
+  const [pieceId, setPieceId] = useState<PieceId>("instagram-stories");
   const [slide, setSlide] = useState(0);
   const playerRef = useRef<PlayerRef>(null);
 
