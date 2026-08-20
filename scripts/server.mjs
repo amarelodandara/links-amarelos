@@ -29,15 +29,15 @@ const MIME = {
 /** As 3 peças de uma edição, e como cada uma é renderizada. */
 const PIECES = {
   stories: {
-    label: "Stories / Twitter / BlueSky",
+    label: "Story do Instagram",
     composition: (id) => `Stories-${id}`,
     output: "stories.mp4",
     extraArgs: [],
   },
-  feed: {
-    label: "Instagram Feed",
-    composition: (id) => `Feed-${id}`,
-    output: "feed.mp4",
+  square: {
+    label: "Quadrado (feed do Instagram, X, BlueSky)",
+    composition: (id) => `Square-${id}`,
+    output: "square.mp4",
     extraArgs: [],
   },
   carousel: {

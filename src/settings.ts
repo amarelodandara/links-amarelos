@@ -14,7 +14,7 @@ export const FPS = settings.fps;
 export const DURATION_IN_FRAMES = settings.durationInSeconds * settings.fps;
 
 export const STORIES = settings.formats.stories;
-export const FEED = settings.formats.feed;
+export const SQUARE = settings.formats.square;
 export const CAROUSEL = settings.formats.carousel;
 export const CAROUSEL_SLIDE_COUNT = settings.formats.carouselSlideCount;
 
@@ -49,6 +49,15 @@ export const DITHERING = {
   opacity: settings.dithering.opacity,
   colorFront: settings.dithering.colorFront,
 } as const;
+
+/**
+ * Geometria por proporção. As cenas não leem medida do `settings` direto: cada
+ * composition escolhe um layout e passa adiante, e é isso que permite a mesma
+ * cena servir o 9:16 e o 1:1 sem `if` de formato espalhado pelo componente.
+ */
+export type Layout = (typeof settings.layouts)[keyof typeof settings.layouts];
+
+export const LAYOUTS = settings.layouts;
 
 /** Tela do form da composition `Editor` — ferramenta, não formato de saída. */
 export const EDITOR = settings.formats.editor;

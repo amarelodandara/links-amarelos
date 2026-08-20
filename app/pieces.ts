@@ -1,19 +1,19 @@
 import type { ComponentType } from "react";
 import type { EditionEntry } from "../src/schema/edition";
-import { PreDesignPlaceholder } from "../src/compositions/PreDesignPlaceholder";
-import { Stories } from "../src/compositions/stories/Stories";
-import { CAROUSEL, CAROUSEL_SLIDE_COUNT, DURATION_IN_FRAMES, FEED, FPS, STORIES } from "../src/settings";
+import { CarouselSlide } from "../src/compositions/CarouselSlide";
+import { Square } from "../src/compositions/Square";
+import { Stories } from "../src/compositions/Stories";
+import { CAROUSEL, CAROUSEL_SLIDE_COUNT, DURATION_IN_FRAMES, FPS, SQUARE, STORIES } from "../src/settings";
 
 /**
  * As 3 peças de saída, do ponto de vista do preview: qual componente, em que
  * proporção e por quantos frames. Os ids batem com os do servidor (`PIECES` em
  * scripts/server.mjs), que é quem sabe renderizar cada uma.
  *
- * `Feed` e `CarouselSlide` ainda apontam pro placeholder — etapas 6 e 7 do
- * plano. Quando ganharem design, é só trocar o componente aqui.
+ * As três já têm design próprio; nenhuma aponta mais pro andaime.
  */
 
-export type PieceId = "stories" | "feed" | "carousel";
+export type PieceId = "stories" | "square" | "carousel";
 
 /**
  * O que toda peça recebe no player e no render. `type` e não `interface`: o
@@ -52,7 +52,7 @@ export const PIECES: Piece[] = [
   {
     id: "stories",
     label: "Stories",
-    format: "9:16 · Stories, Twitter/X, BlueSky",
+    format: "9:16 · Story do Instagram",
     width: STORIES.width,
     height: STORIES.height,
     fps: FPS,
@@ -62,15 +62,15 @@ export const PIECES: Piece[] = [
     posterFrame: 60,
   },
   {
-    id: "feed",
-    label: "Feed",
-    format: "4:5 · Instagram feed",
-    width: FEED.width,
-    height: FEED.height,
+    id: "square",
+    label: "Quadrado",
+    format: "1:1 · feed do Instagram, X, BlueSky",
+    width: SQUARE.width,
+    height: SQUARE.height,
     fps: FPS,
     durationInFrames: DURATION_IN_FRAMES,
-    component: PreDesignPlaceholder,
-    props: (entry) => ({ entry, label: "Instagram Feed" }),
+    component: Square,
+    props: (entry) => ({ entry, label: "Quadrado" }),
     posterFrame: 60,
   },
   {
@@ -81,7 +81,7 @@ export const PIECES: Piece[] = [
     height: CAROUSEL.height,
     fps: 1,
     durationInFrames: CAROUSEL_SLIDE_COUNT,
-    component: PreDesignPlaceholder,
+    component: CarouselSlide,
     props: (entry) => ({ entry, label: "Carrossel Substack" }),
     isStills: true,
     posterFrame: 0,

@@ -3,20 +3,23 @@ import type { Edition } from "../../schema/edition";
 import { MONO, SANS } from "../../design/fonts";
 import { HyperlinksLogotype, LinksLogotype, OndasLogotype, SunCursorMark } from "../../design/marks";
 import type { Theme } from "../../design/theme";
+import type { Layout } from "../../settings";
 import { settings } from "../../settings";
 
 /**
  * Cena de abertura (artboards "links+ondas - opening" / "Hyperlinks — Abertura"):
  * sol + cursor, "essa semana nos", logo do tema, byline. Entradas escalonadas.
  */
-export const OpeningScene: React.FC<{ edition: Edition; theme: Theme }> = ({
-  edition,
-  theme,
-}) => {
+export const OpeningScene: React.FC<{
+  edition: Edition;
+  theme: Theme;
+  layout: Layout;
+}> = ({ edition, theme, layout }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const t = settings.typography;
   const c = settings.colors;
+  const o = layout.opening;
 
   const sunScale = spring({ frame, fps, config: { damping: 14, mass: 0.8 } });
   const enter = (from: number) => ({
@@ -35,14 +38,20 @@ export const OpeningScene: React.FC<{ edition: Edition; theme: Theme }> = ({
       <div
         style={{
           position: "absolute",
-          left: 88,
-          top: 564,
-          width: 1080 - 2 * 88,
+          left: o.insetXPx,
+          right: o.insetXPx,
+          // "top" fixa o topo (é o artboard do Paper); "center" acha o meio da
+          // tela sozinho, que é o que o quadrado precisa.
+          ...(o.align === "center"
+            ? { top: 0, bottom: 0, justifyContent: "center" }
+            : { top: o.topPx }),
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          gap: 128,
+          gap: o.stackGapPx,
           color: theme.ink,
+          transform: `scale(${o.scale})`,
+          transformOrigin: o.align === "center" ? "center center" : "center top",
         }}
       >
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24 }}>

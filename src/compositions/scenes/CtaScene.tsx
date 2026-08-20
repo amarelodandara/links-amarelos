@@ -1,8 +1,10 @@
+import { useMemo } from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame, useVideoConfig } from "remotion";
 import type { Edition } from "../../schema/edition";
 import { MONO, SANS } from "../../design/fonts";
 import type { Theme } from "../../design/theme";
-import { SCENES, settings, STORIES } from "../../settings";
+import type { Layout } from "../../settings";
+import { SCENES, settings } from "../../settings";
 
 /**
  * Cena de encerramento (artboards "links + ondas - CTA" / "Hyperlinks — CTA"):
@@ -48,56 +50,64 @@ const axis = (start: number, speed: number, frame: number, span: number) => {
   };
 };
 
-const b = settings.ctaDateBounce;
-const SPAN_X = STORIES.width - b.boxWidthPx;
-const SPAN_Y = STORIES.height - b.boxHeightPx;
-
-const boxAt = (frame: number) => ({
-  x: axis(b.startXPx, b.speedXPerFrame, frame, SPAN_X),
-  y: axis(b.startYPx, b.speedYPerFrame, frame, SPAN_Y),
-});
-
 /**
- * "Canto" com folga: exigir as duas paredes no mesmo frame é raro demais para
- * acontecer dentro da cena. Vale como canto estar a `cornerNearPx` de uma
- * parede vertical e de uma horizontal ao mesmo tempo.
+ * Resolve o quique para um formato. Precisa ser por formato e não constante de
+ * módulo: o curso do eixo Y no 1:1 é quase metade do 9:16, o que muda em que
+ * frame cada parede e cada canto acontecem.
  */
-const isNearCorner = (frame: number): boolean => {
-  const { x, y } = boxAt(frame);
-  return (
-    Math.min(x.position, SPAN_X - x.position) <= b.cornerNearPx &&
-    Math.min(y.position, SPAN_Y - y.position) <= b.cornerNearPx
+const solveBounce = (layout: Layout, width: number, height: number) => {
+  const b = layout.ctaDateBounce;
+  const spanX = width - b.boxWidthPx;
+  const spanY = height - b.boxHeightPx;
+
+  const boxAt = (frame: number) => ({
+    x: axis(b.startXPx, b.speedXPerFrame, frame, spanX),
+    y: axis(b.startYPx, b.speedYPerFrame, frame, spanY),
+  });
+
+  /**
+   * "Canto" com folga: exigir as duas paredes no mesmo frame é raro demais para
+   * acontecer dentro da cena. Vale como canto estar a `cornerNearPx` de uma
+   * parede vertical e de uma horizontal ao mesmo tempo.
+   */
+  const isNearCorner = (frame: number): boolean => {
+    const { x, y } = boxAt(frame);
+    return (
+      Math.min(x.position, spanX - x.position) <= b.cornerNearPx &&
+      Math.min(y.position, spanY - y.position) <= b.cornerNearPx
+    );
+  };
+
+  /**
+   * Frames em que a caixa *entra* num canto. Só a borda de subida conta — dentro
+   * de um canto ela fica perto por vários frames seguidos, e isso é um evento só.
+   */
+  const cornerFrames = Array.from({ length: SCENES.cta }, (_, frame) => frame).filter(
+    (frame) => frame > 0 && isNearCorner(frame) && !isNearCorner(frame - 1),
   );
+
+  return { box: b, boxAt, cornerFrames };
 };
-
-/**
- * Frames em que a caixa *entra* num canto. Só a borda de subida conta — dentro
- * de um canto ela fica perto por vários frames seguidos, e isso é um evento só.
- * O frame 0 nasce num canto (é a posição do artboard), então não vira evento.
- */
-const CORNER_FRAMES = Array.from({ length: SCENES.cta }, (_, frame) => frame).filter(
-  (frame) => frame > 0 && isNearCorner(frame) && !isNearCorner(frame - 1),
-);
-
-const D = settings.ctaDialogs;
 
 /**
  * Caixa de CTA. O bevel (claro em cima/à esquerda, escuro embaixo/à direita)
  * é o que faz ler como diálogo de sistema antigo em vez de card.
  */
 const CtaDialog: React.FC<{
-  link: (typeof settings.ctaLinks)[number];
+  label: string;
+  position: { leftPx: number; topPx: number };
+  widthPx: number;
   theme: Theme;
-}> = ({ link, theme }) => {
+}> = ({ label, position, widthPx, theme }) => {
   const t = settings.typography;
 
   return (
     <div
       style={{
         position: "absolute",
-        left: link.leftPx,
-        top: link.topPx,
-        width: D.widthPx,
+        left: position.leftPx,
+        top: position.topPx,
+        width: widthPx,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
@@ -121,7 +131,7 @@ const CtaDialog: React.FC<{
           whiteSpace: "nowrap",
         }}
       >
-        {link.label}
+        {label}
       </span>
       <span
         style={{
@@ -146,22 +156,29 @@ const CtaDialog: React.FC<{
   );
 };
 
-export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
-  edition,
-  theme,
-}) => {
+export const CtaScene: React.FC<{
+  edition: Edition;
+  theme: Theme;
+  layout: Layout;
+}> = ({ edition, theme, layout }) => {
   const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
+  const { fps, width, height } = useVideoConfig();
   const t = settings.typography;
+  const D = settings.ctaDialogs;
+
+  const { box, boxAt, cornerFrames } = useMemo(
+    () => solveBounce(layout, width, height),
+    [layout, width, height],
+  );
 
   const { x, y } = boxAt(frame);
   const palette = theme.cta.dateColors;
   const color = palette[(x.bounces + y.bounces) % palette.length];
 
   // Cada canto batido troca data ↔ dia da semana e dá um pulso de escala.
-  const cornersHit = CORNER_FRAMES.filter((corner) => corner <= frame).length;
+  const cornersHit = cornerFrames.filter((corner) => corner <= frame).length;
   const showsWeekday = cornersHit % 2 === 1;
-  const lastCorner = CORNER_FRAMES[cornersHit - 1] ?? -Infinity;
+  const lastCorner = cornerFrames[cornersHit - 1] ?? -Infinity;
   const cornerPop = interpolate(frame - lastCorner, [0, 4, 10], [1.22, 1.06, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
@@ -180,8 +197,8 @@ export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
           position: "absolute",
           left: x.position,
           top: y.position,
-          width: b.boxWidthPx,
-          height: b.boxHeightPx,
+          width: box.boxWidthPx,
+          height: box.boxHeightPx,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
@@ -219,7 +236,7 @@ export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
             : `${String(date.day).padStart(2, "0")}/${String(date.month).padStart(2, "0")}`}
         </div>
       </div>
-      {settings.ctaLinks.map((link, index) => {
+      {settings.ctaLinks.map((label, index) => {
         /**
          * Snap puro: ou a janela está lá, ou não está. Nada de spring nem fade
          * — caixa de erro de sistema antigo aparece inteira de um frame pro
@@ -233,7 +250,13 @@ export const CtaScene: React.FC<{ edition: Edition; theme: Theme }> = ({
         }
 
         return (
-          <CtaDialog key={link.label} link={link} theme={theme} />
+          <CtaDialog
+            key={label}
+            label={label}
+            position={layout.ctaDialogs.positions[index]}
+            widthPx={layout.ctaDialogs.widthPx}
+            theme={theme}
+          />
         );
       })}
     </AbsoluteFill>

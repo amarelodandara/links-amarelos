@@ -3,8 +3,49 @@
   "fps": 30,
   "durationInSeconds": 16.5,
   "formats": {
+    "$comment_formats": "Uma peça por proporção, não por plataforma: stories só serve o Story do Instagram; square serve feed do Instagram + X + BlueSky (as duas últimas exibem no formato nativo do arquivo, sem crop); carousel são os 6 stills do Substack, no 14:10 que é a especificação deles.",
     "stories": { "width": 1080, "height": 1920 },
-    "feed": { "width": 1080, "height": 1350 },
+    "carousel": {
+      "$comment": "14:10 horizontal (1456x1040) — os 6 stills do Substack. É a proporção mais diferente das três: sobra largura e falta altura, então a janela do browser fica larga e baixa e as caixas de CTA cabem duas por faixa.",
+      "opening": {
+        "insetXPx": 120,
+        "align": "center",
+        "topPx": 0,
+        "stackGapPx": 64,
+        "scale": 0.82
+      },
+      "browserWindow": {
+        "width": 1200,
+        "height": 800,
+        "left": 128,
+        "top": 140,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 48
+      },
+      "ctaDialogs": {
+        "$comment": "Duas na faixa de cima e uma embaixo: com 1456 de largura cabem duas caixas de 520 lado a lado sem encostar.",
+        "widthPx": 520,
+        "positions": [
+          { "leftPx": 90, "topPx": 150 },
+          { "leftPx": 846, "topPx": 150 },
+          { "leftPx": 468, "topPx": 620 }
+        ]
+      },
+      "$comment_ctaStillFrame": "Frame da cena de CTA em que o slide 6 congela. Escolhido por busca: é onde a data cai praticamente no centro (602,430), com 430px de folga da caixa mais próxima e sem sobrepor nenhuma — e num trecho em que mostra a data, não o dia da semana.",
+      "ctaStillFrame": 128,
+      "ctaDateBounce": {
+        "$comment": "O carrossel é still: o quique nunca roda, só o frame congelado em ctaStillFrame aparece. Estes valores existem pra posicionar a data nesse frame, longe das caixas — não pra animar.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 490,
+        "startYPx": 250,
+        "speedXPerFrame": 18,
+        "speedYPerFrame": 15,
+        "cornerNearPx": 100
+      }
+    },
+    "square": { "width": 1080, "height": 1080 },
     "carousel": { "width": 1456, "height": 1040 },
     "carouselSlideCount": 6,
     "$comment_editor": "Não é formato de saída — só o tamanho da tela do form da composition Editor.",
@@ -59,42 +100,137 @@
     "ctaLink": { "sizePx": 40, "weight": 700, "lineHeightPx": 50 },
     "ctaDialogButton": { "sizePx": 24, "weight": 700, "trackingEm": 0.04 }
   },
-  "ctaDateBounce": {
-    "$comment": "Data do CTA quicando estilo logo de DVD. Bate 6 paredes e 3 cantos (frames 47/108/168) nos 6s da cena — as 6 cores aparecem uma vez cada, e cada canto troca data <-> dia da semana — mexer em speed*/start* muda essa contagem, então vale reconferir. box* é a caixa usada na colisão (o texto é auto-width, a colisão precisa de número fixo); speed em px/frame; colors são fora da paleta de marca de propósito.",
-    "boxWidthPx": 360,
-    "boxHeightPx": 170,
-    "startXPx": 230,
-    "startYPx": 300,
-    "speedXPerFrame": 12,
-    "speedYPerFrame": 29,
-    "cornerNearPx": 90
-  },
-  "browserWindow": {
-    "$comment": "Janela da metáfora de aba (cena das tabs), valores do Paper em px.",
-    "width": 900,
-    "height": 1260,
-    "left": 90,
-    "top": 330,
-    "radius": 20,
-    "borderWidth": 3,
-    "contentPadding": 64
-  },
   "handle": "@linksamarelos",
+  "ctaLinks": ["leia no substack", "ouça no spotify", "siga no instagram"],
+  "ctaDialogs": {
+    "$comment": "Cada CTA é uma caixa estilo diálogo do Windows 95: entram uma por vez, espalhadas. Sem easing de propósito — dialog antigo não anima, ele aparece de um frame pro outro. A posição de cada caixa é por proporção, em layouts.<formato>.ctaDialogs.",
+    "startSeconds": 1.6,
+    "stepSeconds": 0.55
+  },
+  "$comment_layouts": "Geometria por proporção. O 9:16 é o desenho que veio aprovado do Paper e não deve mudar; o 1:1 é adaptação — mesmos elementos e mesma tipografia, medidas próprias. Nada aqui é derivado por fórmula de propósito: é tudo número solto pra poder ajustar um formato sem mexer no outro.",
+  "layouts": {
+    "stories": {
+      "opening": {
+        "$comment": "align \"top\" preserva o topo exato do artboard do Paper.",
+        "insetXPx": 88,
+        "align": "top",
+        "topPx": 564,
+        "stackGapPx": 128,
+        "scale": 1
+      },
+      "browserWindow": {
+        "$comment": "Janela da metáfora de aba (cena das tabs), valores do Paper em px.",
+        "width": 900,
+        "height": 1260,
+        "left": 90,
+        "top": 330,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 64
+      },
+      "ctaDialogs": {
+        "$comment": "A tela tem 1080 de largura e a caixa 560, então só cabe uma por faixa horizontal — é isso que garante que nenhuma cubra a outra.",
+        "widthPx": 560,
+        "positions": [
+          { "leftPx": 70, "topPx": 300 },
+          { "leftPx": 450, "topPx": 980 },
+          { "leftPx": 110, "topPx": 1560 }
+        ]
+      },
+      "ctaDateBounce": {
+        "$comment": "Data do CTA quicando estilo logo de DVD. Bate 6 paredes e 3 cantos (frames 47/108/168) nos 6s da cena — as 6 cores aparecem uma vez cada, e cada canto troca data <-> dia da semana. Mexer em speed*/start* muda essa contagem, então vale reconferir. box* é a caixa usada na colisão: o texto é auto-width, a colisão precisa de número fixo.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 230,
+        "startYPx": 300,
+        "speedXPerFrame": 12,
+        "speedYPerFrame": 29,
+        "cornerNearPx": 90
+      }
+    },
+    "carousel": {
+      "$comment": "14:10 horizontal (1456x1040) — os 6 stills do Substack. É a proporção mais diferente das três: sobra largura e falta altura, então a janela do browser fica larga e baixa e as caixas de CTA cabem duas por faixa.",
+      "opening": {
+        "insetXPx": 120,
+        "align": "center",
+        "topPx": 0,
+        "stackGapPx": 64,
+        "scale": 0.82
+      },
+      "browserWindow": {
+        "width": 1200,
+        "height": 800,
+        "left": 128,
+        "top": 140,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 48
+      },
+      "ctaDialogs": {
+        "$comment": "Duas na faixa de cima e uma embaixo: com 1456 de largura cabem duas caixas de 520 lado a lado sem encostar.",
+        "widthPx": 520,
+        "positions": [
+          { "leftPx": 90, "topPx": 150 },
+          { "leftPx": 846, "topPx": 150 },
+          { "leftPx": 468, "topPx": 620 }
+        ]
+      },
+      "$comment_ctaStillFrame": "Frame da cena de CTA em que o slide 6 congela. Escolhido por busca: é onde a data cai praticamente no centro (602,430), com 430px de folga da caixa mais próxima e sem sobrepor nenhuma — e num trecho em que mostra a data, não o dia da semana.",
+      "ctaStillFrame": 128,
+      "ctaDateBounce": {
+        "$comment": "O carrossel é still: o quique nunca roda, só o frame congelado em ctaStillFrame aparece. Estes valores existem pra posicionar a data nesse frame, longe das caixas — não pra animar.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 490,
+        "startYPx": 250,
+        "speedXPerFrame": 18,
+        "speedYPerFrame": 15,
+        "cornerNearPx": 100
+      }
+    },
+    "square": {
+      "opening": {
+        "$comment": "Centralizado e reduzido: a mesma pilha do 9:16 em 1080 de altura passaria do rodapé.",
+        "insetXPx": 72,
+        "align": "center",
+        "topPx": 0,
+        "stackGapPx": 56,
+        "scale": 0.72
+      },
+      "browserWindow": {
+        "$comment": "Mais baixa e com menos respiro interno que a do 9:16 — é a altura que sobra depois do chrome das abas.",
+        "width": 920,
+        "height": 780,
+        "left": 80,
+        "top": 150,
+        "radius": 20,
+        "borderWidth": 3,
+        "contentPadding": 40
+      },
+      "ctaDialogs": {
+        "$comment": "Caixas mais estreitas: 520 ainda cabe \"siga no instagram\" e deixa margem lateral nos 1080.",
+        "widthPx": 520,
+        "positions": [
+          { "leftPx": 60, "topPx": 110 },
+          { "leftPx": 500, "topPx": 440 },
+          { "leftPx": 90, "topPx": 770 }
+        ]
+      },
+      "ctaDateBounce": {
+        "$comment": "Resolvido para 1080x1080 — os parâmetros do 9:16 não servem: o eixo Y tem quase metade do curso, o que muda em que frame cada canto acontece. Aqui bate 8 paredes e 3 cantos (frames 48/98/168), os 3 longe das caixas de CTA, com as 6 cores aparecendo pelo menos uma vez.",
+        "boxWidthPx": 360,
+        "boxHeightPx": 170,
+        "startXPx": 490,
+        "startYPx": 250,
+        "speedXPerFrame": 18,
+        "speedYPerFrame": 15,
+        "cornerNearPx": 100
+      }
+    }
+  },
   "ctaDateColors": {
     "$comment": "Paleta da data quicando, uma por tema. Precisa ser separada por tema, e medida sobre o fundo *renderizado*, não sobre a cor nominal: o dithering mistura #FFCC00 no fundo dos dois temas e muda a luminância real (no tema azul ela sobe de 0.24 para ~0.31, o que derruba cor clara). Contraste mínimo aqui: creme >= 4.4:1, azul >= 2.8:1. Ordem = ordem de aparição.",
     "links-ondas": ["#E0004D", "#006E2E", "#0A1FA8", "#D10000", "#7B00E0", "#110A03"],
     "hyperlinks": ["#7A0025", "#FFFFFF", "#4B0082", "#003D3A", "#04165E", "#110A03"]
-  },
-  "ctaDialogs": {
-    "$comment": "Cada CTA é uma caixa estilo diálogo do Windows 95: entram uma por vez, espalhadas. Sem easing de propósito — dialog antigo não anima, ele aparece de um frame pro outro.",
-    "startSeconds": 1.6,
-    "stepSeconds": 0.55,
-    "widthPx": 560
-  },
-  "$comment_ctaLinks": "leftPx/topPx espalham as caixas por cantos diferentes. A tela tem 1080 de largura e a caixa 560, então só cabe uma por faixa horizontal — é isso que garante que nenhuma cubra a outra.",
-  "ctaLinks": [
-    { "label": "leia no substack", "leftPx": 70, "topPx": 300 },
-    { "label": "ouça no spotify", "leftPx": 450, "topPx": 980 },
-    { "label": "siga no instagram", "leftPx": 110, "topPx": 1560 }
-  ]
+  }
 }

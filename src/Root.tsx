@@ -1,25 +1,27 @@
 import { Composition, Folder } from "remotion";
 import { editions } from "./editions.generated";
-import { PreDesignPlaceholder } from "./compositions/PreDesignPlaceholder";
-import { Stories } from "./compositions/stories/Stories";
+import { CarouselSlide } from "./compositions/CarouselSlide";
+import { Square } from "./compositions/Square";
+import { Stories } from "./compositions/Stories";
 import { EditionEditor } from "./editor/EditionEditor";
 import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
   DURATION_IN_FRAMES,
   EDITOR,
-  FEED,
+  SQUARE,
   FPS,
   STORIES,
 } from "./settings";
 
 /**
  * Uma pasta por edição no seletor lateral do Studio, com as três compositions
- * de saída dentro (seção 4). `Stories` cobre Instagram Stories + Twitter +
- * BlueSky; `Feed` cobre o 4:5 do Instagram; `CarouselSlide` sai como stills.
+ * de saída dentro (seção 4). `Stories` cobre só o Story do Instagram;
+ * `Square` cobre feed do Instagram + X + BlueSky; `CarouselSlide` sai como
+ * stills no 14:10 do Substack.
  *
- * `Stories` já usa o design final do Paper; `Feed` e `CarouselSlide` ainda são
- * placeholder (etapas 6 e 7 da ordem de construção).
+ * As três compartilham as cenas de `compositions/scenes` e só diferem no
+ * layout. `CarouselSlide` roda a 1 fps: cada frame é um slide, congelado.
  */
 export const RemotionRoot: React.FC = () => {
   return (
@@ -53,23 +55,23 @@ export const RemotionRoot: React.FC = () => {
               defaultProps={{ entry }}
             />
             <Composition
-              id={`Feed-${id}`}
-              component={PreDesignPlaceholder}
+              id={`Square-${id}`}
+              component={Square}
               durationInFrames={DURATION_IN_FRAMES}
               fps={FPS}
-              width={FEED.width}
-              height={FEED.height}
-              defaultProps={{ entry, label: "Instagram Feed" }}
+              width={SQUARE.width}
+              height={SQUARE.height}
+              defaultProps={{ entry }}
             />
             {/* fps=1 e 1 frame por slide: cada frame vira um still do carrossel. */}
             <Composition
               id={`CarouselSlide-${id}`}
-              component={PreDesignPlaceholder}
+              component={CarouselSlide}
               durationInFrames={CAROUSEL_SLIDE_COUNT}
               fps={1}
               width={CAROUSEL.width}
               height={CAROUSEL.height}
-              defaultProps={{ entry, label: "Carrossel Substack" }}
+              defaultProps={{ entry }}
             />
           </Folder>
         );

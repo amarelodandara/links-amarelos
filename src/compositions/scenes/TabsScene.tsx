@@ -11,6 +11,7 @@ import type { EditionEntry } from "../../schema/edition";
 import { tabAssetPath } from "../../schema/edition";
 import { SANS } from "../../design/fonts";
 import type { Theme } from "../../design/theme";
+import type { Layout } from "../../settings";
 import { SCENES, settings } from "../../settings";
 
 /**
@@ -106,13 +107,14 @@ const ActiveTab: React.FC<{
   );
 };
 
-export const TabsScene: React.FC<{ entry: EditionEntry; theme: Theme }> = ({
-  entry,
-  theme,
-}) => {
+export const TabsScene: React.FC<{
+  entry: EditionEntry;
+  theme: Theme;
+  layout: Layout;
+}> = ({ entry, theme, layout }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const w = settings.browserWindow;
+  const w = layout.browserWindow;
 
   const tabIndex = Math.min(3, Math.floor(frame / SCENES.perTab));
   const frameInTab = frame - tabIndex * SCENES.perTab;

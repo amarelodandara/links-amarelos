@@ -193,9 +193,8 @@ Cada formato é uma **Composition** separada, todas lendo o mesmo
 
 | Composition | Uso |
 |---|---|
-| `Stories` | Instagram Stories |
-| `Feed` | Instagram feed |
-| `Social` | Twitter / BlueSky (mesma composição pode servir pros dois, a confirmar se a proporção é igual) |
+| `Stories` | Story do Instagram — e só ele |
+| `Square` | feed do Instagram + X + BlueSky |
 | `CarouselSlide` | as 6 imagens estáticas do carrossel do Substack (renderizada como stills, não vídeo) |
 
 **Resoluções pesquisadas (2026), viáveis como padrão do projeto:**
@@ -207,12 +206,20 @@ Cada formato é uma **Composition** separada, todas lendo o mesmo
 | Twitter/X | 9:16 vertical **ou** 16:9 (1920×1080) — ambos nativamente suportados | recomendo reaproveitar o vertical 1080×1920 pra não precisar de uma 4ª composição | até 140s (contas free) |
 | BlueSky | exibe no formato nativo do arquivo (não força crop) — 9:16 ou 16:9 funcionam | recomendo também reaproveitar o vertical 1080×1920 | até 3 min, mas arquivo limitado a 100MB |
 
-**Recomendação prática:** dá pra usar a **mesma composition vertical
-(1080×1920)** pra Stories, Twitter e BlueSky — as três aceitam nativamente
-9:16 sem cortar nem adicionar barra preta. Isso elimina uma composition
-inteira do trabalho (era a dúvida em aberto sobre Twitter/BlueSky
-compartilharem ou não a mesma peça). Só o **Feed do Instagram** pede uma
-proporção própria (4:5), porque lá o vertical completo (9:16) fica cortado.
+**Decisão (2026-08-20), que substitui a recomendação anterior:** o vertical
+1080×1920 fica **só** com o Story do Instagram. Feed do Instagram, X e
+BlueSky passam a dividir um **quadrado 1080×1080** — X e BlueSky exibem no
+formato nativo do arquivo, então aceitam 1:1 sem crop, e assim o feed do
+Instagram não precisa de uma proporção só dele.
+
+Continuam sendo duas compositions de vídeo, não três. A troca em relação ao
+plano original: antes o vertical servia três plataformas e o 4:5 servia uma;
+agora o vertical serve uma e o quadrado serve três. O custo é abrir mão dos
+4:5 no feed do Instagram, que ocupa mais tela que o 1:1 — foi uma escolha
+consciente, pra ter uma peça só cobrindo as três plataformas de feed.
+
+Nenhuma dessas proporções ganha desenho próprio no Paper: o quadrado
+**adapta** o conteúdo das cenas do vertical.
 
 ### Saída em vídeo (não gif)
 
@@ -261,7 +268,10 @@ Renderizadas como **stills de uma composição Remotion própria**
 de layout/timing específico pra versão estática.
 
 **Resolução:** ela já tem a especificação certa do Substack —
-**14:10, horizontal** (ex: 1456×1040 ou 1400×1000). Isso é bem diferente da
+**14:10, horizontal** (ex: 1456×1040 ou 1400×1000). Reconfirmado em
+2026-08-20: chegou-se a cogitar deixar o carrossel quadrado junto com a peça
+de feed, mas o 14:10 é a spec do próprio Substack e desperdiçaria largura no
+player deles, então fica como está. Isso é bem diferente da
 proporção do Feed do Instagram (4:5, vertical), então a ideia de reaproveitar
 o mesmo layout entre Feed e carrossel não se aplica — o `CarouselSlide`
 precisa do próprio layout pensado pra um formato horizontal.
@@ -331,7 +341,7 @@ server do Figma/Paper configurado desde o início (não é uma etapa "depois",
 5. Puxar o HTML+CSS do Paper via MCP e implementar a Composition `Stories`
    sozinha, com dados mockados — validar timing, tema/logo, tipografia via
    preview no Remotion Studio.
-6. Replicar pras outras composições de vídeo (Feed; Twitter/BlueSky
+6. Replicar pras outras composições de vídeo (Square: feed do Instagram, X, BlueSky
    reaproveitando a composition vertical, seção 4).
 7. Composition `CarouselSlide` (stills, seção 5).
 8. Form de criação como **composition `Editor`** dentro do Remotion Studio

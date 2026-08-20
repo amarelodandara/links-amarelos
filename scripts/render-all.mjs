@@ -47,7 +47,7 @@ for (const entry of targets) {
   mkdirSync(outDir, { recursive: true });
 
   run(["render", `Stories-${id}`, join(outDir, "stories.mp4")]);
-  run(["render", `Feed-${id}`, join(outDir, "feed.mp4")]);
+  run(["render", `Square-${id}`, join(outDir, "square.mp4")]);
   // Carrossel sai como 6 PNGs numerados, não como vídeo.
   run([
     "render",
