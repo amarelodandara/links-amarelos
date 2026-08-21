@@ -4,7 +4,7 @@ import Image from "next/image";
 import YellowCircle from "../components/YellowCircle";
 import Button from "../components/Button";
 import SectionPill, { PILL_BASE } from "../components/SectionPill";
-import Accordion from "../components/Accordion";
+import Accordion, { AccordionGroup } from "../components/Accordion";
 import Link from "next/link";
 
 const statusStyles = {
@@ -103,7 +103,11 @@ export default function RealizacoesClient() {
       </section>
 
       {/* Accordions */}
-      <section className="bg-sun-light border-x border-sun divide-y divide-sun">
+      <AccordionGroup
+        render={
+          <section className="bg-sun-light border-x border-sun divide-y divide-sun" />
+        }
+      >
         <Accordion
           numero="01"
           nome="Profundo e Otimista"
@@ -314,7 +318,7 @@ export default function RealizacoesClient() {
           </RealizacaoCard>
         </div>
         </Accordion>
-      </section>
+      </AccordionGroup>
 
       {/* Support CTA */}
       <section className="px-8 py-16 space-y-4 text-center bg-[url('/bg-texture-white.svg')] bg-repeat">

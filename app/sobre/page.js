@@ -3,7 +3,7 @@ import Timeline from "../components/Timeline";
 import TypingCycler from "../components/TypingCycler";
 import Button from "../components/Button";
 import SectionPill from "../components/SectionPill";
-import Accordion from "../components/Accordion";
+import Accordion, { AccordionGroup } from "../components/Accordion";
 
 export const metadata = {
   title: "sobre",
@@ -66,7 +66,9 @@ export default function SobrePage() {
       </section>
 
       {/* O que é */}
-      <section className="bg-sun-light divide-y divide-sun">
+      <AccordionGroup
+        render={<section className="bg-sun-light divide-y divide-sun" />}
+      >
         <Accordion
           numero="01"
           nome="Links Amarelos"
@@ -101,7 +103,7 @@ export default function SobrePage() {
             ganha um espaço dedicado em forma de ensaio por áudio.
           </p>
         </Accordion>
-      </section>
+      </AccordionGroup>
 
       {/* Timeline */}
       <section className="bg-sun-light">
@@ -115,140 +117,31 @@ export default function SobrePage() {
         </div>
       </section>
 
-      {/* Manifesto */}
-      <section id="manifesto" className="bg-sun-light">
-        <div className="px-8 py-16 space-y-10">
-          <div className="font-manrope text-sm w-3/4 space-y-10">
-            {/* Intro */}
-            <div className="space-y-5">
-              <p>
-                Links podem começar com qualquer coisa, mas acho que esquecemos
-                disso. Hoje em dia todos os links começam com{" "}
-                <span className="font-space-mono bg-sun px-1">
-                  https://
-                  <TypingCycler />
-                </span>
-                .
-              </p>
-              <p>
-                Mas aqui não. Aqui eles começam com profundidade, pertencem a
-                qualquer mídia e se sustentam com o apoio de vocês.
-              </p>
-              <p>
-                Os links amarelos, as ondas amarelas, e o que mais sair disso,
-                são uma contribuição para que passemos mais tempo na internet
-                como o nosso bairro e não como o shopping deles.
-              </p>
-              <p>
-                Tudo o que fazemos para que isso aconteça, se apoia em quatro
-                princípios:
-              </p>
-            </div>
-
-            {/* Princípio 1 */}
-            <div className="space-y-4">
-              <h3 className="text-xl font-bold tracking-tight">
-                Profundo e Otimista
-              </h3>
-              <p>
-                Enquanto o resto da internet estiver preocupado com resumir,
-                cortar e viralizar, aqui eu vou me preocupar com respirar fundo,
-                com rolar até o fim da página e priorizar a mensagem. Isso
-                envolve contar a mensagem na mídia que ela precisa e não na mais
-                rápida, contar com calma e contar com fontes.
-              </p>
-              <p>
-                Essa profundidade vai ser feita com otimismo. É fácil achar o
-                lado ruim das coisas, é mais fácil ainda se beneficiar dele. É
-                muito mais difícil discutir pontos que não explodiram em
-                vermelho essa semana, mas que ninguém vai se lembrar semana que
-                vem. Felizmente os links são amarelos, não vermelhos ou sequer
-                laranjas.
-              </p>
-            </div>
-
-            {/* Princípio 2 */}
-            <div className="space-y-4">
-              <h3 className="font-unbounded text-xl text-brand-black tracking-tight">
-                Presente e Multimídia
-              </h3>
-              <p>
-                A internet é mais que texto e imagem, vídeo curto e propaganda.
-                Eu procuro por elementos inusitados, por histórias sendo
-                contadas sem som, com muito som ou só com o teclado. O amarelo
-                mora nelas.
-              </p>
-              <p>
-                E eu amo a internet, mas o mundo não acaba aqui. Eu encontro
-                pessoas que são otimistas e as apoio com profundidade no mundo
-                real, no mundo físico, no mundo impresso, nas letras e nas
-                ondas.
-              </p>
-            </div>
-
-            {/* Princípio 3 */}
-            <div className="space-y-4">
-              <h3 className="font-unbounded text-xl text-brand-black tracking-tight">
-                Auto-sustentável e Expansivo
-              </h3>
-              <p>
-                A curadoria não começou com a primeira edição da newsletter e
-                não vai parar se um dia ela acabar. Tudo isso é apenas a minha
-                maneira de alcançar ainda mais pessoas que se interessam por
-                ela. A melhor maneira de manter essa transmissão rodando é
-                escolher o caminho mais eficiente, mais longevo e mais honesto.
-                Mesmo que ele também seja o mais engenhoso.
-              </p>
-              <p>
-                A melhor maneira de expandi-lo é com consistência, transparência
-                e vivendo o resto da minha vida porque tem muitas outras cores
-                por aí.
-              </p>
-            </div>
-
-            {/* Princípio 4 */}
-            <div className="space-y-4">
-              <h3 className="font-unbounded text-xl text-brand-black tracking-tight">
-                Apoiado e Apoiador
-              </h3>
-              <p>
-                Todo apoio dado a esse projeto me dá a simples chance de:
-                continuar brincando. O meu único interesse é que toda iniciativa
-                amarela sempre tenha chance de parar de pé quando for lançada
-                pra cima e, se precisar, deixada sozinha.
-              </p>
-              <p>
-                E enquanto me seguram de pé, impulsionarei outros pra cima.
-                Sempre procurarei oportunidades de apoiar, retribuir, e dar o
-                elogio que alguém precisa pra continuar fazendo o que ama e o
-                que sabe. Se precisar de mim, é só me chamar.
-              </p>
-            </div>
-
-            {/* Fechamento */}
-            <div className="space-y-8 pt-4 border-t border-sun-light">
-              <p>
-                Esses princípios trazem todas as recomendações até vocês e guiam
-                todas as realizações do papel para a realidade. É com eles que
-                não eu, mas nós, vamos pintar o mundo de amarelo.
-              </p>
-              <div className="space-y-1">
-                <p className="font-unbounded text-base text-brand-black">
-                  Amarelo Dandara
-                </p>
-                <p className="italic">
-                  <a
-                    href="https://en.wikipedia.org/wiki/Gesamtkunstwerk"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-4 decoration-brand-black/30 hover:decoration-brand-black transition-colors"
-                  >
-                    Gesamtkunstwerk
-                  </a>{" "}
-                  dos links amarelos e +
-                </p>
-              </div>
-            </div>
+      {/* Manifesto teaser */}
+      <section className="bg-sun-light">
+        <div className="border-b border-sun pt-16">
+          <p className="uppercase text-sun font-unbounded px-8 pb-2">
+            No que acreditamos
+          </p>
+        </div>
+        <div className="px-8 py-12 space-y-4 font-manrope">
+          <p className="text-xl font-semibold tracking-tight leading-relaxed">
+            Aqui os links não começam com{" "}
+            <span className="font-space-mono bg-sun px-1">
+              https://
+              <TypingCycler />
+            </span>
+            .
+          </p>
+          <p className="leading-relaxed max-w-prose">
+            Eles começam com profundidade, pertencem a qualquer mídia e se
+            sustentam com o apoio de vocês. O manifesto amarelo reúne os quatro
+            princípios que guiam todas as recomendações e realizações.
+          </p>
+          <div className="pt-2">
+            <Button variant="ghost" href="/manifesto" trail>
+              leia o manifesto amarelo
+            </Button>
           </div>
         </div>
       </section>

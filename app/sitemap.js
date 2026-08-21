@@ -1,4 +1,4 @@
-const routes = ["", "/sobre", "/realizacoes", "/apoio"];
+const routes = ["", "/sobre", "/manifesto", "/realizacoes", "/apoio"];
 
 export default function sitemap() {
   const base = "https://linksamarelos.com";

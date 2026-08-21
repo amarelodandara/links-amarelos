@@ -259,7 +259,7 @@ export default function Home() {
               <span className="text-sun"> em uma semana </span> por amarelo
               dandara.
             </p>
-            <Button variant="ghost" href="/sobre">
+            <Button variant="ghost" href="/manifesto">
               Leia o manifesto amarelo
             </Button>
           </div>

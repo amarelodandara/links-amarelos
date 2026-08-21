@@ -1,5 +1,17 @@
 import Link from "next/link";
+import { Button as BaseButton } from "@base-ui/react/button";
 import PixelTrail from "./PixelTrail";
+
+// Typeface split: the pixel face carries the big CTAs (primary / secondary),
+// while small utility controls — the nav pill, inline ghost links, and the
+// share/copy buttons in PageActions — stay on mono so they read cleanly at
+// text size.
+//
+// geist ships FIVE pixel faces (square, grid, circle, triangle, line). Swap
+// PIXEL_FONT to change every CTA at once; the utilities are already generated
+// in globals.css.
+const PIXEL_FONT = "font-geist-pixel-square";
+const MONO_FONT = "font-geist-mono";
 
 // Hierarchy decided from the /playground inventory review:
 // - primary / primary-inverted: main CTAs, can opt into the brand pixel-trail
@@ -25,6 +37,7 @@ const VARIANTS = {
     // ramp now, so a bg-code hover would be indistinguishable from default.
     className:
       "px-6 py-3 bg-code text-white rounded-full hover:brightness-90 active:bg-code-dark",
+    font: PIXEL_FONT,
     trailColor: "255,255,255",
   },
   "primary-inverted": {
@@ -35,6 +48,7 @@ const VARIANTS = {
     // exactly match the surrounding bg-code panel and disappear.
     className:
       "px-6 py-3 bg-white text-code border-2 border-white rounded-full hover:bg-code hover:text-white active:bg-code-dark focus-visible:ring-(--sun)",
+    font: PIXEL_FONT,
     trailColor: "59,130,246", // code — default white trail would vanish on this bg
   },
   secondary: {
@@ -42,14 +56,17 @@ const VARIANTS = {
     // instead of two mismatched yellows.
     className:
       "px-6 py-3 border-2 border-brand-white text-brand-white rounded-full hover:bg-white/10 active:bg-white/20",
+    font: PIXEL_FONT,
   },
   nav: {
     className:
       "px-4 py-2 bg-(--sun) text-brand-white font-bold rounded-full tracking-wide hover:brightness-95 active:brightness-90",
+    font: MONO_FONT,
   },
   ghost: {
     className:
       "text-brand-black/70 underline underline-offset-2 decoration-brand-black/30 hover:decoration-brand-black active:text-brand-black",
+    font: MONO_FONT,
   },
 };
 
@@ -92,28 +109,35 @@ export default function Button({
   previewState, // "hover" | "active" | "focus" — playground only
   className = "",
   children,
+  ...props
 }) {
-  const { className: variantClassName, trailColor } = VARIANTS[variant];
+  const {
+    className: variantClassName,
+    font,
+    trailColor,
+  } = VARIANTS[variant];
   const isPill = variant !== "ghost";
   const previewClassName = previewState
     ? STATE_PREVIEW[variant]?.[previewState]
     : "";
 
-  const sharedClassName = `relative whitespace-nowrap font-space-mono lowercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${isPill ? "inline-flex items-center overflow-hidden" : "inline"} ${variantClassName} ${disabled ? "opacity-40 pointer-events-none cursor-not-allowed" : ""} ${previewClassName} ${className}`;
+  // Base UI drives the disabled semantics: data-disabled for styling, plus a
+  // real disabled button rather than the aria-disabled span this used to
+  // render. A live button still renders as a Next <Link> via `render`.
+  const asLink = Boolean(href) && !disabled;
 
-  if (disabled) {
-    return (
-      <span className={sharedClassName} aria-disabled="true" tabIndex={-1}>
-        {trail && <PixelTrail color={trailColor} paused />}
-        <span className="relative">{children}</span>
-      </span>
-    );
-  }
+  const sharedClassName = `relative whitespace-nowrap ${font} lowercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${isPill ? "inline-flex items-center overflow-hidden" : "inline"} ${variantClassName} data-disabled:opacity-40 data-disabled:cursor-not-allowed ${previewClassName} ${className}`;
 
   return (
-    <Link href={href} className={sharedClassName}>
-      {trail && <PixelTrail color={trailColor} />}
+    <BaseButton
+      {...props}
+      disabled={disabled}
+      nativeButton={!asLink}
+      render={asLink ? <Link href={href} /> : undefined}
+      className={sharedClassName}
+    >
+      {trail && <PixelTrail color={trailColor} paused={disabled} />}
       <span className="relative">{children}</span>
-    </Link>
+    </BaseButton>
   );
 }

@@ -1,13 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
+import { Popover } from "@base-ui/react/popover";
 
 const pages = [
   {
     href: "/sobre",
     label: "Sobre",
-    tagline: "Conheça a história, leia o manifesto",
+    tagline: "Conheça a história por trás dos links",
+  },
+  {
+    href: "/manifesto",
+    label: "Manifesto",
+    tagline: "Os quatro princípios que guiam tudo",
   },
   {
     href: "/apoio",
@@ -27,6 +33,7 @@ export default function NavDrawer({
   size = 20,
 }) {
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef(null);
 
   const pad = size * 0.1;
   const x1 = pad;
@@ -39,9 +46,9 @@ export default function NavDrawer({
   const cls = (name) => `hb-line ${name}${open ? " open" : ""}`;
 
   return (
-    <>
-      <button
-        onClick={() => setOpen((v) => !v)}
+    <Popover.Root open={open} onOpenChange={setOpen}>
+      <Popover.Trigger
+        ref={triggerRef}
         aria-label={open ? "Fechar menu" : "Abrir menu"}
         className="flex justify-center items-center size-9 cursor-pointer"
       >
@@ -75,33 +82,42 @@ export default function NavDrawer({
             strokeLinecap="round"
           />
         </svg>
-      </button>
+      </Popover.Trigger>
 
-      <div
-        className={`absolute left-0 right-0 top-full z-50 border-b border-(--sun) bg-sun-light transition-[opacity,transform] duration-300 ${
-          open
-            ? "opacity-100 translate-y-0 pointer-events-auto"
-            : "opacity-0 -translate-y-1 pointer-events-none"
-        }`}
-      >
-        <nav className="flex flex-col">
-          {pages.map(({ href, label, tagline }) => (
-            <Link
-              key={href}
-              href={href}
-              onClick={() => setOpen(false)}
-              className="flex px-6 py-3 font-manrope items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) hover:bg-(--sun) group text-brand-black md:text-(--sun-dark)"
-            >
-              <span className="font-semibold lowercase text-lg tracking-tight group-hover:text-white transition-colors">
-                {label}
-              </span>
-              <span className="group-hover:text-white transition-colors mt-0.5 lowercase">
-                {tagline}
-              </span>
-            </Link>
-          ))}
-        </nav>
-      </div>
-    </>
+      <Popover.Portal>
+        {/* Anchored to the whole <nav> so the panel keeps spanning its full width */}
+        <Popover.Positioner
+          anchor={() => triggerRef.current?.closest("nav") ?? null}
+          side="bottom"
+          align="start"
+          sideOffset={0}
+          className="z-50"
+        >
+          <Popover.Popup className="w-[var(--anchor-width)] border-b border-(--sun) bg-sun-light transition-[opacity,transform] duration-300 data-[starting-style]:opacity-0 data-[starting-style]:-translate-y-1 data-[ending-style]:opacity-0 data-[ending-style]:-translate-y-1">
+            <nav className="flex flex-col">
+              {pages.map(({ href, label, tagline }) => (
+                <Popover.Close
+                  key={href}
+                  nativeButton={false}
+                  render={
+                    <Link
+                      href={href}
+                      className="flex px-6 py-3 font-manrope items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) hover:bg-(--sun) group text-brand-black md:text-(--sun-dark)"
+                    >
+                      <span className="font-semibold lowercase text-lg tracking-tight group-hover:text-white transition-colors">
+                        {label}
+                      </span>
+                      <span className="group-hover:text-white transition-colors mt-0.5 lowercase">
+                        {tagline}
+                      </span>
+                    </Link>
+                  }
+                />
+              ))}
+            </nav>
+          </Popover.Popup>
+        </Popover.Positioner>
+      </Popover.Portal>
+    </Popover.Root>
   );
 }

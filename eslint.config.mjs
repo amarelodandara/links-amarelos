@@ -7,6 +7,8 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    // Scratch dir for verification builds (see NEXT_DIST_DIR in next.config.mjs).
+    ".next-verify/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
