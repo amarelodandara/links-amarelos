@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef } from "react";
+import { useId, useRef } from "react";
 import { CENTERLINES } from "./signature-data";
+import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 
 // Handwritten signature, drawn on scroll-in as if being written live.
 //
@@ -102,9 +103,6 @@ const TIMELINE = (() => {
     return step;
   });
 })();
-
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 export default function Signature({ className = "", title = "Assinatura" }) {
   const rawId = useId();

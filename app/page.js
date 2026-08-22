@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import AutoTooltips from "./components/AutoTooltips";
-import LogoCarousel from "./components/LogoCarousel";
 import ExperimenteSection from "./components/ExperimenteSection";
 import CountdownOdometer from "./components/CountdownOdometer";
 import FloatingLink from "./components/FloatingLink";
@@ -74,10 +73,6 @@ export default function Home() {
       </section>
 
       <div>
-        {/* <div className="text-sun-light">
-          <LogoCarousel />
-        </div>*/}
-
         <ExperimenteSection />
 
         <section

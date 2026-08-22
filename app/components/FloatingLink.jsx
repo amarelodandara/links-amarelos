@@ -5,7 +5,6 @@ import PixelTrail from "./PixelTrail";
 const R = 12;
 const STIFFNESS = 0.1;
 const DAMPING = 0.82;
-const FLOAT_AMP = 28;
 const FLOAT_SPEED = 0.0007;
 
 export default function FloatingLink({ title, url }) {

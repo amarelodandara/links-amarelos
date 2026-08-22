@@ -8,12 +8,12 @@
 import {
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
 import { Button } from "@base-ui/react/button";
+import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 
 // Easing curves from the emil-design-eng guidance: the CSS built-ins are too
 // weak to read as intentional. ease-in-out for the on-screen morph, ease-out
@@ -35,9 +35,6 @@ const BUTTON_CLASS =
   "hover:bg-sun/35 active:scale-[0.97] " +
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark/60 focus-visible:ring-offset-1 " +
   "data-[success=true]:bg-sun/60";
-
-const useIsomorphicLayoutEffect =
-  typeof window === "undefined" ? useEffect : useLayoutEffect;
 
 // matchMedia is an external store, so subscribe to it properly rather than
 // mirroring it into state from an effect.

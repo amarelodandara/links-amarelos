@@ -1,4 +1,3 @@
-import LinksLogotype from "../components/icons/LinksLogotype";
 import Timeline from "../components/Timeline";
 import TypingCycler from "../components/TypingCycler";
 import Button from "../components/Button";
