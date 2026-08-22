@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "oxlint && eslint",
-    "lint:oxlint": "oxlint"
+    "lint:oxlint": "oxlint",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -22,10 +23,15 @@
   "devDependencies": {
     "@oxlint/plugins": "^1.79.0",
     "@tailwindcss/postcss": "^4",
+    "@types/matter-js": "^0.20.2",
+    "@types/node": "26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
     "agentation": "^3.0.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
     "oxlint": "^1.79.0",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "typescript": "^6.0.3"
   }
 }
