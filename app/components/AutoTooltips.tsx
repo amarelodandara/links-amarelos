@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useRef, useCallback } from "react";
+import IconButton from "./IconButton";
 
 const ITEMS = [
   {
@@ -156,11 +157,11 @@ export default function AutoTooltips() {
           <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-sun-light to-transparent pointer-events-none" />
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          <button
+          <IconButton
+            label="Abrir em nova aba"
             onClick={handleOpen}
             disabled={!displayedUrl}
-            className="transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 active:scale-90 cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
-            title="Abrir em nova aba"
+            className="transition-transform duration-300 [transition-timing-function:cubic-bezier(0.34,1.56,0.64,1)] hover:scale-125 active:scale-90 cursor-pointer disabled:opacity-30 disabled:pointer-events-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1 rounded-sm"
           >
             <svg
               width="13"
@@ -175,7 +176,7 @@ export default function AutoTooltips() {
               <line x1="7" y1="17" x2="17" y2="7" />
               <polyline points="7 7 17 7 17 17" />
             </svg>
-          </button>
+          </IconButton>
         </div>
       </div>
     </div>

@@ -2,6 +2,8 @@
 import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Matter from "matter-js";
+import { Button as BaseButton } from "@base-ui/react/button";
+import IconButton from "./IconButton";
 
 const LINKS = [
   {
@@ -496,20 +498,19 @@ export default function ExperimenteSection() {
               zIndex: 30,
             }}
           >
-            <div
-              className="bg-white border border-sun-light rounded-sm shadow-sm px-3 py-2 flex items-center gap-2 cursor-pointer"
-              onClick={() => window.open(c.url, "_blank", "noopener,noreferrer")}
-            >
-              <span className="font-manrope font-semibold text-sm text-stone-900 whitespace-nowrap">
+            <div className="bg-white border border-sun-light rounded-sm shadow-sm px-3 py-2 flex items-center gap-2">
+              <a
+                href={c.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-manrope font-semibold text-sm text-stone-900 whitespace-nowrap rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1"
+              >
                 {c.title}
-              </span>
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  window.open(c.url, "_blank", "noopener,noreferrer");
-                }}
-                className="text-sun-dark hover:text-code transition-colors duration-150"
-                title="Abrir link"
+              </a>
+              <IconButton
+                label="Abrir link"
+                onClick={() => window.open(c.url, "_blank", "noopener,noreferrer")}
+                className="text-sun-dark hover:text-code transition-colors duration-150 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1"
               >
                 <svg
                   width="13"
@@ -523,7 +524,7 @@ export default function ExperimenteSection() {
                   <polyline points="15 3 21 3 21 9" />
                   <line x1="10" y1="14" x2="21" y2="3" />
                 </svg>
-              </button>
+              </IconButton>
             </div>
             <div className="w-2.5 h-2.5 bg-white border-r border-b border-sun-light rotate-45 -mt-1.5" />
           </div>
@@ -543,7 +544,7 @@ export default function ExperimenteSection() {
 
       {/* Button + counter */}
       <div className="relative space-y-2" style={{ zIndex: 5 }}>
-        <button
+        <BaseButton
           onPointerDown={startHold}
           onPointerUp={cancelHold}
           onPointerLeave={() => {
@@ -577,7 +578,7 @@ export default function ExperimenteSection() {
           >
             Degustar link
           </span>
-        </button>
+        </BaseButton>
         <p
           className="font-space-mono text-xs text-code transition-opacity duration-700"
           style={{ opacity: hasInteracted ? 1 : 0 }}
@@ -586,6 +587,23 @@ export default function ExperimenteSection() {
             ? "se gostou, tem mais, é só inscrever!"
             : `${linksRemaining} link${linksRemaining !== 1 ? "s" : ""} restante${linksRemaining !== 1 ? "s" : ""}`}
         </p>
+
+        {settledCircles.length > 0 && (
+          <ul className="sr-only focus-within:not-sr-only focus-within:flex focus-within:flex-col focus-within:items-center focus-within:gap-1 focus-within:pt-4">
+            {settledCircles.map((c) => (
+              <li key={c.id}>
+                <a
+                  href={c.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-space-mono text-xs lowercase underline underline-offset-2 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
+                >
+                  {c.title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </section>
   );

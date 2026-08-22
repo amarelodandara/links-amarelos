@@ -13,7 +13,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import type { ReactNode } from "react";
-import { Button } from "@base-ui/react/button";
+import { Toolbar } from "@base-ui/react/toolbar";
 import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 
 // Easing curves from the emil-design-eng guidance: the CSS built-ins are too
@@ -138,7 +138,7 @@ function ActionButton({
       className="inline-flex justify-start"
       style={width ? { width } : undefined}
     >
-      <Button
+      <Toolbar.Button
         ref={buttonRef}
         onClick={handleClick}
         data-success={succeeded ? "true" : "false"}
@@ -167,7 +167,7 @@ function ActionButton({
         >
           <CheckIcon />
         </span>
-      </Button>
+      </Toolbar.Button>
 
       {/* Replaces the toast: the outcome is announced, nothing is drawn. */}
       <span role="status" aria-live="polite" className="sr-only">
@@ -346,12 +346,14 @@ export default function PageActions({
   title,
   markdownTargetId,
 }: PageActionsProps) {
+  // Toolbar puts the actions on one roving tab stop with arrow-key movement
+  // between them, rather than each button being its own tab stop.
   return (
-    <div className="flex items-center gap-2">
+    <Toolbar.Root className="flex items-center gap-2">
       {markdownTargetId && (
         <CopyMarkdownButton targetId={markdownTargetId} title={title} />
       )}
       <ShareTrigger title={title} />
-    </div>
+    </Toolbar.Root>
   );
 }

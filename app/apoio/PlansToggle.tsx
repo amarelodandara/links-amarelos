@@ -1,13 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import { ToggleGroup } from "@base-ui/react/toggle-group";
+import { Toggle } from "@base-ui/react/toggle";
 import Button from "../components/Button";
 import SectionPill from "../components/SectionPill";
 import CheckIcon from "../components/icons/CheckIcon";
 import LockIcon from "../components/icons/LockIcon";
 
+const PERIOD_CLASS =
+  "lowercase rounded-full px-3 py-1 transition-colors duration-150 " +
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 " +
+  "text-white/70 hover:text-white data-[pressed]:bg-white data-[pressed]:text-code";
+
 export default function PlansToggle() {
   const [anual, setAnual] = useState(false);
+  const period = anual ? "anual" : "mensal";
 
   return (
     <section className="border-y-2 border-sun-light grid md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-sun-light">
@@ -66,32 +74,26 @@ export default function PlansToggle() {
 
       <div className="bg-code text-white flex flex-col">
         <div className="p-8 flex flex-col gap-6 flex-1">
-          <div
-            role="group"
+          {/* ToggleGroup is multi-select by design, so single selection is
+              controlled: take whichever value in the new array is not the one
+              already pressed, and ignore an empty array so the segment cannot
+              be deselected into a state with no billing period at all. */}
+          <ToggleGroup
+            value={[period]}
+            onValueChange={(next) => {
+              const picked = next.find((item) => item !== period);
+              if (picked) setAnual(picked === "anual");
+            }}
             aria-label="Período de cobrança"
             className="flex items-center gap-0.5 self-end rounded-full border border-white/30 p-0.5 font-space-mono text-xs"
           >
-            <button
-              type="button"
-              onClick={() => setAnual(false)}
-              aria-pressed={!anual}
-              className={`lowercase rounded-full px-3 py-1 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
-                !anual ? "bg-white text-code" : "text-white/70 hover:text-white"
-              }`}
-            >
+            <Toggle value="mensal" className={PERIOD_CLASS}>
               mensal
-            </button>
-            <button
-              type="button"
-              onClick={() => setAnual(true)}
-              aria-pressed={anual}
-              className={`lowercase rounded-full px-3 py-1 transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70 ${
-                anual ? "bg-white text-code" : "text-white/70 hover:text-white"
-              }`}
-            >
+            </Toggle>
+            <Toggle value="anual" className={PERIOD_CLASS}>
               anual
-            </button>
-          </div>
+            </Toggle>
+          </ToggleGroup>
           <div className="space-y-2">
             <SectionPill tone="dark">Membro</SectionPill>
             <h2 className="lowercase font-unbounded text-2xl tracking-tight">

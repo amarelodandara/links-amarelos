@@ -1,6 +1,7 @@
 "use client";
 import { useRef, useEffect, useState } from "react";
 import PixelTrail from "./PixelTrail";
+import IconButton from "./IconButton";
 
 const R = 12;
 const STIFFNESS = 0.1;
@@ -155,10 +156,10 @@ export default function FloatingLink({
                 <span className="font-manrope font-semibold text-sm text-stone-900 whitespace-nowrap">
                   {title}
                 </span>
-                <button
+                <IconButton
+                  label="Abrir link"
                   onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
-                  className="text-sun-dark hover:text-code transition-colors duration-150"
-                  title="Abrir link"
+                  className="text-sun-dark hover:text-code transition-colors duration-150 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1"
                 >
                   <svg
                     width="13"
@@ -172,15 +173,19 @@ export default function FloatingLink({
                     <polyline points="15 3 21 3 21 9" />
                     <line x1="10" y1="14" x2="21" y2="3" />
                   </svg>
-                </button>
+                </IconButton>
               </div>
               <div className="w-2.5 h-2.5 bg-white border-r border-b border-sun-light rotate-45 -mt-1.5" />
             </div>
           )}
 
           {/* Circle */}
-          <div
-            className="absolute pointer-events-auto cursor-pointer overflow-hidden"
+          <a
+            href={url}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Abrir: ${title}`}
+            className="absolute pointer-events-auto cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
             style={{
               left: pos.x,
               top: pos.y,
@@ -194,10 +199,11 @@ export default function FloatingLink({
             }}
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
-            onClick={() => window.open(url, "_blank", "noopener,noreferrer")}
+            onFocus={() => setHovered(true)}
+            onBlur={() => setHovered(false)}
           >
             <PixelTrail color="255,255,255" />
-          </div>
+          </a>
         </>
       )}
     </div>
