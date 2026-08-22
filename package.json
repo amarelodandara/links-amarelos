@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "oxlint && eslint",
+    "lint:oxlint": "oxlint"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
@@ -19,10 +20,12 @@
     "react-type-animation": "^3.2.0"
   },
   "devDependencies": {
+    "@oxlint/plugins": "^1.79.0",
     "@tailwindcss/postcss": "^4",
     "agentation": "^3.0.2",
     "eslint": "^9",
     "eslint-config-next": "16.2.9",
+    "oxlint": "^1.79.0",
     "tailwindcss": "^4"
   }
 }

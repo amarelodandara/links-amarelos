@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev      # start dev server (localhost:3000)
 npm run build    # production build
-npm run lint     # eslint
+npm run lint     # oxlint (anti-slop plugin) + eslint
 ```
 
 ## Stack
