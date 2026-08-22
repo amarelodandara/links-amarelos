@@ -32,7 +32,10 @@ export default function ManifestoPage() {
               land on an <h2> with no <h1> above it. */}
           <h1 className="sr-only">O Manifesto Amarelo</h1>
 
-          <div className="flex items-center justify-between gap-4">
+          {/* Stacked on mobile — breadcrumb and the two action buttons on one
+              row overflow a narrow column. Both stay flush left; they only
+              share a line from md up, where the row has the width for it. */}
+          <div className="flex flex-col items-start gap-4 md:flex-row md:items-center md:justify-between">
             <nav aria-label="Trilha de navegação">
               <ol className="flex items-center gap-2 leading-none">
                 <li className="flex items-center">
