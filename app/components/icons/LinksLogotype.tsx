@@ -1,4 +1,6 @@
-export default function LinksLogotype({ className, ...props }) {
+import type { SVGProps } from "react";
+
+export default function LinksLogotype({ className, ...props }: SVGProps<SVGSVGElement>) {
   return (
     <svg width="617" height="75" viewBox="0 0 617 75" fill="none" xmlns="http://www.w3.org/2000/svg" className={className} {...props}>
       <path d="M0 73.5V0H13.6V73.5H0Z" fill="currentColor"/>
