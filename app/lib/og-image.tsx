@@ -162,7 +162,7 @@ export async function renderOgImage(tagline: string) {
                 justifyContent: "center",
               }}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element, jsx-a11y/alt-text -- Satori (next/og) requires a plain img, next/image is not usable inside ImageResponse */}
+              {/* eslint-disable-next-line @next/next/no-img-element -- Satori (next/og) requires a plain img, next/image is not usable inside ImageResponse */}
               <img src={ICON_DATA_URI} width={140} height={140} alt="" />
             </div>
             <div

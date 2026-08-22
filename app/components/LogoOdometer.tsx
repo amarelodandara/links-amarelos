@@ -26,51 +26,61 @@ export default function LogoOdometer({ interactive = false }: { interactive?: bo
   // a no-op before the first schedule.
   const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  function advance() {
-    if (isAnimatingRef.current) return;
-    isAnimatingRef.current = true;
-
-    const next = (stepRef.current + 1) % 3;
-    stepRef.current = next;
-
-    if (next === 0) {
-      setWithTransition(true);
-      setStripIdx(0);
-      setTimeout(() => {
-        setWithTransition(false);
-        setStripIdx(3);
-        requestAnimationFrame(() =>
-          requestAnimationFrame(() => {
-            setWithTransition(true);
-            isAnimatingRef.current = false;
-          })
-        );
-      }, ANIM_MS + 50);
-    } else {
-      setWithTransition(true);
-      setStripIdx(3 - next);
-      setTimeout(() => {
-        isAnimatingRef.current = false;
-      }, ANIM_MS);
-    }
-  }
-
-  function scheduleStep(remaining: number) {
-    if (remaining <= 0) {
-      isCyclingRef.current = false;
-      timerRef.current = setTimeout(startCycle, REST_INTERVAL);
-      return;
-    }
-    advance();
-    timerRef.current = setTimeout(() => scheduleStep(remaining - 1), STEP_INTERVAL);
-  }
-
-  function startCycle() {
-    isCyclingRef.current = true;
-    scheduleStep(3);
-  }
+  // The cycle lives inside the effect so the effect closes over nothing from
+  // render scope — these three call each other, and as plain function
+  // declarations in the component body the effect captured the first render's
+  // copies. Only refs and setState (both stable) cross the boundary now, so
+  // the empty dependency array is honest. handleMouseEnter reaches the entry
+  // point through a ref, the same indirection AutoTooltips uses for its tick.
+  const startCycleRef = useRef<() => void>(() => {});
 
   useEffect(() => {
+    function advance() {
+      if (isAnimatingRef.current) return;
+      isAnimatingRef.current = true;
+
+      const next = (stepRef.current + 1) % 3;
+      stepRef.current = next;
+
+      if (next === 0) {
+        setWithTransition(true);
+        setStripIdx(0);
+        setTimeout(() => {
+          setWithTransition(false);
+          setStripIdx(3);
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              setWithTransition(true);
+              isAnimatingRef.current = false;
+            })
+          );
+        }, ANIM_MS + 50);
+      } else {
+        setWithTransition(true);
+        setStripIdx(3 - next);
+        setTimeout(() => {
+          isAnimatingRef.current = false;
+        }, ANIM_MS);
+      }
+    }
+
+    function scheduleStep(remaining: number) {
+      if (remaining <= 0) {
+        isCyclingRef.current = false;
+        timerRef.current = setTimeout(startCycle, REST_INTERVAL);
+        return;
+      }
+      advance();
+      timerRef.current = setTimeout(() => scheduleStep(remaining - 1), STEP_INTERVAL);
+    }
+
+    function startCycle() {
+      isCyclingRef.current = true;
+      scheduleStep(3);
+    }
+
+    startCycleRef.current = startCycle;
+
     // Purely decorative loop — it never starts when the OS asks for reduced
     // motion, and it stops if that preference is turned on mid-session.
     const query = window.matchMedia(MOTION_QUERY);
@@ -96,7 +106,7 @@ export default function LogoOdometer({ interactive = false }: { interactive?: bo
   function handleMouseEnter() {
     if (reduceMotionRef.current || isCyclingRef.current) return;
     clearTimeout(timerRef.current);
-    startCycle();
+    startCycleRef.current();
   }
 
   return (

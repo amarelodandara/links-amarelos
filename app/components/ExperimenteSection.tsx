@@ -97,7 +97,6 @@ const TRAIL_CURVE_FREQ = 0.5; // sine cycles along height (0.5=lean, 1=S-curve, 
 export default function ExperimenteSection() {
   const [linksRemaining, setLinksRemaining] = useState(10);
   const [holdProgress, setHoldProgress] = useState(0);
-  const [isHolding, setIsHolding] = useState(false);
   const [isExhausted, setIsExhausted] = useState(false);
   const [settledCircles, setSettledCircles] = useState<SettledCircle[]>([]);
   const [hoveredId, setHoveredId] = useState<number | null>(null);
@@ -390,7 +389,6 @@ export default function ExperimenteSection() {
       e.preventDefault();
       if (isExhausted || isHoldingRef.current) return;
       isHoldingRef.current = true;
-      setIsHolding(true);
       setHoveredId(null);
       setHasInteracted(true);
       holdStartRef.current = performance.now();
@@ -405,7 +403,6 @@ export default function ExperimenteSection() {
           holdRafRef.current = requestAnimationFrame(animate);
         } else {
           isHoldingRef.current = false;
-          setIsHolding(false);
           holdProgressRef.current = 0;
           setHoldProgress(0);
           spawnCircle();
@@ -425,7 +422,6 @@ export default function ExperimenteSection() {
     if (!isHoldingRef.current) return;
     cancelAnimationFrame(holdRafRef.current);
     isHoldingRef.current = false;
-    setIsHolding(false);
 
     const decay = () => {
       holdProgressRef.current *= 0.82;
@@ -550,7 +546,7 @@ export default function ExperimenteSection() {
         <button
           onPointerDown={startHold}
           onPointerUp={cancelHold}
-          onPointerLeave={(e) => {
+          onPointerLeave={() => {
             cancelHold();
             isBtnHoveredRef.current = false;
           }}
