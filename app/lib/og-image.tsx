@@ -34,7 +34,11 @@ const WAVEFORM_AMPLITUDES = [
 const WAVE_W = 280;
 const WAVE_H = 64;
 
-function waveformPath(amplitudes, width, height) {
+function waveformPath(
+  amplitudes: readonly number[],
+  width: number,
+  height: number,
+) {
   const cy = height / 2;
   const step = width / (amplitudes.length - 1);
   const top = amplitudes.map(
@@ -52,7 +56,7 @@ function waveformPath(amplitudes, width, height) {
 // fonts have to be fetched as raw bytes per request. This is the documented
 // Vercel pattern: ask Google's CSS API for only the glyphs this text needs,
 // then follow the @font-face src url to the actual font file.
-async function loadGoogleFont(family, weight, text) {
+async function loadGoogleFont(family: string, weight: number, text: string) {
   const params = new URLSearchParams({ family: `${family}:wght@${weight}`, text });
   const css = await (
     await fetch(`https://fonts.googleapis.com/css2?${params}`)
@@ -67,13 +71,13 @@ async function loadGoogleFont(family, weight, text) {
 
 // Headline length varies per page — scale it down instead of letting long
 // taglines overflow their row.
-function headlineFontSize(tagline) {
+function headlineFontSize(tagline: string) {
   if (tagline.length > 90) return 40;
   if (tagline.length > 70) return 46;
   return 54;
 }
 
-export async function renderOgImage(tagline) {
+export async function renderOgImage(tagline: string) {
   const row1Text = ROW1_LINES.join("");
   const [manrope, spaceMono, redacted] = await Promise.all([
     loadGoogleFont("Manrope", 700, tagline),

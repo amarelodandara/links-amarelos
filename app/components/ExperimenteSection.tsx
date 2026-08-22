@@ -1,4 +1,5 @@
 "use client";
+import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent } from "react";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Matter from "matter-js";
 
@@ -45,6 +46,37 @@ const LINKS = [
   },
 ];
 
+// A circle is either still falling or has come to rest. Settled circles freeze
+// their landing coordinates and the moment they landed, which is what the
+// pulse animation and the hit-test read; a falling circle has neither, so the
+// two states are separate rather than one shape with optional fields.
+type BaseCircle = {
+  id: number;
+  title: string;
+  url: string;
+  body: Matter.Body;
+  settledFrames: number;
+};
+type FallingCircle = BaseCircle & { settled: false };
+type RestingCircle = BaseCircle & {
+  settled: true;
+  sx: number;
+  sy: number;
+  settledAt: number;
+};
+type Circle = FallingCircle | RestingCircle;
+
+const hasSettled = (c: Circle): c is RestingCircle => c.settled;
+
+/** What the overlay renders: a settled circle flattened to page coordinates. */
+type SettledCircle = {
+  id: number;
+  title: string;
+  url: string;
+  x: number;
+  y: number;
+};
+
 const HOLD_MS = 800;
 const CIRCLE_R = 12;
 const SETTLE_SPEED = 0.5;
@@ -67,25 +99,26 @@ export default function ExperimenteSection() {
   const [holdProgress, setHoldProgress] = useState(0);
   const [isHolding, setIsHolding] = useState(false);
   const [isExhausted, setIsExhausted] = useState(false);
-  const [settledCircles, setSettledCircles] = useState([]);
-  const [hoveredId, setHoveredId] = useState(null);
+  const [settledCircles, setSettledCircles] = useState<SettledCircle[]>([]);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [shuffledLinks] = useState(() =>
     [...LINKS].sort(() => Math.random() - 0.5),
   );
 
-  const sectionRef = useRef(null);
-  const canvasRef = useRef(null);
-  const btnCanvasRef = useRef(null);
-  const holdRafRef = useRef(null);
-  const holdStartRef = useRef(null);
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const btnCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // 0 is the safe idle value: cancelAnimationFrame(0) is a defined no-op.
+  const holdRafRef = useRef(0);
+  const holdStartRef = useRef<number | null>(null);
   const holdProgressRef = useRef(0);
   const isHoldingRef = useRef(false);
   const linkIdxRef = useRef(0);
-  const circlesRef = useRef([]);
-  const settledCirclesRef = useRef([]);
-  const engineRef = useRef(null);
-  const trailCmdRef = useRef(null); // 'dismiss' | null
+  const circlesRef = useRef<Circle[]>([]);
+  const settledCirclesRef = useRef<SettledCircle[]>([]);
+  const engineRef = useRef<Matter.Engine | null>(null);
+  const trailCmdRef = useRef<"dismiss" | null>(null);
   const isBtnHoveredRef = useRef(false);
   const isExhaustedRef = useRef(false);
 
@@ -96,7 +129,7 @@ export default function ExperimenteSection() {
     if (!section || !canvas) return;
 
     const dims = { width: 0, height: 0 };
-    let wallBodies = [];
+    let wallBodies: Matter.Body[] = [];
 
     const engine = Matter.Engine.create({ gravity: { y: 1.2 } });
     engineRef.current = engine;
@@ -120,7 +153,9 @@ export default function ExperimenteSection() {
     };
     rebuildWalls();
 
-    const ctx = canvas.getContext("2d");
+    const maybeCtx = canvas.getContext("2d");
+    if (!maybeCtx) return;
+    const ctx: CanvasRenderingContext2D = maybeCtx;
 
     const resizeObserver = new ResizeObserver(rebuildWalls);
     resizeObserver.observe(section);
@@ -156,7 +191,7 @@ export default function ExperimenteSection() {
 
       if (changed) {
         const s = updated
-          .filter((c) => c.settled)
+          .filter(hasSettled)
           .map(({ id, title, url, sx, sy }) => ({
             id,
             title,
@@ -207,16 +242,21 @@ export default function ExperimenteSection() {
     const canvas = btnCanvasRef.current;
     if (!canvas) return;
     const btn = canvas.parentElement;
+    if (!btn) return;
     const { width: W, height: H } = btn.getBoundingClientRect();
     canvas.width = W;
     canvas.height = H;
-    const ctx = canvas.getContext("2d");
+    // Same shape as PixelTrail: `frame` below is a hoisted function
+    // declaration, so the null-guard narrowing does not reach inside it.
+    const maybeCtx = canvas.getContext("2d");
+    if (!maybeCtx) return;
+    const ctx: CanvasRenderingContext2D = maybeCtx;
 
     const totalRows = Math.ceil(H / TRAIL_PIXEL_SIZE);
     let head = -TRAIL_PIXEL_SIZE * 2;
-    let trail = []; // [{ col, opacity }]
-    let rafId;
-    let timeoutId;
+    let trail: { col: number; opacity: number }[] = [];
+    let rafId = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let stopped = false;
 
     const restart = () => {
@@ -346,7 +386,7 @@ export default function ExperimenteSection() {
   }, [shuffledLinks]);
 
   const startHold = useCallback(
-    (e) => {
+    (e: ReactPointerEvent<HTMLButtonElement>) => {
       e.preventDefault();
       if (isExhausted || isHoldingRef.current) return;
       isHoldingRef.current = true;
@@ -355,8 +395,9 @@ export default function ExperimenteSection() {
       setHasInteracted(true);
       holdStartRef.current = performance.now();
 
-      const animate = (now) => {
-        const progress = Math.min((now - holdStartRef.current) / HOLD_MS, 1);
+      const animate = (now: number) => {
+        const start = holdStartRef.current ?? now;
+        const progress = Math.min((now - start) / HOLD_MS, 1);
         holdProgressRef.current = progress;
         setHoldProgress(progress);
 
@@ -399,7 +440,7 @@ export default function ExperimenteSection() {
     holdRafRef.current = requestAnimationFrame(decay);
   }, []);
 
-  const findCircleAt = useCallback((clientX, clientY) => {
+  const findCircleAt = useCallback((clientX: number, clientY: number) => {
     const rect = sectionRef.current?.getBoundingClientRect();
     if (!rect) return null;
     const mx = clientX - rect.left;
@@ -413,14 +454,14 @@ export default function ExperimenteSection() {
   }, []);
 
   const handleMouseMove = useCallback(
-    (e) => {
+    (e: ReactMouseEvent<HTMLElement>) => {
       setHoveredId(findCircleAt(e.clientX, e.clientY)?.id ?? null);
     },
     [findCircleAt],
   );
 
   const handleClick = useCallback(
-    (e) => {
+    (e: ReactMouseEvent<HTMLElement>) => {
       const hit = findCircleAt(e.clientX, e.clientY);
       if (hit) window.open(hit.url, "_blank", "noopener,noreferrer");
     },
