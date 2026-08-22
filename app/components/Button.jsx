@@ -59,8 +59,11 @@ const VARIANTS = {
     font: PIXEL_FONT,
   },
   nav: {
+    // brand-white on --sun measured 1.46:1 — far under the 4.5:1 floor for
+    // this 14px bold label. brand-black on the same yellow is 13:1 and keeps
+    // the pill unmistakably brand-yellow.
     className:
-      "px-4 py-2 bg-(--sun) text-brand-white font-bold rounded-full tracking-wide hover:brightness-95 active:brightness-90",
+      "px-4 py-2 bg-(--sun) text-brand-black font-bold rounded-full tracking-wide hover:brightness-95 active:brightness-90",
     font: MONO_FONT,
   },
   ghost: {
@@ -92,7 +95,7 @@ const STATE_PREVIEW = {
   nav: {
     hover: "!brightness-95",
     active: "!brightness-90",
-    focus: "!ring-2 !ring-brand-white !ring-offset-1",
+    focus: "!ring-2 !ring-brand-black !ring-offset-1",
   },
   ghost: {
     hover: "!decoration-brand-black",
@@ -126,7 +129,7 @@ export default function Button({
   // render. A live button still renders as a Next <Link> via `render`.
   const asLink = Boolean(href) && !disabled;
 
-  const sharedClassName = `relative whitespace-nowrap ${font} lowercase transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${isPill ? "inline-flex items-center overflow-hidden" : "inline"} ${variantClassName} data-disabled:opacity-40 data-disabled:cursor-not-allowed ${previewClassName} ${className}`;
+  const sharedClassName = `relative whitespace-nowrap ${font} lowercase [touch-action:manipulation] [-webkit-tap-highlight-color:transparent] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 ${isPill ? "inline-flex items-center overflow-hidden" : "inline"} ${variantClassName} data-disabled:opacity-40 data-disabled:cursor-not-allowed ${previewClassName} ${className}`;
 
   return (
     <BaseButton

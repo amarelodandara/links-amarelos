@@ -75,6 +75,12 @@ export const metadata = {
   },
 };
 
+// Matches the nav's bg-sun-lighter, which is what sits under the browser
+// chrome at the top of every page.
+export const viewport = {
+  themeColor: "#fef3c7",
+};
+
 export default function RootLayout({ children }) {
   return (
     <html
@@ -82,9 +88,22 @@ export default function RootLayout({ children }) {
       className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${GeistPixelGrid.variable} ${GeistPixelCircle.variable} ${GeistPixelTriangle.variable} ${GeistPixelLine.variable} ${manrope.variable} ${unbounded.variable} ${spaceMono.variable} ${redacted.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <nav className="relative border-b border-(--sun) bg-sun-lighter py-3 px-6 flex justify-between items-center">
-          <Link href="/" className="text-sun">
-            <LogoOdometer />
+        <a href="#conteudo" className="skip-link font-geist-mono lowercase">
+          Pular para o conteúdo
+        </a>
+
+        <nav
+          aria-label="Navegação principal"
+          className="relative border-b border-(--sun) bg-sun-lighter py-3 px-6 flex justify-between items-center [padding-left:max(1.5rem,env(safe-area-inset-left))] [padding-right:max(1.5rem,env(safe-area-inset-right))]"
+        >
+          {/* The logotype is a decorative <svg> with no text, so the accessible
+              name has to live on the link itself. */}
+          <Link
+            href="/"
+            aria-label="links amarelos — página inicial"
+            className="text-sun rounded-sm [touch-action:manipulation] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
+          >
+            <LogoOdometer interactive />
           </Link>
 
           <div className="flex gap-2 text-sm items-center">
@@ -108,7 +127,13 @@ export default function RootLayout({ children }) {
             </HideOnRoutes>
           </div>
         </nav>
-        <div className="flex-1 bg-[url('/bg-texture.svg')] bg-repeat">
+        {/* Skip-link target. tabIndex=-1 so focus actually lands here rather
+            than staying on the link and reading from the top again. */}
+        <div
+          id="conteudo"
+          tabIndex={-1}
+          className="flex-1 bg-[url('/bg-texture.svg')] bg-repeat focus:outline-none"
+        >
           {children}
         </div>
 

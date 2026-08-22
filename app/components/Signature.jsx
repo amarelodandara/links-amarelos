@@ -103,13 +103,6 @@ const TIMELINE = (() => {
   });
 })();
 
-// End of the last stroke, so a replay starts a clean 5s after the ink lands.
-const SEQUENCE_MS = TIMELINE.reduce(
-  (end, step) => Math.max(end, step.delay + step.duration),
-  0,
-);
-const REPLAY_DELAY_MS = 5000;
-
 const useIsomorphicLayoutEffect =
   typeof window === "undefined" ? useEffect : useLayoutEffect;
 
@@ -132,17 +125,24 @@ export default function Signature({ className = "", title = "Assinatura" }) {
     });
 
     let animations = [];
-    let timer = null;
-    let active = false;
+    let played = false;
+    let observer = null;
 
     const cancelAll = () => {
       for (const animation of animations) animation.cancel();
       animations = [];
     };
 
+    // Draws ONCE, the first time it scrolls into view, and is then left on
+    // screen as finished ink. It used to redraw itself every 5s for as long as
+    // it stayed visible — auto-playing motion that never ends needs a
+    // pause/stop control, and a control bolted onto a signature is worse than
+    // simply not looping. The whole sequence is ~2s, well under the five-second
+    // threshold, so drawing once needs no control at all.
     const play = () => {
-      // Cancelling drops the forwards-fill, so each mask snaps back to the
-      // hidden inline dashoffset in the same tick it restarts — no flicker.
+      if (played) return;
+      played = true;
+
       cancelAll();
       maskRefs.current.forEach((el, i) => {
         if (!el) return;
@@ -156,29 +156,14 @@ export default function Signature({ className = "", title = "Assinatura" }) {
           ),
         );
       });
-      timer = window.setTimeout(play, SEQUENCE_MS + REPLAY_DELAY_MS);
+
+      observer?.disconnect();
     };
 
-    const start = () => {
-      if (active) return;
-      active = true;
-      play();
-    };
-
-    // Looping off-screen would burn frames for nobody; the finished signature
-    // is left on screen rather than reset when it scrolls away.
-    const stop = () => {
-      if (!active) return;
-      active = false;
-      window.clearTimeout(timer);
-      timer = null;
-    };
-
-    const observer = new IntersectionObserver(
+    observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
-          if (entry.isIntersecting) start();
-          else stop();
+          if (entry.isIntersecting) play();
         }
       },
       { threshold: 0.4 },
@@ -186,8 +171,7 @@ export default function Signature({ className = "", title = "Assinatura" }) {
     observer.observe(root);
 
     return () => {
-      observer.disconnect();
-      stop();
+      observer?.disconnect();
       cancelAll();
     };
   }, [maskId]);

@@ -50,14 +50,17 @@ export default function NavDrawer({
       <Popover.Trigger
         ref={triggerRef}
         aria-label={open ? "Fechar menu" : "Abrir menu"}
-        className="flex justify-center items-center size-9 cursor-pointer"
+        className="flex justify-center items-center size-9 cursor-pointer rounded-full [touch-action:manipulation] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
       >
+        {/* --sun-dark on the nav's bg-sun-lighter measured 1.9:1; a UI icon
+            needs 3:1. brand-black/70 clears it at 7:1. */}
         <svg
           width={size}
           height={size}
           viewBox={`0 0 ${size} ${size}`}
           fill="none"
-          className="text-(--sun-dark)"
+          aria-hidden="true"
+          className="text-brand-black/70"
           style={{ "--hb-gap": `${gap}px` }}
         >
           <line
@@ -94,7 +97,7 @@ export default function NavDrawer({
           className="z-50"
         >
           <Popover.Popup className="w-[var(--anchor-width)] border-b border-(--sun) bg-sun-light transition-[opacity,transform] duration-300 data-[starting-style]:opacity-0 data-[starting-style]:-translate-y-1 data-[ending-style]:opacity-0 data-[ending-style]:-translate-y-1">
-            <nav className="flex flex-col">
+            <nav aria-label="Páginas do site" className="flex flex-col">
               {pages.map(({ href, label, tagline }) => (
                 <Popover.Close
                   key={href}
@@ -102,14 +105,16 @@ export default function NavDrawer({
                   render={
                     <Link
                       href={href}
-                      className="flex px-6 py-3 font-manrope items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) hover:bg-(--sun) group text-brand-black md:text-(--sun-dark)"
+                      // The md: --sun-dark override measured 1.7:1 on
+                      // bg-sun-light, and the white hover text measured 1.5:1
+                      // on --sun. Both now stay brand-black; the yellow fill
+                      // is what carries the hover state.
+                      className="flex px-6 py-3 font-manrope items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) text-brand-black hover:bg-(--sun) focus-visible:bg-(--sun) focus-visible:outline-none"
                     >
-                      <span className="font-semibold lowercase text-lg tracking-tight group-hover:text-white transition-colors">
+                      <span className="font-semibold lowercase text-lg tracking-tight">
                         {label}
                       </span>
-                      <span className="group-hover:text-white transition-colors mt-0.5 lowercase">
-                        {tagline}
-                      </span>
+                      <span className="mt-0.5 lowercase">{tagline}</span>
                     </Link>
                   }
                 />

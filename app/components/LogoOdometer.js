@@ -10,10 +10,16 @@ const STEP_INTERVAL = 3000;  // between each logo in a cycle
 const REST_INTERVAL = 60000; // pause between cycles
 const ANIM_MS = 600;
 
-export default function LogoOdometer() {
+const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+// `interactive` only controls the cursor: in the nav the odometer sits inside a
+// <Link> and should read as clickable, in the footer it is decoration and a
+// pointer cursor there promises a click that does nothing.
+export default function LogoOdometer({ interactive = false }) {
   const [stripIdx, setStripIdx] = useState(3);
   const [withTransition, setWithTransition] = useState(true);
   const stepRef = useRef(0);
+  const reduceMotionRef = useRef(false);
   const isAnimatingRef = useRef(false);
   const isCyclingRef = useRef(false);
   const timerRef = useRef(null);
@@ -63,19 +69,39 @@ export default function LogoOdometer() {
   }
 
   useEffect(() => {
-    timerRef.current = setTimeout(startCycle, INITIAL_DELAY);
-    return () => clearTimeout(timerRef.current);
+    // Purely decorative loop — it never starts when the OS asks for reduced
+    // motion, and it stops if that preference is turned on mid-session.
+    const query = window.matchMedia(MOTION_QUERY);
+
+    const apply = () => {
+      reduceMotionRef.current = query.matches;
+      clearTimeout(timerRef.current);
+      if (query.matches) {
+        isCyclingRef.current = false;
+        return;
+      }
+      timerRef.current = setTimeout(startCycle, INITIAL_DELAY);
+    };
+
+    apply();
+    query.addEventListener("change", apply);
+    return () => {
+      query.removeEventListener("change", apply);
+      clearTimeout(timerRef.current);
+    };
   }, []);
 
   function handleMouseEnter() {
-    if (isCyclingRef.current) return;
+    if (reduceMotionRef.current || isCyclingRef.current) return;
     clearTimeout(timerRef.current);
     startCycle();
   }
 
   return (
     <div
-      className="h-4 md:h-5 overflow-hidden cursor-pointer min-w-[120px] md:min-w-[160px]"
+      className={`h-4 md:h-5 overflow-hidden min-w-[120px] md:min-w-[160px] ${
+        interactive ? "cursor-pointer" : ""
+      }`}
       onMouseEnter={handleMouseEnter}
     >
       <div

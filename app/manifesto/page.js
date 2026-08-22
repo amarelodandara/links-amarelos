@@ -25,20 +25,25 @@ export default function ManifestoPage() {
   return (
     <main className="min-h-screen bg-sun w-full md:max-w-4xl md:mx-auto border-x border-sun divide-y divide-sun">
       {/* Manifesto */}
-      <section id="manifesto" className="bg-sun-lighter">
+      <section id="manifesto" className="bg-sun-lighter scroll-mt-24">
         <div className="px-8 py-16 space-y-10">
+          {/* The page opens on prose, not a display title — the heading exists
+              for the document outline and for screen readers, which otherwise
+              land on an <h2> with no <h1> above it. */}
+          <h1 className="sr-only">O Manifesto Amarelo</h1>
+
           <div className="flex items-center justify-between gap-4">
             <nav aria-label="Trilha de navegação">
               <ol className="flex items-center gap-2 leading-none">
                 <li className="flex items-center">
                   <Link
                     href="/sobre"
-                    className="font-geist-mono text-xs lowercase text-brand-black/60 underline-offset-4 transition-colors hover:text-brand-black hover:underline"
+                    className="rounded-sm font-geist-mono text-xs lowercase text-brand-black/60 underline-offset-4 [touch-action:manipulation] transition-colors hover:text-brand-black hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
                   >
                     sobre
                   </Link>
                 </li>
-                <li aria-hidden="true" className="flex items-center font-geist-mono text-xs text-brand-black/40">
+                <li aria-hidden="true" className="flex items-center font-geist-mono text-xs text-brand-black/55">
                   /
                 </li>
                 <li aria-current="page" className="flex items-center">
@@ -64,13 +69,10 @@ export default function ManifestoPage() {
           >
             {/* Intro */}
             <div className="space-y-4">
-              <p className="text-2xl md:text-3xl leading-snug tracking-tight w-4/5">
+              <p className="text-2xl md:text-3xl leading-snug tracking-tight">
                 Links podem começar com qualquer coisa, mas acho que esquecemos
                 disso. Hoje em dia todos os links começam com{" "}
-                <span className="font-space-mono bg-sun px-1">
-                  https://
-                  <TypingCycler />
-                </span>.
+                <TypingCycler />
               </p>
               <p className="leading-relaxed text-balance">
                 Mas aqui não. Aqui os links começam de maneiras imprevisíveis e pertencem a
@@ -86,7 +88,7 @@ export default function ManifestoPage() {
 
             {/* Princípio 1 */}
             <div className="space-y-4">
-              <h2 className="font-unbounded text-xl text-brand-black tracking-tight">
+              <h2 className="font-unbounded text-xl text-brand-black tracking-tight text-pretty">
                 Profundidade e Otimismo
               </h2>
               <p className="leading-relaxed text-balance">
@@ -105,7 +107,7 @@ export default function ManifestoPage() {
 
             {/* Princípio 2 */}
             <div className="space-y-4">
-              <h2 className="font-unbounded text-xl text-brand-black tracking-tight">
+              <h2 className="font-unbounded text-xl text-brand-black tracking-tight text-pretty">
                 Presença e Multimídias
               </h2>
               <p className="leading-relaxed text-balance">
@@ -123,7 +125,7 @@ export default function ManifestoPage() {
 
             {/* Princípio 3 */}
             <div className="space-y-4">
-              <h2 className="font-unbounded text-xl text-brand-black tracking-tight">
+              <h2 className="font-unbounded text-xl text-brand-black tracking-tight text-pretty">
                 Auto-sustententabilidade e Expansão
               </h2>
               <p className="leading-relaxed text-balance">
@@ -137,7 +139,7 @@ export default function ManifestoPage() {
 
             {/* Princípio 4 */}
             <div className="space-y-4">
-              <h2 className="font-unbounded text-xl text-brand-black tracking-tight">
+              <h2 className="font-unbounded text-xl text-brand-black tracking-tight text-pretty">
                 Apoiado e Apoiador
               </h2>
               <p className="leading-relaxed text-balance">
@@ -172,9 +174,13 @@ export default function ManifestoPage() {
                     href="https://en.wikipedia.org/wiki/Gesamtkunstwerk"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="underline underline-offset-4 decoration-brand-black/30 hover:decoration-brand-black transition-colors"
+                    className="rounded-sm underline underline-offset-4 decoration-brand-black/30 [touch-action:manipulation] transition-colors hover:decoration-brand-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2"
                   >
                     Gesamtkunstwerk
+                    <span className="sr-only" data-md="skip">
+                      {" "}
+                      (abre em uma nova aba)
+                    </span>
                   </a>{" "}
                   dos links amarelos e muito mais
                 </p>

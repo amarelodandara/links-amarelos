@@ -1,6 +1,10 @@
 @import "tailwindcss";
 
 :root {
+    /* Light-only site — declared so native controls (scrollbars, form fields,
+       date pickers) don't get painted dark by the OS preference. */
+    color-scheme: light;
+
     --background: #ffffff;
     --brand-black: #110a03;
     --foreground: var(--brand-black);
@@ -48,6 +52,26 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
+/* Skip link: off-screen until focused, then pinned to the top-left above the
+   nav. Kept in CSS rather than utilities so it can't be tree-shaken away. */
+.skip-link {
+    position: absolute;
+    left: 0.5rem;
+    top: -100%;
+    z-index: 100;
+    padding: 0.5rem 1rem;
+    border-radius: 9999px;
+    background: var(--brand-black);
+    color: var(--brand-white);
+    font-size: 0.875rem;
+    transition: top 0.15s ease-out;
+}
+.skip-link:focus {
+    top: 0.5rem;
+    outline: 2px solid var(--sun);
+    outline-offset: 2px;
+}
+
 .hb-line {
     transform-box: stroke-box;
     transform-origin: center;
@@ -86,3 +110,17 @@ body {
     will-change: transform;
 }
 
+
+/* Decorative, auto-playing motion stops entirely when the OS asks for it.
+   Component-level guards (Signature, LogoOdometer, TypingCycler) cover the
+   JS-driven animations; this catches the CSS-driven ones. */
+@media (prefers-reduced-motion: reduce) {
+    .logo-marquee {
+        animation: none;
+    }
+
+    .hb-line,
+    .hb-line.open {
+        transition: none;
+    }
+}

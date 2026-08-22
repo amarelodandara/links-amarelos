@@ -17,6 +17,15 @@ const PAGES = [
   { href: "/apoio", label: "Apoio" },
 ];
 
+const LINK_CLASS =
+  "w-fit rounded-sm font-manrope text-sm lowercase [touch-action:manipulation] transition-colors hover:text-brand-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2";
+
+// --sun-dark (#f59e0b) on the footer's #fff1b9 texture measured 1.9:1. These
+// 12px labels need 4.5:1, which brand-black/60 clears at 4.9:1 while still
+// reading as a muted label rather than body copy.
+const LABEL_CLASS =
+  "font-space-mono text-xs text-brand-black/60 uppercase tracking-widest";
+
 export default function SiteFooter() {
   const pathname = usePathname();
   const showPages = !NO_PAGE_LINKS.includes(pathname);
@@ -26,7 +35,9 @@ export default function SiteFooter() {
       <div className="max-w-4xl mx-auto px-6 py-12 flex flex-col gap-10 md:flex-row md:justify-between">
         {/* Brand */}
         <div className="space-y-3">
-          <div className="text-sun w-fit">
+          {/* Decoration here, not a link — hidden from assistive tech so it
+              doesn't read as a second, nameless "links amarelos". */}
+          <div className="text-sun w-fit" aria-hidden="true">
             <LogoOdometer />
           </div>
           <p className="font-manrope text-sm leading-relaxed">
@@ -37,16 +48,15 @@ export default function SiteFooter() {
         {/* Pages */}
         {showPages && (
           <div className="space-y-3">
-            <p className="font-space-mono text-xs text-(--sun-dark) uppercase tracking-widest">
+            <p id="footer-pages-label" className={LABEL_CLASS}>
               Páginas
             </p>
-            <nav className="flex flex-col gap-2">
+            <nav
+              aria-labelledby="footer-pages-label"
+              className="flex flex-col gap-2"
+            >
               {PAGES.map(({ href, label }) => (
-                <Link
-                  key={href}
-                  href={href}
-                  className="font-manrope text-sm hover:text-(--sun-dark) transition-colors lowercase"
-                >
+                <Link key={href} href={href} className={LINK_CLASS}>
                   {label}
                 </Link>
               ))}
@@ -56,9 +66,7 @@ export default function SiteFooter() {
 
         {/* Socials */}
         <div className="space-y-3">
-          <p className="font-space-mono text-xs text-(--sun-dark) uppercase tracking-widest">
-            Leia e ouça
-          </p>
+          <p className={LABEL_CLASS}>Leia e ouça</p>
           <div className="flex flex-col gap-2 items-start">
             <ExternalLinkPill
               platform="substack"
@@ -73,11 +81,15 @@ export default function SiteFooter() {
       </div>
 
       {/* Bottom bar */}
-      <div className="border-t border-(--sun)/30 px-6 py-4 max-w-4xl mx-auto flex justify-between items-center">
-        <p className="font-space-mono text-xs text-brand-black/50 lowercase">
+      <div className="border-t border-(--sun)/30 px-6 py-4 pb-[max(1rem,env(safe-area-inset-bottom))] max-w-4xl mx-auto flex justify-between items-center gap-4">
+        {/* /50 measured 3.6:1 on the footer texture; /70 clears 4.5:1. */}
+        <p
+          className="font-space-mono text-xs text-brand-black/70 lowercase"
+          suppressHydrationWarning
+        >
           © {new Date().getFullYear()} amarelo dandara
         </p>
-        <p className="font-space-mono text-xs text-brand-black/50 lowercase">
+        <p className="font-space-mono text-xs text-brand-black/70 lowercase">
           feito por completo
         </p>
       </div>

@@ -162,23 +162,33 @@ function ActionButton({ label, icon, onAction, successLabel }) {
   );
 }
 
+function collapse(text) {
+  return text.replace(/\s+/g, " ").trim();
+}
+
+// Opt-out marker for content that should not reach the clipboard: the "(abre
+// em uma nova aba)" hint, and the live typing animation, whose text is
+// mid-word whenever the reader happens to hit copy. Both have a static
+// counterpart elsewhere in the same sentence that IS serialized.
+function isMarkdownSkipped(node) {
+  return node.nodeType === Node.ELEMENT_NODE && node.dataset.md === "skip";
+}
+
 // Serializes one element's inline content, keeping links as markdown.
 function inlineToMarkdown(node) {
   let out = "";
   for (const child of node.childNodes) {
+    if (isMarkdownSkipped(child)) continue;
+
     if (child.nodeType === Node.TEXT_NODE) {
       out += child.textContent;
     } else if (child.nodeName === "A") {
-      out += `[${child.textContent.trim()}](${child.href})`;
+      out += `[${collapse(inlineToMarkdown(child))}](${child.href})`;
     } else {
       out += inlineToMarkdown(child);
     }
   }
   return out;
-}
-
-function collapse(text) {
-  return text.replace(/\s+/g, " ").trim();
 }
 
 // Reads the rendered prose rather than duplicating the copy, so the markdown
