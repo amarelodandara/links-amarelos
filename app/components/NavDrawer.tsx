@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@base-ui/react/popover";
@@ -33,7 +34,7 @@ export default function NavDrawer({
   size = 20,
 }) {
   const [open, setOpen] = useState(false);
-  const triggerRef = useRef(null);
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
 
   const pad = size * 0.1;
   const x1 = pad;
@@ -43,7 +44,13 @@ export default function NavDrawer({
   const yBot = size * 0.75;
   const gap = size * 0.25;
 
-  const cls = (name) => `hb-line ${name}${open ? " open" : ""}`;
+  const cls = (name: string) => `hb-line ${name}${open ? " open" : ""}`;
+
+  // React's CSSProperties has no room for custom properties, so the style
+  // object declares the one it sets instead of being asserted through.
+  const hamburgerStyle: CSSProperties & Record<"--hb-gap", string> = {
+    "--hb-gap": `${gap}px`,
+  };
 
   return (
     <Popover.Root open={open} onOpenChange={setOpen}>
@@ -61,7 +68,7 @@ export default function NavDrawer({
           fill="none"
           aria-hidden="true"
           className="text-brand-black/70"
-          style={{ "--hb-gap": `${gap}px` }}
+          style={hamburgerStyle}
         >
           <line
             className={cls("hb-top")}

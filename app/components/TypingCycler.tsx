@@ -20,7 +20,7 @@ const SEQUENCE = DOMAINS.flatMap((domain) => [domain, HOLD_MS]);
 
 const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
-function subscribeToMotionPreference(onChange) {
+function subscribeToMotionPreference(onChange: () => void) {
   const query = window.matchMedia(MOTION_QUERY);
   query.addEventListener("change", onChange);
   return () => query.removeEventListener("change", onChange);
@@ -55,7 +55,8 @@ export default function TypingCycler() {
   // null = follow the OS preference. Once the reader touches the toggle their
   // choice wins in both directions, including opting back into the animation
   // on a machine that asks for reduced motion.
-  const [choice, setChoice] = useState(null);
+  // null means "no explicit choice yet", so the media query still decides.
+  const [choice, setChoice] = useState<boolean | null>(null);
   const playing = choice ?? !reduceMotion;
   const paused = !playing;
 

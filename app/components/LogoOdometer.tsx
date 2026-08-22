@@ -15,14 +15,16 @@ const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 // `interactive` only controls the cursor: in the nav the odometer sits inside a
 // <Link> and should read as clickable, in the footer it is decoration and a
 // pointer cursor there promises a click that does nothing.
-export default function LogoOdometer({ interactive = false }) {
+export default function LogoOdometer({ interactive = false }: { interactive?: boolean }) {
   const [stripIdx, setStripIdx] = useState(3);
   const [withTransition, setWithTransition] = useState(true);
   const stepRef = useRef(0);
   const reduceMotionRef = useRef(false);
   const isAnimatingRef = useRef(false);
   const isCyclingRef = useRef(false);
-  const timerRef = useRef(null);
+  // undefined rather than null: clearTimeout accepts it, and both are equally
+  // a no-op before the first schedule.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   function advance() {
     if (isAnimatingRef.current) return;
@@ -53,7 +55,7 @@ export default function LogoOdometer({ interactive = false }) {
     }
   }
 
-  function scheduleStep(remaining) {
+  function scheduleStep(remaining: number) {
     if (remaining <= 0) {
       isCyclingRef.current = false;
       timerRef.current = setTimeout(startCycle, REST_INTERVAL);

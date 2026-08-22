@@ -12,8 +12,18 @@ const TRAIL_OPACITY = 0.5;
 const TRAIL_CURVE_AMP = 10;
 const TRAIL_CURVE_FREQ = 0.5;
 
-export default function YellowCircle({ filled = false, className = "" }) {
-  const canvasRef = useRef(null);
+type YellowCircleProps = {
+  filled?: boolean;
+  className?: string;
+};
+
+type TrailBlock = { col: number; opacity: number };
+
+export default function YellowCircle({
+  filled = false,
+  className = "",
+}: YellowCircleProps) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     if (!filled) return;
@@ -22,14 +32,19 @@ export default function YellowCircle({ filled = false, className = "" }) {
     const { width: W, height: H } = canvas.getBoundingClientRect();
     canvas.width = W;
     canvas.height = H;
-    const ctx = canvas.getContext("2d");
+    // Same shape as PixelTrail: `frame` is a hoisted function declaration, so
+    // the null-guard narrowing does not reach it. An explicitly typed const
+    // carries the type instead of an assertion.
+    const maybeCtx = canvas.getContext("2d");
+    if (!maybeCtx) return;
+    const ctx: CanvasRenderingContext2D = maybeCtx;
     const r = Math.min(W, H) / 2;
 
     const totalRows = Math.ceil(H / TRAIL_PIXEL_SIZE);
     let head = -TRAIL_PIXEL_SIZE * 2;
-    let trail = [];
-    let rafId;
-    let timeoutId;
+    let trail: TrailBlock[] = [];
+    let rafId = 0;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
     let stopped = false;
 
     const restart = () => {

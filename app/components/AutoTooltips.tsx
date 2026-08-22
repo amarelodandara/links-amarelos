@@ -20,44 +20,49 @@ const ITEMS = [
   },
 ];
 
-function longestCommonPrefix(a, b) {
+function longestCommonPrefix(a: string, b: string) {
   let i = 0;
   while (i < a.length && i < b.length && a[i] === b[i]) i++;
   return i;
 }
 
-const SEQUENCE = [null, 0, 1, 2, 3];
+// A null step is the "breath" between items, not an index into ITEMS.
+const SEQUENCE: readonly (number | null)[] = [null, 0, 1, 2, 3];
+
+type Timer = ReturnType<typeof setTimeout>;
 const PAUSE_MS = 3600;
 const BREATH_MS = 5000;
 const TYPE_MS = 28;
 const BACK_MS = 16;
 
 export default function AutoTooltips() {
-  const [activeIdx, setActiveIdx] = useState(null);
+  const [activeIdx, setActiveIdx] = useState<number | null>(null);
   const [displayedUrl, setDisplayedUrl] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
 
   const stepRef = useRef(0);
-  const seqTimerRef = useRef(null);
-  const urlTimerRef = useRef(null);
+  // Timer handles start undefined rather than null: clearTimeout accepts
+  // undefined, and both are equally a no-op before the first tick.
+  const seqTimerRef = useRef<Timer | undefined>(undefined);
+  const urlTimerRef = useRef<Timer | undefined>(undefined);
   const displayedUrlRef = useRef("");
-  const lastItemIdxRef = useRef(null);
-  const tickRef = useRef(null);
+  const lastItemIdxRef = useRef<number | null>(null);
+  const tickRef = useRef<(() => void) | null>(null);
 
-  const setUrl = useCallback((url) => {
+  const setUrl = useCallback((url: string) => {
     displayedUrlRef.current = url;
     setDisplayedUrl(url);
   }, []);
 
   const animateTo = useCallback(
-    (target) => {
+    (target: string) => {
       clearTimeout(urlTimerRef.current);
       const from = displayedUrlRef.current;
       const pivot = longestCommonPrefix(from, target);
 
       setIsAnimating(true);
 
-      const typePhase = (len) => {
+      const typePhase = (len: number) => {
         setUrl(target.substring(0, len));
         if (len < target.length) {
           urlTimerRef.current = setTimeout(() => typePhase(len + 1), TYPE_MS);
@@ -66,7 +71,7 @@ export default function AutoTooltips() {
         }
       };
 
-      const backPhase = (len) => {
+      const backPhase = (len: number) => {
         setUrl(from.substring(0, len));
         if (len > pivot) {
           urlTimerRef.current = setTimeout(() => backPhase(len - 1), BACK_MS);
@@ -92,7 +97,7 @@ export default function AutoTooltips() {
     const delay = idx === null ? BREATH_MS : PAUSE_MS;
     seqTimerRef.current = setTimeout(() => {
       stepRef.current = (stepRef.current + 1) % SEQUENCE.length;
-      tickRef.current();
+      tickRef.current?.();
     }, delay);
   }, [animateTo]);
 
@@ -117,7 +122,7 @@ export default function AutoTooltips() {
     window.open(href, "_blank", "noopener,noreferrer");
   }, []);
 
-  const wordClass = (i) =>
+  const wordClass = (i: number) =>
     `transition-colors duration-[600ms] ${
       activeIdx === i ? "text-sun-lighter" : ""
     }`;
