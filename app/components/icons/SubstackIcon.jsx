@@ -2,6 +2,9 @@ export default function SubstackIcon(props) {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
+      shapeRendering="geometricPrecision"
+      textRendering="geometricPrecision"
+      imageRendering="optimizeQuality"
       fillRule="evenodd"
       clipRule="evenodd"
       viewBox="0 0 448 511.471"
