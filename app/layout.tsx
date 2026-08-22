@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import {
   Inter,
   Manrope,
@@ -81,7 +82,11 @@ export const viewport = {
   themeColor: "#fef3c7",
 };
 
-export default function RootLayout({ children }) {
+export default function RootLayout({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return (
     <html
       lang="pt-BR"

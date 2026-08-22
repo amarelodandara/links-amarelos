@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import Image from "next/image";
 import YellowCircle from "../components/YellowCircle";
 import Button from "../components/Button";
@@ -13,7 +14,13 @@ const statusStyles = {
   planejada: "border-sun-dark text-sun-dark border-dashed",
 };
 
-function StatusPill({ status }) {
+type RealizacaoStatus = keyof typeof statusStyles;
+
+// null is a real state here, not a missing prop: a card with no status renders
+// the blob placeholder rather than a pill.
+type StatusPillProps = { status?: RealizacaoStatus | null };
+
+function StatusPill({ status }: StatusPillProps) {
   if (!status) return null;
   return (
     <span className={`${PILL_BASE} ${statusStyles[status] ?? ""}`}>
@@ -22,7 +29,23 @@ function StatusPill({ status }) {
   );
 }
 
-function RealizacaoCard({ status, name, cover, cta, href, children }) {
+type RealizacaoCardProps = {
+  status?: RealizacaoStatus | null;
+  name: string;
+  cover?: string;
+  cta?: string;
+  href?: string;
+  children?: ReactNode;
+};
+
+function RealizacaoCard({
+  status,
+  name,
+  cover,
+  cta,
+  href,
+  children,
+}: RealizacaoCardProps) {
   return (
     <div className="p-6 aspect-square flex flex-col justify-between">
       <div className="flex justify-end">

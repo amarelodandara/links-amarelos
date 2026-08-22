@@ -92,7 +92,11 @@ const WAVEFORM_AMPLITUDES = [
 const WAVE_W = 280;
 const WAVE_H = 64;
 
-function waveformPath(amplitudes, width, height) {
+function waveformPath(
+  amplitudes: readonly number[],
+  width: number,
+  height: number,
+) {
   const cy = height / 2;
   const step = width / (amplitudes.length - 1);
   const top = amplitudes.map(
