@@ -12,6 +12,7 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import type { ReactNode } from "react";
 import { Button } from "@base-ui/react/button";
 import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 
@@ -40,7 +41,7 @@ const BUTTON_CLASS =
 // mirroring it into state from an effect.
 const MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
-function subscribeToMotionPreference(onChange) {
+function subscribeToMotionPreference(onChange: () => void) {
   const query = window.matchMedia(MOTION_QUERY);
   query.addEventListener("change", onChange);
   return () => query.removeEventListener("change", onChange);
@@ -77,12 +78,29 @@ function CheckIcon() {
  * start-aligned, so the left edge stays put and the pill closes in on its icon
  * instead of pulling toward a centre point.
  */
-function ActionButton({ label, icon, onAction, successLabel }) {
+/** What an action reports back: whether to show the success state, and the
+ *  status message to announce either way. */
+type ActionResult = { ok: boolean; message?: string };
+
+type ActionButtonProps = {
+  label: string;
+  icon: ReactNode;
+  onAction: () => Promise<ActionResult>;
+  successLabel: string;
+};
+
+function ActionButton({
+  label,
+  icon,
+  onAction,
+  successLabel,
+}: ActionButtonProps) {
   const [succeeded, setSucceeded] = useState(false);
   const [status, setStatus] = useState("");
-  const [width, setWidth] = useState(null);
-  const buttonRef = useRef(null);
-  const timerRef = useRef(null);
+  // null until the button has been measured once.
+  const [width, setWidth] = useState<number | null>(null);
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const timerRef = useRef<number | undefined>(undefined);
   // Read during render and stays live if the OS setting changes mid-session.
   const reduceMotion = useSyncExternalStore(
     subscribeToMotionPreference,
@@ -159,7 +177,7 @@ function ActionButton({ label, icon, onAction, successLabel }) {
   );
 }
 
-function collapse(text) {
+function collapse(text: string) {
   return text.replace(/\s+/g, " ").trim();
 }
 
@@ -167,19 +185,21 @@ function collapse(text) {
 // em uma nova aba)" hint, and the live typing animation, whose text is
 // mid-word whenever the reader happens to hit copy. Both have a static
 // counterpart elsewhere in the same sentence that IS serialized.
-function isMarkdownSkipped(node) {
-  return node.nodeType === Node.ELEMENT_NODE && node.dataset.md === "skip";
+function isMarkdownSkipped(node: ChildNode) {
+  // instanceof rather than a nodeType check: it is the same test for the HTML
+  // this serializes, and it narrows to something that actually has `dataset`.
+  return node instanceof HTMLElement && node.dataset.md === "skip";
 }
 
 // Serializes one element's inline content, keeping links as markdown.
-function inlineToMarkdown(node) {
+function inlineToMarkdown(node: Node): string {
   let out = "";
   for (const child of node.childNodes) {
     if (isMarkdownSkipped(child)) continue;
 
     if (child.nodeType === Node.TEXT_NODE) {
-      out += child.textContent;
-    } else if (child.nodeName === "A") {
+      out += child.textContent ?? "";
+    } else if (child instanceof HTMLAnchorElement) {
       out += `[${collapse(inlineToMarkdown(child))}](${child.href})`;
     } else {
       out += inlineToMarkdown(child);
@@ -190,7 +210,7 @@ function inlineToMarkdown(node) {
 
 // Reads the rendered prose rather than duplicating the copy, so the markdown
 // cannot drift out of sync with what the page actually says.
-function buildMarkdown(targetId, title) {
+function buildMarkdown(targetId: string, title: string) {
   const root = document.getElementById(targetId);
   if (!root) return null;
 
@@ -204,7 +224,13 @@ function buildMarkdown(targetId, title) {
   return blocks.join("\n\n");
 }
 
-function CopyMarkdownButton({ targetId, title }) {
+function CopyMarkdownButton({
+  targetId,
+  title,
+}: {
+  targetId: string;
+  title: string;
+}) {
   const copy = useCallback(async () => {
     const markdown = buildMarkdown(targetId, title);
     if (!markdown) return { ok: false, message: "não achei o texto pra copiar" };
@@ -249,7 +275,7 @@ function CopyMarkdownButton({ targetId, title }) {
   );
 }
 
-function ShareTrigger({ title }) {
+function ShareTrigger({ title }: { title: string }) {
   const share = useCallback(async () => {
     const url = window.location.href;
 
@@ -260,7 +286,12 @@ function ShareTrigger({ title }) {
       } catch (error) {
         // Dismissing the sheet is not a failure — don't fall through to a copy,
         // and don't flash a success state for something the user cancelled.
-        if (error?.name === "AbortError") return { ok: false, message: "" };
+        // A catch binding is `unknown` under strict, and DOMException extends
+        // Error, so this covers both what the Share API rejects with and the
+        // plain Error some browsers use.
+        if (error instanceof Error && error.name === "AbortError") {
+          return { ok: false, message: "" };
+        }
       }
     }
 
@@ -305,7 +336,16 @@ function ShareTrigger({ title }) {
   );
 }
 
-export default function PageActions({ title, markdownTargetId }) {
+type PageActionsProps = {
+  title: string;
+  /** Omitted on pages with no prose worth serializing to markdown. */
+  markdownTargetId?: string;
+};
+
+export default function PageActions({
+  title,
+  markdownTargetId,
+}: PageActionsProps) {
   return (
     <div className="flex items-center gap-2">
       {markdownTargetId && (

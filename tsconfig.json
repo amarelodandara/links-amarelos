@@ -16,11 +16,6 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "incremental": true,
-    // Incremental migration: .js/.jsx still compile and are inferred from, but
-    // are not themselves type-checked. Flip checkJs on (or delete allowJs) once
-    // every file under app/ has been converted.
-    "allowJs": true,
-    "checkJs": false,
     "plugins": [
       {
         "name": "next"
@@ -30,14 +25,13 @@
       "@/*": [
         "./*"
       ]
-    }
+    },
+    "allowJs": true
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
   ],

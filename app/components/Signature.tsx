@@ -104,11 +104,20 @@ const TIMELINE = (() => {
   });
 })();
 
-export default function Signature({ className = "", title = "Assinatura" }) {
+type SignatureProps = {
+  className?: string;
+  title?: string;
+};
+
+export default function Signature({
+  className = "",
+  title = "Assinatura",
+}: SignatureProps) {
   const rawId = useId();
   const maskId = `sig-${rawId.replace(/:/g, "")}`;
-  const rootRef = useRef(null);
-  const maskRefs = useRef([]);
+  const rootRef = useRef<SVGSVGElement | null>(null);
+  // One slot per drawn stroke; a slot is null while its <path> is unmounted.
+  const maskRefs = useRef<(SVGPathElement | null)[]>([]);
 
   useIsomorphicLayoutEffect(() => {
     const root = rootRef.current;
@@ -122,9 +131,9 @@ export default function Signature({ className = "", title = "Assinatura" }) {
       if (el) el.style.strokeDashoffset = String(DRAWN[i].line.length);
     });
 
-    let animations = [];
+    let animations: Animation[] = [];
     let played = false;
-    let observer = null;
+    let observer: IntersectionObserver | null = null;
 
     const cancelAll = () => {
       for (const animation of animations) animation.cancel();

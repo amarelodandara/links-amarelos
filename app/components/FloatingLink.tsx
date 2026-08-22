@@ -7,15 +7,26 @@ const STIFFNESS = 0.1;
 const DAMPING = 0.82;
 const FLOAT_SPEED = 0.0007;
 
-export default function FloatingLink({ title, url }) {
-  const wrapRef = useRef(null);
-  const posRef = useRef(null);
-  const velRef = useRef({ x: 0, y: 0 });
-  const targetRef = useRef(null); // null = idle; { x, y } = follow
-  const originRef = useRef(null); // saved pos on cursor enter
-  const returnTimerRef = useRef(null);
-  const rafRef = useRef(null);
-  const t0Ref = useRef(null);
+type Point = { x: number; y: number };
+
+export default function FloatingLink({
+  title,
+  url,
+}: {
+  title: string;
+  url: string;
+}) {
+  const wrapRef = useRef<HTMLDivElement | null>(null);
+  const posRef = useRef<Point | null>(null);
+  const velRef = useRef<Point>({ x: 0, y: 0 });
+  const targetRef = useRef<Point | null>(null); // null = idle
+  const originRef = useRef<Point | null>(null); // saved pos on cursor enter
+  const returnTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  // 0 is the safe idle value: cancelAnimationFrame(0) is a defined no-op.
+  const rafRef = useRef(0);
+  const t0Ref = useRef<number | null>(null);
 
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [ready, setReady] = useState(false);
@@ -38,18 +49,21 @@ export default function FloatingLink({ title, url }) {
     };
     init();
 
-    const relPos = (e) => {
+    const relPos = (e: MouseEvent): Point => {
       const rect = section.getBoundingClientRect();
       return { x: e.clientX - rect.left, y: e.clientY - rect.top };
     };
 
-    const onEnter = (e) => {
+    const onEnter = (e: MouseEvent) => {
       clearTimeout(returnTimerRef.current);
-      originRef.current = { ...posRef.current };
+      // init() always runs first, so posRef is set by the time a pointer can
+      // reach the section; the null branch keeps the ref honest rather than
+      // storing the empty object a spread of null used to produce.
+      originRef.current = posRef.current ? { ...posRef.current } : null;
       targetRef.current = relPos(e);
     };
 
-    const onMove = (e) => {
+    const onMove = (e: MouseEvent) => {
       clearTimeout(returnTimerRef.current);
       targetRef.current = relPos(e);
     };
@@ -70,7 +84,7 @@ export default function FloatingLink({ title, url }) {
     section.addEventListener("mousemove", onMove);
     section.addEventListener("mouseleave", onLeave);
 
-    const animate = (now) => {
+    const animate = (now: number) => {
       if (!posRef.current) {
         rafRef.current = requestAnimationFrame(animate);
         return;
@@ -78,7 +92,8 @@ export default function FloatingLink({ title, url }) {
       const elapsed = now - (t0Ref.current ?? now);
       const { width: w, height: h } = section.getBoundingClientRect();
 
-      let tx, ty;
+      let tx: number;
+      let ty: number;
       if (targetRef.current) {
         tx = targetRef.current.x;
         ty = targetRef.current.y;
