@@ -1,12 +1,19 @@
 "use client";
 
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { Accordion as BaseAccordion } from "@base-ui/react/accordion";
 
 /**
  * Wraps sibling <Accordion> items so arrow keys move focus between triggers.
  * Renders as whatever element you pass via `render` (defaults to a <div>).
  */
-export function AccordionGroup({ children, multiple = true, ...props }) {
+type AccordionGroupProps = ComponentPropsWithoutRef<typeof BaseAccordion.Root>;
+
+export function AccordionGroup({
+  children,
+  multiple = true,
+  ...props
+}: AccordionGroupProps) {
   return (
     <BaseAccordion.Root multiple={multiple} {...props}>
       {children}
@@ -14,13 +21,21 @@ export function AccordionGroup({ children, multiple = true, ...props }) {
   );
 }
 
+type AccordionProps = {
+  numero: ReactNode;
+  nome: ReactNode;
+  explainer?: ReactNode;
+  children?: ReactNode;
+  emptyMessage?: ReactNode;
+};
+
 export default function Accordion({
   numero,
   nome,
   explainer,
   children,
   emptyMessage = "conteúdo a caminho",
-}) {
+}: AccordionProps) {
   const hasContent = Boolean(children);
 
   return (

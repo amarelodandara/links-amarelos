@@ -37,7 +37,17 @@ const PLATFORMS = {
 // of them. NOT OK on: black, code, --sun (brand yellow). Don't place this pill
 // on those surfaces; pick a different surface for the section instead of
 // forcing a color fix.
-export default function ExternalLinkPill({ platform, href, className = "" }) {
+type ExternalLinkPillProps = {
+  platform: keyof typeof PLATFORMS;
+  href: string;
+  className?: string;
+};
+
+export default function ExternalLinkPill({
+  platform,
+  href,
+  className = "",
+}: ExternalLinkPillProps) {
   const { Icon, iconSize, label, name, classes } = PLATFORMS[platform];
 
   return (

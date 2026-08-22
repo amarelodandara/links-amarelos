@@ -5,7 +5,7 @@ const TARGET = new Date("2026-07-11T00:00:00");
 const H = "1.25em";
 
 function getTimeLeft() {
-  const diff = Math.max(0, TARGET - Date.now());
+  const diff = Math.max(0, TARGET.getTime() - Date.now());
   return {
     days: Math.floor(diff / 86400000),
     hours: Math.floor((diff % 86400000) / 3600000),
@@ -14,7 +14,7 @@ function getTimeLeft() {
   };
 }
 
-function Digit({ value }) {
+function Digit({ value }: { value: number }) {
   return (
     <span
       className="relative inline-block overflow-hidden"
@@ -37,7 +37,7 @@ function Digit({ value }) {
   );
 }
 
-function Num({ value }) {
+function Num({ value }: { value: number }) {
   if (value < 10) {
     return <Digit value={value} />;
   }
