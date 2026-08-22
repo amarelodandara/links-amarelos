@@ -14,6 +14,7 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import { Toolbar } from "@base-ui/react/toolbar";
+import { Toast } from "@base-ui/react/toast";
 import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 
 // Easing curves from the emil-design-eng guidance: the CSS built-ins are too
@@ -96,7 +97,7 @@ function ActionButton({
   successLabel,
 }: ActionButtonProps) {
   const [succeeded, setSucceeded] = useState(false);
-  const [status, setStatus] = useState("");
+  const toastManager = Toast.useToastManager();
   // null until the button has been measured once.
   const [width, setWidth] = useState<number | null>(null);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -118,16 +119,27 @@ function ActionButton({
 
   const handleClick = useCallback(async () => {
     const { ok, message } = await onAction();
-    setStatus(message ?? "");
+
+    // A failed copy used to change nothing on screen — the button only morphs
+    // on success — so unless you were on a screen reader you got no feedback
+    // at all. Both outcomes are shown now; errors are announced first and
+    // stay put until dismissed.
+    if (message) {
+      toastManager.add({
+        title: message,
+        type: ok ? "success" : "error",
+        priority: ok ? "low" : "high",
+        timeout: ok ? 4000 : 0,
+      });
+    }
     if (!ok) return;
 
     setSucceeded(true);
     window.clearTimeout(timerRef.current);
     timerRef.current = window.setTimeout(() => {
       setSucceeded(false);
-      setStatus("");
     }, SUCCESS_HOLD_MS);
-  }, [onAction]);
+  }, [onAction, toastManager]);
 
   // Reduced motion keeps the state change (the check still appears) but drops
   // the collapse, which is pure movement.
@@ -168,11 +180,6 @@ function ActionButton({
           <CheckIcon />
         </span>
       </Toolbar.Button>
-
-      {/* Replaces the toast: the outcome is announced, nothing is drawn. */}
-      <span role="status" aria-live="polite" className="sr-only">
-        {status}
-      </span>
     </span>
   );
 }

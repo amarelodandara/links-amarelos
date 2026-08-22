@@ -3,6 +3,7 @@ import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent }
 import { useState, useEffect, useRef, useCallback } from "react";
 import Matter from "matter-js";
 import { Button as BaseButton } from "@base-ui/react/button";
+import { Meter } from "@base-ui/react/meter";
 import IconButton from "./IconButton";
 
 const LINKS = [
@@ -79,6 +80,11 @@ type SettledCircle = {
   y: number;
 };
 
+// LINKS holds more than this on purpose: the section is a taste, not the whole
+// curation, and the pool is shuffled so the sample differs per visit. Kept as a
+// name so the counter, the exhaust condition and the meter cannot drift apart.
+const TASTE_LIMIT = 10;
+
 const HOLD_MS = 800;
 const CIRCLE_R = 12;
 const SETTLE_SPEED = 0.5;
@@ -97,7 +103,7 @@ const TRAIL_CURVE_FREQ = 0.5; // sine cycles along height (0.5=lean, 1=S-curve, 
 // ─────────────────────────────────────────────────────────────────────────────
 
 export default function ExperimenteSection() {
-  const [linksRemaining, setLinksRemaining] = useState(10);
+  const [linksRemaining, setLinksRemaining] = useState(TASTE_LIMIT);
   const [holdProgress, setHoldProgress] = useState(0);
   const [isExhausted, setIsExhausted] = useState(false);
   const [settledCircles, setSettledCircles] = useState<SettledCircle[]>([]);
@@ -579,14 +585,35 @@ export default function ExperimenteSection() {
             Degustar link
           </span>
         </BaseButton>
-        <p
-          className="font-space-mono text-xs text-code transition-opacity duration-700"
-          style={{ opacity: hasInteracted ? 1 : 0 }}
-        >
-          {isExhausted
-            ? "se gostou, tem mais, é só inscrever!"
-            : `${linksRemaining} link${linksRemaining !== 1 ? "s" : ""} restante${linksRemaining !== 1 ? "s" : ""}`}
-        </p>
+        {isExhausted ? (
+          <p
+            className="font-space-mono text-xs text-code transition-opacity duration-700"
+            style={{ opacity: hasInteracted ? 1 : 0 }}
+          >
+            se gostou, tem mais, é só inscrever!
+          </p>
+        ) : (
+          // A bounded quantity counting down is what role="meter" describes.
+          // getAriaValueText keeps the announced text the same Portuguese
+          // sentence that is on screen rather than a bare number.
+          <Meter.Root
+            value={linksRemaining}
+            min={0}
+            max={TASTE_LIMIT}
+            getAriaValueText={(_, value) =>
+              `${value} link${value !== 1 ? "s" : ""} restante${value !== 1 ? "s" : ""}`
+            }
+            className="font-space-mono text-xs text-code transition-opacity duration-700"
+            style={{ opacity: hasInteracted ? 1 : 0 }}
+          >
+            <Meter.Label className="sr-only">Links para degustar</Meter.Label>
+            <Meter.Value>
+              {(formatted, value) =>
+                `${value} link${value !== 1 ? "s" : ""} restante${value !== 1 ? "s" : ""}`
+              }
+            </Meter.Value>
+          </Meter.Root>
+        )}
 
         {settledCircles.length > 0 && (
           <ul className="sr-only focus-within:not-sr-only focus-within:flex focus-within:flex-col focus-within:items-center focus-within:gap-1 focus-within:pt-4">
