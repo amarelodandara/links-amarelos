@@ -51,8 +51,8 @@ needed, so reach for one of them before reaching for an escape hatch.
   not one shape with optional fields. See the falling/resting circle split in
   `ExperimenteSection.tsx`.
 
-`app/components/signature-data.ts` is generated. Edit the template in
-`scripts/build-signature.mjs`, never the output.
+`app/components/signature-data.ts` is frozen data, not build output — nothing
+regenerates it. Its header explains where it came from.
 
 ## Important: Next.js version
 

@@ -8,10 +8,10 @@ import useIsomorphicLayoutEffect from "../lib/use-isomorphic-layout-effect";
 //
 // The source SVG is five FILLED OUTLINE paths (each traces AROUND a pen
 // stroke), not stroked lines — so stroke-dashoffset can't drive them directly.
-// scripts/build-signature.mjs recovers each stroke's centreline offline and
-// bakes it into signature-data.js; here that centreline is stroked inside a
-// mask and wiped on, which reveals the fill in the direction the pen travelled.
-// Re-run the script if the signature artwork changes.
+// Each stroke's centreline was recovered offline and baked into
+// signature-data.ts; here that centreline is stroked inside a mask and wiped
+// on, which reveals the fill in the direction the pen travelled. See that
+// file's header if the signature artwork ever changes.
 //
 // Listed in DRAW ORDER, which is not the source document order: the D curve
 // first, then the marks inside it, then the long right-hand stroke last.
