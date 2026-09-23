@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import AutoTooltips from "./components/AutoTooltips";
+import TasteSection from "./components/taste/TasteSection";
 import CountdownOdometer from "./components/CountdownOdometer";
 import FloatingLink from "./components/FloatingLink";
 import ExternalLinkPill from "./components/ExternalLinkPill";
@@ -72,6 +73,7 @@ export default function Home() {
       </section>
 
       <div>
+        <TasteSection />
 
         <section
           id="apoie"
