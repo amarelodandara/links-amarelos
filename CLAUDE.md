@@ -16,6 +16,7 @@ npm run typecheck # tsc --noEmit
 - Next.js 16.2.9, React 19 — App Router, TypeScript (strict)
 - Tailwind CSS v4 (PostCSS plugin, `@import "tailwindcss"` in globals.css)
 - `agentation` — agent utilities package
+- `three` — WebGL for the homepage taste section (`app/components/taste/`)
 
 ## TypeScript
 
@@ -34,7 +35,7 @@ needed, so reach for one of them before reaching for an escape hatch.
 - Canvas code: a hoisted `function frame()` does not see an `if (!ctx) return`
   narrowing from its enclosing scope. Bind through an explicitly typed const
   (`const ctx: CanvasRenderingContext2D = maybeCtx`). See `PixelTrail.tsx`,
-  `YellowCircle.tsx`, `taste/TasteSection.tsx`.
+  `YellowCircle.tsx`.
 - Timer handles: `useRef<ReturnType<typeof setTimeout> | undefined>(undefined)`.
   `useRef(null)` infers `RefObject<null>` and rejects every later assignment.
   For `requestAnimationFrame` ids, idle at `0` — `cancelAnimationFrame(0)` is a

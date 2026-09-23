@@ -7,7 +7,6 @@ import { editionsOf } from "../../data/links";
 type LinkDotProps = {
   link: Link;
   open: boolean;
-  visited: boolean;
   /** False while the field collapses — the dots are on their way out. */
   interactive: boolean;
   onOpenChange: (open: boolean) => void;
@@ -18,13 +17,12 @@ type LinkDotProps = {
 
 const hostname = (url: string) => new URL(url).hostname.replace(/^www\./, "");
 
-/** One link on the field: a yellow circle that turns blue once visited, and
- *  the card that grows out of it. The circle only opens the card; the card is
+/** One link on the field: an invisible hit target over its WebGL sphere
+ *  (which turns blue once visited), and the card that grows out of it. The circle only opens the card; the card is
  *  what opens the link, so a stray tap on the field never leaves the page. */
 export default function LinkDot({
   link,
   open,
-  visited,
   interactive,
   onOpenChange,
   onVisit,
@@ -61,9 +59,9 @@ export default function LinkDot({
         // translate, scale, opacity, z-index and pointer-events every frame.
         // Starts off-canvas so there is no flash at 0,0 before the first one.
         style={{ transform: "translate(-100px, -100px)" }}
-        className={`absolute top-0 left-0 size-8 rounded-full border-2 border-brand-black outline-none will-change-transform transition-colors duration-300 focus-visible:ring-2 focus-visible:ring-code focus-visible:ring-offset-2 ${
-          visited ? "bg-code" : "bg-(--sun)"
-        } ${interactive ? "cursor-pointer" : "!pointer-events-none"}`}
+        className={`absolute top-0 left-0 size-8 rounded-full outline-none will-change-transform focus-visible:ring-2 focus-visible:ring-code focus-visible:ring-offset-2 ${
+          interactive ? "cursor-pointer" : "!pointer-events-none"
+        }`}
       />
       <Popover.Portal>
         <Popover.Positioner

@@ -47,21 +47,13 @@ const beat = (index: number): CSSProperties & Record<"--i", string> => ({
 export default function TasteEnding({ onAgain }: TasteEndingProps) {
   return (
     <div className="flex flex-col items-center gap-8 px-4 text-center">
-      <div className="taste-pop space-y-2" style={beat(0)}>
-        <p className="font-manrope text-2xl font-bold tracking-tighter md:text-3xl">
-          gostou? tem muito mais de onde vieram esses
-        </p>
-        <p className="font-manrope">
-          toda semana, na newsletter e no podcast
-        </p>
-      </div>
-
+      {/* Headline copy returns once the animation is nailed. */}
       <div className="flex flex-wrap justify-center gap-6">
         {MEDIA.map((media, index) => (
           <div
             key={media.key}
             className="taste-pop flex w-44 flex-col items-center gap-3 rounded-2xl border border-brand-black bg-brand-white p-4 shadow-[0.25rem_0.25rem_0] shadow-brand-black/15"
-            style={beat(index + 1)}
+            style={beat(index)}
           >
             <Image
               src={media.cover}
@@ -87,7 +79,7 @@ export default function TasteEnding({ onAgain }: TasteEndingProps) {
         ))}
       </div>
 
-      <div className="taste-pop" style={beat(3)}>
+      <div className="taste-pop" style={beat(2)}>
         <Button variant="ghost" onClick={onAgain}>
           provar de novo
         </Button>

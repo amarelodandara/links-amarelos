@@ -116,31 +116,18 @@ body {
 
 
 /* ── Taste the links ─────────────────────────────────────────────────────────
-   The section is full-bleed and opens out from the page column as it scrolls
-   into view. Where scroll timelines are missing, or motion is reduced, it is
-   simply full-bleed. */
+   The section is full-bleed but opens out from the page column as it
+   scrolls in: TasteSection writes --grow (0 → 1). Before JS runs it sits
+   inside the column. */
 .taste-bleed {
     width: 100vw;
     margin-inline: calc(50% - 50vw);
 }
 
-@keyframes taste-grow {
-    from {
-        clip-path: inset(3rem max(0px, calc(50% - 28rem)) round 1.5rem);
-    }
-    to {
-        clip-path: inset(0 0 round 0);
-    }
-}
-
-@supports (animation-timeline: view()) {
-    @media (prefers-reduced-motion: no-preference) and (min-width: 768px) {
-        .taste-stage {
-            animation: taste-grow linear both;
-            animation-timeline: view();
-            animation-range: entry 0% cover 45%;
-        }
-    }
+.taste-stage {
+    clip-path: inset(
+        0 calc((1 - var(--grow, 0)) * max(0px, 50% - 28rem))
+    );
 }
 
 /* --fade (0 → 1) is written by TasteSection while the button is held. */

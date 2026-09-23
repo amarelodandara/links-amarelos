@@ -1,30 +1,29 @@
-// The space-time field behind the taste section: a sheet seen in perspective
-// that every landed link dents with its mass. No React in here — TasteSection
-// owns the loop and calls `step` then `drawField` once per frame.
+// The space-time field behind the taste section: a sheet that every landed
+// link dents with its mass. Pure simulation — no React, no drawing. Each frame
+// TasteSection calls `step`, then scene.ts renders the result in WebGL.
 //
 // World units: x runs left/right, z is distance from the camera, and the
 // sheet rests at height 0. `depthAt` is how far the sheet sinks at (x, z);
 // the surface height there is its negative.
 
 // ── Tuning ───────────────────────────────────────────────────────────────────
-const GRID_X = 2.6; // half-width of the sheet; past the canvas edges on purpose
-const GRID_Z_NEAR = 1.15;
-const GRID_Z_FAR = 4.6;
-const GRID_COLUMNS = 27;
-const GRID_ROWS = 16;
-const GRID_SAMPLES = 120; // points per drawn line
-const CAMERA_HEIGHT = 1;
-
-const LINK_RADIUS = 0.075; // world radius of a link circle
-const LINK_MASS = 0.2; // well depth one link carries
-const WELL_SIGMA = 0.34; // well width
-const SAG_PER_LINK = 0.045; // the whole sheet leans toward the centre
-const SAG_SIGMA = 1.25;
-const CENTER_Z = 2.3; // where the sheet sags to, and where the singularity opens
+// The sheet's shape constants are exported because scene.ts evaluates the
+// same shape on the GPU (see SHEET_GLSL there). Change one, check both.
+export const LINK_RADIUS = 0.075; // world radius of a link sphere
+export const LINK_MASS = 0.2; // well depth one link carries
+export const WELL_SIGMA = 0.34; // well width
+export const SAG_PER_LINK = 0.045; // the whole sheet leans toward the centre
+export const SAG_SIGMA = 1.25;
+export const CENTER_Z = 2.3; // where the sheet sags to, and where the singularity opens
 // Link wells stack, but the sheet stretches only so far before the collapse:
 // their summed depth eases toward this ceiling so settled links stay on
 // screen however they pile up.
-const MAX_LINK_DEPTH = 0.42;
+export const MAX_LINK_DEPTH = 0.42;
+// The singularity: a well that deepens while it narrows. Kept shallow enough
+// that the throat stays inside the view.
+export const FUNNEL_DEPTH = 1.05;
+export const FUNNEL_SIGMA_START = 0.9;
+export const FUNNEL_SIGMA_SHRINK = 0.76;
 
 const GRAVITY = 9;
 const BOUNCE = 0.22;
@@ -38,29 +37,14 @@ const SETTLE_SECONDS = 0.35;
 const MAX_SLIDE_SECONDS = 2.5;
 
 const RIPPLE_AMP = 0.05;
-const RIPPLE_SPEED = 1.6;
-const RIPPLE_WIDTH = 0.28;
-const RIPPLE_WAVELENGTH = 0.32;
-const RIPPLE_LIFE = 1.4;
+export const RIPPLE_SPEED = 1.6;
+export const RIPPLE_WIDTH = 0.28;
+export const RIPPLE_WAVELENGTH = 0.32;
+export const RIPPLE_LIFE = 1.4;
 
 const COLLAPSE_SECONDS = 2.6;
 const DISSIPATE_SECONDS = 1.3;
 // ─────────────────────────────────────────────────────────────────────────────
-
-export type View = {
-  width: number;
-  height: number;
-  focal: number;
-  focalY: number;
-  horizon: number;
-};
-
-export function makeView(width: number, height: number): View {
-  // Portrait screens are narrow but tall; letting height set a floor keeps
-  // the sheet and its links from shrinking to a strip.
-  const focal = Math.min(Math.max(width, height * 0.9), height * 1.7) * 0.55;
-  return { width, height, focal, focalY: focal * 0.62, horizon: height * 0.46 };
-}
 
 type Common = {
   id: string;
@@ -69,10 +53,6 @@ type Common = {
   y: number;
   vx: number;
   vz: number;
-  /** Screen position and radius, refreshed every step for the DOM layer. */
-  sx: number;
-  sy: number;
-  sr: number;
   opacity: number;
 };
 
@@ -123,7 +103,7 @@ const gaussian = (d2: number, sigma: number) =>
   Math.exp(-d2 / (2 * sigma * sigma));
 
 /** 0 → 1 progress of the collapse, eased in so the funnel accelerates. */
-function collapseAmount(sim: Sim): number {
+export function collapseAmount(sim: Sim): number {
   switch (sim.stage.kind) {
     case "tasting":
       return 0;
@@ -137,7 +117,7 @@ function collapseAmount(sim: Sim): number {
 
 /** How far the sheet sinks at (x, z). `skip` leaves one body's own well out,
  *  so a sliding link feels the others' slopes and not its own dent. */
-function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
+export function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
   const collapse = collapseAmount(sim);
   const count = sim.bodies.length;
 
@@ -156,11 +136,10 @@ function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
   let depth = MAX_LINK_DEPTH * Math.tanh(wells / MAX_LINK_DEPTH);
 
   if (collapse > 0) {
-    // The singularity: a well that deepens while it narrows, which reads as
-    // the funnel in the black-hole diagram.
-    // Kept shallow enough that the throat stays inside the canvas.
-    const funnelSigma = 0.9 - 0.76 * collapse;
-    depth += 1.05 * collapse * gaussian(centerD2, funnelSigma);
+    // Deepens while it narrows, which reads as the funnel in the black-hole
+    // diagram.
+    const funnelSigma = FUNNEL_SIGMA_START - FUNNEL_SIGMA_SHRINK * collapse;
+    depth += FUNNEL_DEPTH * collapse * gaussian(centerD2, funnelSigma);
   }
 
   for (const ripple of sim.ripples) {
@@ -178,23 +157,21 @@ function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
   return depth;
 }
 
-function project(view: View, x: number, y: number, z: number) {
-  return {
-    sx: view.width / 2 + (x * view.focal) / z,
-    sy: view.horizon + ((CAMERA_HEIGHT - y) * view.focalY) / z,
-  };
-}
-
 // ── Links ────────────────────────────────────────────────────────────────────
 
-/** Drops a new link from just above the top edge of the canvas, centred so it
- *  falls across the hold button. With reduced motion it appears where it
- *  would have landed, already calm, and settles on the next step — so its
- *  `settled` event still arrives after the DOM layer has placed it. */
-export function spawnBody(sim: Sim, view: View, id: string): void {
+/** Drops a new link from `startHeight(x, z)` — the renderer answers with a
+ *  height just above the top of the view, so the link falls across the hold
+ *  button. With reduced motion it appears where it would have landed, already
+ *  calm, and settles on the next step — so its `settled` event still arrives
+ *  after the DOM layer has placed it. */
+export function spawnBody(
+  sim: Sim,
+  id: string,
+  startHeight: (x: number, z: number) => number,
+): void {
   const x = (Math.random() - 0.5) * 1.1;
   const z = CENTER_Z - 0.35 + Math.random() * 0.7;
-  const common = { id, x, z, vx: 0, vz: 0, sx: 0, sy: 0, sr: 0, opacity: 1 };
+  const common = { id, x, z, vx: 0, vz: 0, opacity: 1 };
 
   if (sim.reducedMotion) {
     sim.bodies.push({
@@ -207,10 +184,7 @@ export function spawnBody(sim: Sim, view: View, id: string): void {
     return;
   }
 
-  // Solve the projection for the height that puts the circle one radius
-  // above the canvas top.
-  const aboveTop = -view.focal * (LINK_RADIUS / z) * 1.5;
-  const y = CAMERA_HEIGHT - ((aboveTop - view.horizon) * z) / view.focalY;
+  const y = startHeight(x, z);
   sim.bodies.push({ ...common, kind: "falling", y, vy: 0, bounced: false });
 }
 
@@ -220,8 +194,8 @@ export function startCollapse(sim: Sim): void {
   sim.bodies = sim.bodies.map((body) => ({ ...body, kind: "sinking" }));
 }
 
-/** Advances the simulation by `dt` seconds and refreshes screen positions. */
-export function step(sim: Sim, view: View, dt: number): SimEvent[] {
+/** Advances the simulation by `dt` seconds. */
+export function step(sim: Sim, dt: number): SimEvent[] {
   const events: SimEvent[] = [];
   sim.time += dt;
 
@@ -252,10 +226,6 @@ export function step(sim: Sim, view: View, dt: number): SimEvent[] {
     if (body.kind === "sliding" && next.kind === "resting") {
       events.push({ kind: "settled", id: next.id });
     }
-    const { sx, sy } = project(view, next.x, next.y, next.z);
-    next.sx = sx;
-    next.sy = sy;
-    next.sr = Math.max(8, (LINK_RADIUS * view.focal) / next.z);
     return next;
   });
 
@@ -351,51 +321,19 @@ function advanceBody(sim: Sim, body: Body, dt: number): Body {
   }
 }
 
-// ── Drawing ──────────────────────────────────────────────────────────────────
+// ── For the renderer ─────────────────────────────────────────────────────────
 
-export function drawField(
-  ctx: CanvasRenderingContext2D,
-  sim: Sim,
-  view: View,
-  ink: string,
-): void {
-  ctx.clearRect(0, 0, view.width, view.height);
-  if (sim.stage.kind === "gone") return;
+/** How far the sheet has faded (1 → 0) and dropped away while dissipating. */
+export type Dissolve = { fade: number; drop: number };
 
-  const fade = sim.stage.kind === "dissipating" ? 1 - sim.stage.t : 1;
-  // While dissipating the sheet also drops away, as if the floor gave out.
-  const drop = sim.stage.kind === "dissipating" ? sim.stage.t * 0.9 : 0;
-
-  ctx.lineWidth = 1;
-  ctx.strokeStyle = ink;
-
-  const line = (fromX: number, fromZ: number, toX: number, toZ: number) => {
-    ctx.beginPath();
-    for (let i = 0; i <= GRID_SAMPLES; i++) {
-      const t = i / GRID_SAMPLES;
-      const x = fromX + (toX - fromX) * t;
-      const z = fromZ + (toZ - fromZ) * t;
-      const { sx, sy } = project(view, x, -depthAt(sim, x, z) - drop, z);
-      if (i === 0) ctx.moveTo(sx, sy);
-      else ctx.lineTo(sx, sy);
-    }
-    ctx.stroke();
-  };
-
-  // Rows (constant depth) fade with distance, so the far edge melts into the
-  // background instead of ending on a hard line.
-  for (let row = 0; row < GRID_ROWS; row++) {
-    const t = row / (GRID_ROWS - 1);
-    const z = GRID_Z_NEAR * Math.pow(GRID_Z_FAR / GRID_Z_NEAR, t);
-    ctx.globalAlpha = fade * (0.55 - 0.45 * t);
-    line(-GRID_X, z, GRID_X, z);
+export function dissolve(sim: Sim): Dissolve {
+  switch (sim.stage.kind) {
+    case "tasting":
+    case "collapsing":
+      return { fade: 1, drop: 0 };
+    case "dissipating":
+      return { fade: 1 - sim.stage.t, drop: sim.stage.t * 0.9 };
+    case "gone":
+      return { fade: 0, drop: 0.9 };
   }
-
-  ctx.globalAlpha = fade * 0.3;
-  for (let col = 0; col < GRID_COLUMNS; col++) {
-    const x = -GRID_X + (2 * GRID_X * col) / (GRID_COLUMNS - 1);
-    line(x, GRID_Z_NEAR, x, GRID_Z_FAR);
-  }
-
-  ctx.globalAlpha = 1;
 }

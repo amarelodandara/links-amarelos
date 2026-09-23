@@ -3,19 +3,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Link } from "../../data/links";
 import { pickTaste } from "../../data/links";
-import { PILL_BASE } from "../SectionPill";
 import HoldButton from "./HoldButton";
 import LinkDot from "./LinkDot";
 import TasteEnding from "./TasteEnding";
-import type { Sim, View } from "./field";
-import {
-  createSim,
-  drawField,
-  makeView,
-  spawnBody,
-  startCollapse,
-  step,
-} from "./field";
+import type { Sim } from "./field";
+import { createSim, spawnBody, startCollapse, step } from "./field";
+import type { TasteScene } from "./scene";
+import { createTasteScene } from "./scene";
 
 // Enough for the field to visibly strain, few enough to finish.
 const TASTE_COUNT = 7;
@@ -59,7 +53,7 @@ export default function TasteSection() {
   const stageRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const simRef = useRef<Sim | null>(null);
-  const viewRef = useRef<View>(makeView(1, 1));
+  const sceneRef = useRef<TasteScene | null>(null);
   const dotsRef = useRef(new Map<string, HTMLButtonElement>());
   // The sample is drawn on the first hold, not during render, so the server
   // and client never disagree about it.
@@ -84,37 +78,28 @@ export default function TasteSection() {
     }, COLLAPSE_DELAY_MS);
   }, []);
 
-  // The loop reads the latest handler without restarting.
+  // The loop reads the latest handler and visited set without restarting.
   const onSettledRef = useRef(onSettled);
+  const visitedRef = useRef(visited);
   useEffect(() => {
     onSettledRef.current = onSettled;
+    visitedRef.current = visited;
   });
 
   useEffect(() => {
     const stage = stageRef.current;
     const canvas = canvasRef.current;
     if (!stage || !canvas) return;
-    const maybeCtx = canvas.getContext("2d");
-    if (!maybeCtx) return;
-    // `frame` is a hoisted declaration; see CLAUDE.md on canvas narrowing.
-    const ctx: CanvasRenderingContext2D = maybeCtx;
-
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
     simRef.current = createSim(reducedMotion);
-    const ink =
-      getComputedStyle(document.documentElement)
-        .getPropertyValue("--brand-black")
-        .trim() || "#110a03";
+    const taste = createTasteScene(canvas);
+    sceneRef.current = taste;
 
     const resize = () => {
       const { width, height } = stage.getBoundingClientRect();
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      viewRef.current = makeView(width, height);
+      taste.resize(width, height);
     };
     resize();
     const resizeObserver = new ResizeObserver(resize);
@@ -129,18 +114,21 @@ export default function TasteSection() {
       const dt = last ? Math.min(0.05, (now - last) / 1000) : 1 / 60;
       last = now;
 
-      const view = viewRef.current;
-      for (const event of step(sim, view, dt)) {
+      for (const event of step(sim, dt)) {
         if (event.kind === "settled") onSettledRef.current(event.id);
         if (event.kind === "dissipated") setPhase("ended");
       }
-      drawField(ctx, sim, view, ink);
+      const placements = taste.render(sim, visitedRef.current);
 
+      // The spheres are drawn in WebGL; each link's DOM button is an
+      // invisible hit target laid over its sphere, for the cards, focus and
+      // screen readers.
       for (const body of sim.bodies) {
         const dot = dotsRef.current.get(body.id);
-        if (!dot) continue;
-        dot.style.transform = `translate(${body.sx - DOT_HALF}px, ${body.sy - DOT_HALF}px) scale(${body.sr / DOT_HALF})`;
-        dot.style.opacity = String(body.opacity);
+        const place = placements.get(body.id);
+        if (!dot || !place) continue;
+        dot.style.transform = `translate(${place.sx - DOT_HALF}px, ${place.sy - DOT_HALF}px) scale(${place.sr / DOT_HALF})`;
+        dot.style.opacity = String(place.opacity);
         // Nearer links overlap farther ones.
         dot.style.zIndex = String(Math.round(100 - body.z * 10));
         // A link in flight passes over the button; it must not swallow the
@@ -166,6 +154,52 @@ export default function TasteSection() {
       resizeObserver.disconnect();
       visibility.disconnect();
       clearTimeout(collapseTimerRef.current);
+      taste.dispose();
+      sceneRef.current = null;
+    };
+  }, []);
+
+  // Scroll grow: the stage starts clipped to the page column and opens to
+  // full width by the time its top reaches the top of the viewport. The
+  // range is measured from where the section actually sits: if it is already
+  // on screen when the page opens, growth starts at scroll 0 so it begins
+  // flush with the column instead of half-grown.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      stage.style.setProperty("--grow", "1");
+      return;
+    }
+
+    let start = 0;
+    let end = 1;
+    const measure = () => {
+      const top = stage.getBoundingClientRect().top + window.scrollY;
+      start = Math.max(0, top - window.innerHeight);
+      end = Math.max(start + 1, top);
+    };
+    let rafId = 0;
+    const update = () => {
+      rafId = 0;
+      const t = (window.scrollY - start) / (end - start);
+      stage.style.setProperty("--grow", String(Math.min(1, Math.max(0, t))));
+    };
+    const schedule = () => {
+      if (!rafId) rafId = requestAnimationFrame(update);
+    };
+    const remeasure = () => {
+      measure();
+      schedule();
+    };
+
+    remeasure();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", remeasure);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", remeasure);
     };
   }, []);
 
@@ -177,12 +211,13 @@ export default function TasteSection() {
 
   const onHoldComplete = () => {
     const sim = simRef.current;
-    if (!sim || phase !== "tasting") return;
+    const taste = sceneRef.current;
+    if (!sim || !taste || phase !== "tasting") return;
     poolRef.current ??= pickTaste(TASTE_COUNT);
     const link = poolRef.current[released.length];
     if (!link) return;
     setReleased((current) => [...current, link]);
-    spawnBody(sim, viewRef.current, link.id);
+    spawnBody(sim, link.id, taste.startHeight);
   };
 
   const onVisit = (id: string) => {
@@ -225,41 +260,36 @@ export default function TasteSection() {
           className="taste-vignette pointer-events-none absolute inset-0"
         />
 
-        <div className="relative mx-auto flex h-full max-w-4xl flex-col px-4 pt-6">
-          <p className={`${PILL_BASE} bg-black/5 border-brand-black/40 text-brand-black`}>
-            prove
-          </p>
-          <h2
-            id="taste-title"
-            className="mt-3 max-w-sm font-manrope text-xl font-semibold leading-snug tracking-tight"
-          >
-            uma provinha da curadoria, direto do forno
-          </h2>
+        {/* Copy comes back once the animation is nailed; the heading stays
+            for screen readers so the section keeps its name. */}
+        <h2 id="taste-title" className="sr-only">
+          prove os links amarelos
+        </h2>
 
-          {phase !== "ended" && (
-            <div className="absolute top-[34%] left-1/2 flex -translate-x-1/2 -translate-y-1/2 items-center gap-3">
-              <HoldButton
-                disabled={phase !== "tasting" || remaining === 0}
-                onComplete={onHoldComplete}
-                onProgress={onHoldProgress}
-              >
-                segure para provar
-              </HoldButton>
-              <p
-                aria-live="polite"
-                className={`${PILL_BASE} whitespace-nowrap bg-brand-white border-brand-black/40 text-brand-black transition-[translate,opacity] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                  released.length > 0
-                    ? "translate-x-0 opacity-100"
-                    : "pointer-events-none -translate-x-3 opacity-0"
-                }`}
-              >
-                {remaining === 1
-                  ? "1 link restante"
-                  : `${remaining} links restantes`}
-              </p>
-            </div>
-          )}
-        </div>
+        {phase !== "ended" && (
+          <div className="absolute top-[34%] left-1/2 -translate-x-1/2 -translate-y-1/2">
+            <HoldButton
+              disabled={phase !== "tasting" || remaining === 0}
+              onComplete={onHoldComplete}
+              onProgress={onHoldProgress}
+            >
+              segure para provar
+            </HoldButton>
+            {/* Links left, pinned to the button's corner. Pops in after the
+                first link drops. */}
+            <p
+              aria-live="polite"
+              className={`absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-brand-black bg-(--sun) font-space-mono text-xs font-bold text-brand-black transition-[scale,opacity] duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+                released.length > 0
+                  ? "scale-100 opacity-100"
+                  : "pointer-events-none scale-0 opacity-0"
+              }`}
+            >
+              <span className="sr-only">links restantes: </span>
+              {remaining}
+            </p>
+          </div>
+        )}
 
         <div className="pointer-events-none absolute inset-0">
           {released.map((link) => (
@@ -267,7 +297,6 @@ export default function TasteSection() {
               key={link.id}
               link={link}
               open={openId === link.id}
-              visited={visited.has(link.id)}
               interactive={phase === "tasting"}
               onOpenChange={(open) =>
                 setOpenId((current) =>
