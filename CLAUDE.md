@@ -34,7 +34,7 @@ needed, so reach for one of them before reaching for an escape hatch.
 - Canvas code: a hoisted `function frame()` does not see an `if (!ctx) return`
   narrowing from its enclosing scope. Bind through an explicitly typed const
   (`const ctx: CanvasRenderingContext2D = maybeCtx`). See `PixelTrail.tsx`,
-  `YellowCircle.tsx`, `ExperimenteSection.tsx`.
+  `YellowCircle.tsx`.
 - Timer handles: `useRef<ReturnType<typeof setTimeout> | undefined>(undefined)`.
   `useRef(null)` infers `RefObject<null>` and rejects every later assignment.
   For `requestAnimationFrame` ids, idle at `0` — `cancelAnimationFrame(0)` is a
@@ -48,8 +48,9 @@ needed, so reach for one of them before reaching for an escape hatch.
   `catch` binding is `unknown`; `error instanceof Error && error.name === ...`
   covers DOMException too. See `PageActions.tsx`.
 - Physics/animation state with two distinct phases is a discriminated union,
-  not one shape with optional fields. See the falling/resting circle split in
-  `ExperimenteSection.tsx`.
+  not one shape with optional fields. The removed `ExperimenteSection.tsx`
+  (`git show b21657c:app/components/ExperimenteSection.tsx`) had a
+  falling/resting circle split that did this.
 
 `app/components/signature-data.ts` is frozen data, not build output — nothing
 regenerates it. Its header explains where it came from.
