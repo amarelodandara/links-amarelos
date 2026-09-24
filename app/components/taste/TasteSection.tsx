@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import type { Link } from "../../data/links";
 import { pickTaste } from "../../data/links";
 import HoldButton from "./HoldButton";
@@ -10,6 +11,8 @@ import type { Sim } from "./field";
 import { createSim, spawnBody, startCollapse, step } from "./field";
 import type { TasteScene } from "./scene";
 import { createTasteScene } from "./scene";
+import type { Tuning } from "./tuning";
+import { TUNING_DEFAULTS, readTuning } from "./tuning";
 
 // Enough for the field to visibly strain, few enough to finish.
 const TASTE_COUNT = 7;
@@ -19,6 +22,10 @@ const COLLAPSE_DELAY_MS = 1100;
 // LinkDot renders at size-8; the loop scales it to the projected radius.
 const DOT_HALF = 16;
 const VISITED_KEY = "taste:visited";
+// The field's tuning panel ships only in `next dev`, and renders only on
+// the client: its values come from storage.
+const TUNING = process.env.NODE_ENV === "development";
+const TuningPanel = dynamic(() => import("./TuningPanel"), { ssr: false });
 
 type Phase = "tasting" | "collapsing" | "ended";
 
@@ -49,6 +56,9 @@ export default function TasteSection() {
   const [phase, setPhase] = useState<Phase>("tasting");
   const [openId, setOpenId] = useState<string | null>(null);
   const [visited, setVisited] = useState<Set<string>>(readVisited);
+  const [tuning, setTuning] = useState<Tuning>(() =>
+    TUNING ? readTuning() : TUNING_DEFAULTS,
+  );
 
   const stageRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -81,9 +91,11 @@ export default function TasteSection() {
   // The loop reads the latest handler and visited set without restarting.
   const onSettledRef = useRef(onSettled);
   const visitedRef = useRef(visited);
+  const tuningRef = useRef(tuning);
   useEffect(() => {
     onSettledRef.current = onSettled;
     visitedRef.current = visited;
+    tuningRef.current = tuning;
   });
 
   useEffect(() => {
@@ -93,8 +105,8 @@ export default function TasteSection() {
     const reducedMotion = window.matchMedia(
       "(prefers-reduced-motion: reduce)",
     ).matches;
-    simRef.current = createSim(reducedMotion);
-    const taste = createTasteScene(canvas);
+    simRef.current = createSim(reducedMotion, tuningRef.current.field);
+    const taste = createTasteScene(canvas, tuningRef.current.view);
     sceneRef.current = taste;
 
     const resize = () => {
@@ -232,13 +244,19 @@ export default function TasteSection() {
   const again = () => {
     clearTimeout(collapseTimerRef.current);
     const sim = simRef.current;
-    simRef.current = createSim(sim ? sim.reducedMotion : false);
+    simRef.current = createSim(sim ? sim.reducedMotion : false, tuning.field);
     poolRef.current = null;
     settledRef.current = new Set();
     dotsRef.current.clear();
     setReleased([]);
     setOpenId(null);
     setPhase("tasting");
+  };
+
+  const retune = (tune: Tuning) => {
+    if (simRef.current) simRef.current.tune = tune.field;
+    sceneRef.current?.setView(tune.view);
+    setTuning(tune);
   };
 
   const remaining = TASTE_COUNT - released.length;
@@ -259,6 +277,7 @@ export default function TasteSection() {
           aria-hidden
           className="taste-vignette pointer-events-none absolute inset-0"
         />
+        <div aria-hidden className="taste-frame" />
 
         {/* Copy comes back once the animation is nailed; the heading stays
             for screen readers so the section keeps its name. */}
@@ -318,6 +337,16 @@ export default function TasteSection() {
           </div>
         )}
       </div>
+
+      {/* Outside the stage: its clip-path would cut a fixed panel off. */}
+      {TUNING && (
+        <TuningPanel
+          tune={tuning}
+          onChange={retune}
+          onDrop={onHoldComplete}
+          onRestart={again}
+        />
+      )}
     </section>
   );
 }

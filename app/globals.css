@@ -125,9 +125,17 @@ body {
 }
 
 .taste-stage {
-    clip-path: inset(
-        0 calc((1 - var(--grow, 0)) * max(0px, 50% - 28rem))
-    );
+    --taste-side: calc((1 - var(--grow, 0)) * max(0px, 50% - 28rem));
+    clip-path: inset(0 var(--taste-side));
+}
+
+/* The brand-yellow frame rides the clip edge, so it hugs the stage at every
+   width while it grows. */
+.taste-frame {
+    position: absolute;
+    inset: 0 var(--taste-side);
+    border: 1px solid var(--sun);
+    pointer-events: none;
 }
 
 /* --fade (0 → 1) is written by TasteSection while the button is held. */
