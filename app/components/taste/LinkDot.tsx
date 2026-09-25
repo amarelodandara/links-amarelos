@@ -7,7 +7,8 @@ import { editionsOf } from "../../data/links";
 type LinkDotProps = {
   link: Link;
   open: boolean;
-  /** False while the field collapses — the dots are on their way out. */
+  /** False while the view closes in on the field — the dots are moving too
+   *  fast to aim at. */
   interactive: boolean;
   onOpenChange: (open: boolean) => void;
   onVisit: () => void;

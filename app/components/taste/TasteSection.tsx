@@ -8,7 +8,7 @@ import HoldButton from "./HoldButton";
 import LinkDot from "./LinkDot";
 import TasteEnding from "./TasteEnding";
 import type { Sim } from "./field";
-import { createSim, spawnBody, startCollapse, step } from "./field";
+import { createSim, spawnBody, startFraming, step } from "./field";
 import type { TasteScene } from "./scene";
 import { createTasteScene } from "./scene";
 import type { Tuning } from "./tuning";
@@ -16,9 +16,9 @@ import { TUNING_DEFAULTS, readTuning } from "./tuning";
 
 // Enough for the field to visibly strain, few enough to finish.
 const TASTE_COUNT = 7;
-// A beat between the last link settling and the field giving way, so the
+// A beat between the last link settling and the view closing in, so the
 // last card can be seen.
-const COLLAPSE_DELAY_MS = 1100;
+const FRAMING_DELAY_MS = 1100;
 // LinkDot renders at size-8; the loop scales it to the projected radius.
 const DOT_HALF = 16;
 const VISITED_KEY = "taste:visited";
@@ -27,7 +27,9 @@ const VISITED_KEY = "taste:visited";
 const TUNING = process.env.NODE_ENV === "development";
 const TuningPanel = dynamic(() => import("./TuningPanel"), { ssr: false });
 
-type Phase = "tasting" | "collapsing" | "ended";
+// "framing" while the view closes in on the dents; "ended" once it circles
+// them, which it does for as long as the section is on screen.
+type Phase = "tasting" | "framing" | "ended";
 
 // Visited ids persist per browser as a comma-joined string. Storage can be
 // missing or throw (private mode, blocked site data, the server); every path
@@ -49,8 +51,8 @@ function writeVisited(ids: Set<string>): void {
 }
 
 /** "Prove os links": hold the button, links fall onto a space-time sheet and
- *  dent it, and after the last one the sheet collapses into a singularity
- *  and hands the stage to the newsletter and podcast. */
+ *  dent it, and after the last one the view closes in on the dents and turns
+ *  around them beside the newsletter and podcast. */
 export default function TasteSection() {
   const [released, setReleased] = useState<Link[]>([]);
   const [phase, setPhase] = useState<Phase>("tasting");
@@ -69,7 +71,7 @@ export default function TasteSection() {
   // and client never disagree about it.
   const poolRef = useRef<Link[] | null>(null);
   const settledRef = useRef(new Set<string>());
-  const collapseTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
+  const framingTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(
     undefined,
   );
 
@@ -79,14 +81,19 @@ export default function TasteSection() {
     // The newest link introduces itself.
     setOpenId(id);
     if (settledRef.current.size < TASTE_COUNT) return;
-    collapseTimerRef.current = setTimeout(() => {
+    framingTimerRef.current = setTimeout(() => {
       const sim = simRef.current;
       if (!sim) return;
-      startCollapse(sim);
+      startFraming(sim);
       setOpenId(null);
-      setPhase("collapsing");
-    }, COLLAPSE_DELAY_MS);
+      setPhase("framing");
+    }, FRAMING_DELAY_MS);
   }, []);
+
+  // An open card is pinned where its link was, so the orbit waits for it.
+  useEffect(() => {
+    if (simRef.current) simRef.current.holdOrbit = openId !== null;
+  }, [openId]);
 
   // The loop reads the latest handler and visited set without restarting.
   const onSettledRef = useRef(onSettled);
@@ -128,7 +135,7 @@ export default function TasteSection() {
 
       for (const event of step(sim, dt)) {
         if (event.kind === "settled") onSettledRef.current(event.id);
-        if (event.kind === "dissipated") setPhase("ended");
+        if (event.kind === "framed") setPhase("ended");
       }
       const placements = taste.render(sim, visitedRef.current);
 
@@ -140,9 +147,8 @@ export default function TasteSection() {
         const place = placements.get(body.id);
         if (!dot || !place) continue;
         dot.style.transform = `translate(${place.sx - DOT_HALF}px, ${place.sy - DOT_HALF}px) scale(${place.sr / DOT_HALF})`;
-        dot.style.opacity = String(place.opacity);
         // Nearer links overlap farther ones.
-        dot.style.zIndex = String(Math.round(100 - body.z * 10));
+        dot.style.zIndex = String(Math.round(100 - place.depth * 10));
         // A link in flight passes over the button; it must not swallow the
         // next press. Only a link at rest can be hovered or tapped.
         dot.style.pointerEvents = body.kind === "resting" ? "auto" : "none";
@@ -165,7 +171,7 @@ export default function TasteSection() {
       cancelAnimationFrame(rafId);
       resizeObserver.disconnect();
       visibility.disconnect();
-      clearTimeout(collapseTimerRef.current);
+      clearTimeout(framingTimerRef.current);
       taste.dispose();
       sceneRef.current = null;
     };
@@ -242,7 +248,7 @@ export default function TasteSection() {
   };
 
   const again = () => {
-    clearTimeout(collapseTimerRef.current);
+    clearTimeout(framingTimerRef.current);
     const sim = simRef.current;
     simRef.current = createSim(sim ? sim.reducedMotion : false, tuning.field);
     poolRef.current = null;
@@ -267,7 +273,7 @@ export default function TasteSection() {
         ref={stageRef}
         className="taste-stage relative h-[min(100svh,760px)] min-h-[540px] overflow-hidden bg-sun-lighter"
       >
-        {/* Back to front: field, edge fade, button, links + cards. */}
+        {/* Back to front: field, edge fade, button, links + cards, ending. */}
         <canvas
           ref={canvasRef}
           aria-hidden
@@ -285,10 +291,10 @@ export default function TasteSection() {
           prove os links amarelos
         </h2>
 
-        {phase !== "ended" && (
+        {phase === "tasting" && (
           <div className="absolute top-[34%] left-1/2 -translate-x-1/2 -translate-y-1/2">
             <HoldButton
-              disabled={phase !== "tasting" || remaining === 0}
+              disabled={remaining === 0}
               onComplete={onHoldComplete}
               onProgress={onHoldProgress}
             >
@@ -316,7 +322,7 @@ export default function TasteSection() {
               key={link.id}
               link={link}
               open={openId === link.id}
-              interactive={phase === "tasting"}
+              interactive={phase !== "framing"}
               onOpenChange={(open) =>
                 setOpenId((current) =>
                   open ? link.id : current === link.id ? null : current,
@@ -331,8 +337,10 @@ export default function TasteSection() {
           ))}
         </div>
 
-        {phase === "ended" && (
-          <div className="absolute inset-0 flex items-center justify-center">
+        {/* Mounts as the view starts closing in; its pieces wait out most
+            of the move before popping in. */}
+        {phase !== "tasting" && (
+          <div className="taste-ending">
             <TasteEnding onAgain={again} />
           </div>
         )}

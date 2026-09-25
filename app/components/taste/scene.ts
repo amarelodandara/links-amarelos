@@ -1,7 +1,10 @@
 // WebGL rendering for the taste section. field.ts decides where everything
 // is; this draws it: a see-through sheet of uniform yellow grid lines, after
 // the black-hole diagram, that runs past the view on every side and melts
-// into fog at the back, and link spheres that sit in its dents. Sim coordinates map straight across, except that sim z
+// into fog at the back, and link spheres that sit in its dents. Once the
+// last link lands the view closes in: the sheet is cut down to a square
+// patch around the dents, gains finer grid lines, and turns in the left of
+// the stage. Sim coordinates map straight across, except that sim z
 // (distance from the camera) points down three.js's -z.
 import {
   BackSide,
@@ -16,12 +19,13 @@ import {
   PlaneGeometry,
   Scene,
   SphereGeometry,
+  Vector2,
   Vector3,
   Vector4,
   WebGLRenderer,
 } from "three";
 import type { Sim } from "./field";
-import { FIELD_DEFAULTS, collapseAmount, dissolve } from "./field";
+import { FIELD_DEFAULTS, framingAmount, orbitAngle } from "./field";
 
 // ── Tuning ───────────────────────────────────────────────────────────────────
 // How the field is seen. Swappable live through `setView`, like the sim's
@@ -42,6 +46,16 @@ export const VIEW_DEFAULTS = {
 
   fogNear: 3.2,
   fogFar: 11,
+
+  // The final shot: the camera closes in on the dents and circles them.
+  endDistance: 7.5,
+  endElevation: 32,
+  endAim: 0,
+  // The patch's centre moves this share of the stage off centre: left on a
+  // wide stage, up on a tall one, leaving room for the ending's copy.
+  endShift: 0.18,
+  endDivisions: 2, // each grid cell splits into this many per side
+  patchCells: 5, // half the patch's side, in (coarse) grid cells
 };
 export type ViewTuning = typeof VIEW_DEFAULTS;
 
@@ -55,9 +69,14 @@ const SHEET_SEGMENTS_X = 300;
 const SHEET_SEGMENTS_Z = 400;
 // Uniform array sizes; the sim never has more wells or ripples than links.
 const MAX_WELLS = 8;
+// Half the patch's side before it closes in, in grid cells: far past the
+// view, so it starts out reading as the endless sheet.
+const OPEN_PATCH_CELLS = 200;
 
 const OUTLINE_SCALE = 1.14; // inverted-hull outline, matching the site's ink borders
 // ─────────────────────────────────────────────────────────────────────────────
+
+const lerp = (from: number, to: number, t: number) => from + (to - from) * t;
 
 // field.ts's depthAt, in GLSL, so the GPU bends the sheet every frame and
 // the CPU only does the physics. p is (x, sim z). The shape parameters come
@@ -69,10 +88,7 @@ uniform vec4 uRipples[${MAX_WELLS}]; // x, z, amplitude, age
 uniform int uRippleCount;
 uniform float uSag;
 uniform float uWellSigma;
-uniform float uCollapse;
-uniform float uDrop;
 uniform vec3 uSheet;  // centre z, sag sigma, max link depth
-uniform vec3 uFunnel; // depth, sigma at start, sigma shrink
 uniform vec4 uRipple; // speed, life / 3, width², wavelength
 
 float sheetGauss(float d2, float sigma) {
@@ -89,10 +105,6 @@ float sheetDepth(vec2 p) {
     wells += uWells[i].z * sheetGauss(dot(d, d), uWellSigma);
   }
   float depth = uSheet.z * tanh(wells / uSheet.z);
-  if (uCollapse > 0.0) {
-    float funnelSigma = uFunnel.y - uFunnel.z * uCollapse;
-    depth += uFunnel.x * uCollapse * sheetGauss(cd2, funnelSigma);
-  }
   for (int i = 0; i < ${MAX_WELLS}; i++) {
     if (i >= uRippleCount) break;
     vec4 r = uRipples[i];
@@ -105,7 +117,7 @@ float sheetDepth(vec2 p) {
 
 // Local mesh coordinates run x, height, -sim z.
 float sheetHeight(vec2 local) {
-  return -sheetDepth(vec2(local.x, -local.y)) - uDrop;
+  return -sheetDepth(vec2(local.x, -local.y));
 }
 
 varying vec2 vSim;
@@ -117,6 +129,8 @@ varying vec2 vSim;
 const GRID_GLSL = /* glsl */ `
 varying vec2 vSim;
 uniform vec3 uGrid; // cell, line width px, line opacity
+uniform vec2 uDetail; // divisions per cell, how far the finer lines are in
+uniform vec3 uPatch;  // centre x, centre sim z, half side in cells
 
 // 1 on a line through each integer value of the coordinate, 0 between, with
 // the width held in pixels by the coordinate's screen-space derivative.
@@ -126,16 +140,27 @@ float lineAt(float coord, float width) {
 }
 `;
 
+// The finer grid keeps every line of the coarse one and fades in the ones
+// between, so nothing slides while the cells multiply. The patch is a square
+// whose edges sit on coarse lines, so the sheet ends on a line of its own.
 const GRID_FRAGMENT = /* glsl */ `
 vec2 cell = vSim / uGrid.x;
 vec2 cellWidth = fwidth(cell);
+vec2 fromPatch = abs(vSim - uPatch.xy) / uGrid.x;
+if (max(fromPatch.x, fromPatch.y) > uPatch.z + max(cellWidth.x, cellWidth.y) * uGrid.y) discard;
 float line = max(lineAt(cell.x, cellWidth.x), lineAt(cell.y, cellWidth.y));
+vec2 fine = cell * uDetail.x;
+vec2 fineWidth = cellWidth * uDetail.x;
+float fineLine = max(lineAt(fine.x, fineWidth.x), lineAt(fine.y, fineWidth.y));
+line = max(line, fineLine * uDetail.y);
 diffuseColor.a *= line * uGrid.z;
 // Between the lines writes no depth, so it never hides a link behind it.
 if (diffuseColor.a < 0.01) discard;
 `;
 
-export type DotPlacement = { sx: number; sy: number; sr: number; opacity: number };
+/** Where a link's sphere is on screen: centre, radius in pixels, and its
+ *  distance from the camera, for stacking the DOM dots. */
+export type DotPlacement = { sx: number; sy: number; sr: number; depth: number };
 
 function readColor(name: string, fallback: string): Color {
   const value = getComputedStyle(document.documentElement)
@@ -180,7 +205,8 @@ export function createTasteScene(
   const camera = new PerspectiveCamera(view.fovLandscape, 1, 0.05, 40);
 
   // Light for the link spheres; the sheet is unlit, so its lines stay one
-  // yellow however they bend.
+  // yellow however they bend. It stays put while the view circles, so the
+  // highlights on the spheres travel round as the patch turns.
   scene.add(new HemisphereLight(0xffffff, 0xfff4d6, 1.9));
   const sunLight = new DirectionalLight(0xffffff, 1.4);
   const aimLight = (centerZ: number) => {
@@ -211,12 +237,11 @@ export function createTasteScene(
     uRippleCount: { value: 0 },
     uSag: { value: 0 },
     uWellSigma: { value: FIELD_DEFAULTS.wellSigma },
-    uCollapse: { value: 0 },
-    uDrop: { value: 0 },
     uSheet: { value: new Vector3() },
-    uFunnel: { value: new Vector3() },
     uRipple: { value: new Vector4() },
     uGrid: { value: new Vector3() },
+    uDetail: { value: new Vector2() },
+    uPatch: { value: new Vector3() },
   };
   sheetMaterial.onBeforeCompile = (shader) => {
     Object.assign(shader.uniforms, uniforms);
@@ -237,7 +262,31 @@ export function createTasteScene(
   sheet.frustumCulled = false;
   scene.add(sheet);
 
-  function feedSheet(sim: Sim) {
+  // Where the view closes in: the middle of the dents, snapped to a coarse
+  // grid line so the patch's edges land on lines too.
+  const pivot = new Vector3();
+  function findPivot(sim: Sim) {
+    const cell = view.gridCell;
+    let x = 0;
+    let y = 0;
+    let z = 0;
+    for (const body of sim.bodies) {
+      x += body.x;
+      y += body.y;
+      z += body.z;
+    }
+    const count = Math.max(1, sim.bodies.length);
+    // Halfway down the dents, so the rim and the links both stay in frame.
+    pivot.set(
+      Math.round(x / count / cell) * cell,
+      y / count / 2,
+      sim.bodies.length > 0
+        ? Math.round(z / count / cell) * cell
+        : sim.tune.centerZ,
+    );
+  }
+
+  function feedSheet(sim: Sim, framing: number) {
     const tune = sim.tune;
     let wells = 0;
     for (const body of sim.bodies) {
@@ -255,17 +304,9 @@ export function createTasteScene(
     }
     uniforms.uRippleCount.value = ripples;
 
-    const collapse = collapseAmount(sim);
     uniforms.uSag.value = tune.sagPerLink * sim.bodies.length;
-    uniforms.uWellSigma.value =
-      tune.wellSigma * (1 - tune.wellNarrowing * collapse);
-    uniforms.uCollapse.value = collapse;
+    uniforms.uWellSigma.value = tune.wellSigma;
     uniforms.uSheet.value.set(tune.centerZ, tune.sagSigma, tune.maxLinkDepth);
-    uniforms.uFunnel.value.set(
-      tune.funnelDepth,
-      tune.funnelSigmaStart,
-      tune.funnelSigmaShrink,
-    );
     uniforms.uRipple.value.set(
       tune.rippleSpeed,
       tune.rippleLife / 3,
@@ -274,27 +315,56 @@ export function createTasteScene(
     );
     aimLight(tune.centerZ);
     uniforms.uGrid.value.set(view.gridCell, view.lineWidth, view.lineOpacity);
+    uniforms.uDetail.value.set(Math.max(1, Math.round(view.endDivisions)), framing);
+    // Shrinks through log space, so the far-off edges sweep in at an even
+    // pace instead of arriving all at the end.
+    const patch = Math.exp(
+      lerp(Math.log(OPEN_PATCH_CELLS), Math.log(view.patchCells), framing),
+    );
+    uniforms.uPatch.value.set(pivot.x, pivot.z, patch);
   }
 
   const target = new Vector3();
-  function placeCamera(centerZ: number) {
-    const elevation = (view.cameraElevation * Math.PI) / 180;
-    target.set(0, 0, -centerZ);
+  // The camera circles `target` at this distance and elevation, starting
+  // from straight in front; while framing it slides from the tasting view to
+  // the final one.
+  function placeCamera(sim: Sim, framing: number) {
+    const degrees = Math.PI / 180;
+    const distance = lerp(view.cameraDistance, view.endDistance, framing);
+    const elevation =
+      lerp(view.cameraElevation, view.endElevation, framing) * degrees;
+    const aim = lerp(view.cameraAim, view.endAim, framing) * degrees;
+    const azimuth = orbitAngle(sim);
+    target.set(
+      lerp(0, pivot.x, framing),
+      lerp(0, pivot.y, framing),
+      -lerp(sim.tune.centerZ, pivot.z, framing),
+    );
+    const flat = distance * Math.cos(elevation);
     camera.position.set(
-      0,
-      view.cameraDistance * Math.sin(elevation),
-      -centerZ + view.cameraDistance * Math.cos(elevation),
+      target.x + flat * Math.sin(azimuth),
+      target.y + distance * Math.sin(elevation),
+      target.z + flat * Math.cos(azimuth),
     );
     camera.lookAt(target);
-    camera.rotateX((view.cameraAim * Math.PI) / 180);
-    const fov = camera.aspect < 1 ? view.fovPortrait : view.fovLandscape;
-    if (camera.fov !== fov) {
-      camera.fov = fov;
-      camera.updateProjectionMatrix();
+    camera.rotateX(aim);
+
+    camera.fov = camera.aspect < 1 ? view.fovPortrait : view.fovLandscape;
+    // Slide the picture, not the camera, so the patch turns in place off
+    // centre: left of the copy on a wide stage, above it on a tall one.
+    const shift = view.endShift * framing;
+    if (camera.aspect < 1) {
+      camera.setViewOffset(width, height, 0, shift * height, width, height);
+    } else {
+      camera.setViewOffset(width, height, shift * width, 0, width, height);
     }
+    camera.updateProjectionMatrix();
     camera.updateMatrixWorld();
-    fog.near = view.fogNear;
-    fog.far = view.fogFar;
+    // The fog backs off with the camera, so the patch reads as clearly
+    // from the final distance as the sheet did up close.
+    const backOff = distance - view.cameraDistance;
+    fog.near = view.fogNear + backOff;
+    fog.far = view.fogFar + backOff;
   }
 
   // A unit sphere, scaled to the tuned link radius each frame.
@@ -351,42 +421,33 @@ export function createTasteScene(
       height = Math.max(1, nextHeight);
       renderer.setSize(width, height, false);
       camera.aspect = width / height;
-      camera.fov = camera.aspect < 1 ? view.fovPortrait : view.fovLandscape;
-      camera.updateProjectionMatrix();
     },
 
     render(sim, visited) {
-      placeCamera(sim.tune.centerZ);
-      feedSheet(sim);
+      const framing = framingAmount(sim);
+      findPivot(sim);
+      placeCamera(sim, framing);
+      feedSheet(sim, framing);
       radius = sim.tune.linkRadius;
-      const { fade, drop } = dissolve(sim);
-      sheetMaterial.opacity = fade;
-      uniforms.uDrop.value = drop;
-      sheet.visible = fade > 0;
 
       const placements = new Map<string, DotPlacement>();
       const alive = new Set<string>();
       for (const body of sim.bodies) {
         alive.add(body.id);
-        const { mesh, outline } = ballFor(body.id);
+        const { mesh } = ballFor(body.id);
         // The sim tracks where a link touches the sheet; the sphere's centre
         // sits one radius above that.
         const cy = body.y + radius;
         mesh.position.set(body.x, cy, -body.z);
-        mesh.scale.setScalar(
-          radius * Math.max(0.001, 0.4 + 0.6 * body.opacity),
-        );
+        mesh.scale.setScalar(radius);
         mesh.material.color.copy(visited.has(body.id) ? code : sun);
-        mesh.material.opacity = body.opacity;
-        outline.material.opacity = body.opacity;
-        mesh.visible = body.opacity > 0.01;
 
         const { sx, sy } = toScreen(body.x, cy, -body.z);
         placements.set(body.id, {
           sx,
           sy,
-          sr: pixelScale(body.x, cy, -body.z) * mesh.scale.x,
-          opacity: body.opacity,
+          sr: pixelScale(body.x, cy, -body.z) * radius,
+          depth: camera.position.distanceTo(probe.set(body.x, cy, -body.z)),
         });
       }
       for (const [id, ball] of balls) {

@@ -41,27 +41,33 @@ const beat = (index: number): CSSProperties & Record<"--i", string> => ({
   "--i": String(index),
 });
 
-/** What fills the stage once the field is gone: the two places the rest of
- *  the links live. Each piece pops in on its own beat (`taste-pop` in
- *  globals.css, staggered through --i). */
+// The ending mounts as the view starts closing in (framingSeconds in
+// field.ts); the first piece lands near the end of that move.
+const ENTER: CSSProperties & Record<"--pop-delay", string> = {
+  "--pop-delay": "1000ms",
+};
+
+/** Beside the turning patch: the two places the rest of the links live.
+ *  Each piece pops in on its own beat (`taste-pop` in globals.css,
+ *  staggered through --i). */
 export default function TasteEnding({ onAgain }: TasteEndingProps) {
   return (
-    <div className="flex flex-col items-center gap-8 px-4 text-center">
-      {/* Headline copy returns once the animation is nailed. */}
-      <div className="flex flex-wrap justify-center gap-6">
-        {MEDIA.map((media, index) => (
-          <div
-            key={media.key}
-            className="taste-pop flex w-44 flex-col items-center gap-3 rounded-2xl border border-brand-black bg-brand-white p-4 shadow-[0.25rem_0.25rem_0] shadow-brand-black/15"
-            style={beat(index)}
-          >
-            <Image
-              src={media.cover}
-              width={2000}
-              height={2000}
-              alt={`capa de ${media.name}`}
-              className={`size-24 outline outline-2 outline-sun-light ${media.tilt}`}
-            />
+    <div className="flex w-full max-w-sm flex-col gap-4" style={ENTER}>
+      {/* Headline copy goes here once it is written. */}
+      {MEDIA.map((media, index) => (
+        <div
+          key={media.key}
+          className="taste-pop flex items-center gap-4 rounded-2xl border border-brand-black bg-brand-white p-3 shadow-[0.25rem_0.25rem_0] shadow-brand-black/15"
+          style={beat(index)}
+        >
+          <Image
+            src={media.cover}
+            width={2000}
+            height={2000}
+            alt={`capa de ${media.name}`}
+            className={`size-16 shrink-0 outline outline-2 outline-sun-light ${media.tilt}`}
+          />
+          <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
             <div>
               <p className="font-manrope font-bold tracking-tight">
                 {media.name}
@@ -76,10 +82,10 @@ export default function TasteEnding({ onAgain }: TasteEndingProps) {
               className="bg-white/60"
             />
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
 
-      <div className="taste-pop" style={beat(2)}>
+      <div className="taste-pop self-center" style={beat(2)}>
         <Button variant="ghost" onClick={onAgain}>
           provar de novo
         </Button>

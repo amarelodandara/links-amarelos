@@ -16,10 +16,10 @@ export const FIELD_DEFAULTS = {
   linkMass: 0.2, // well depth one link carries
   sagPerLink: 0.03, // the whole sheet leans toward the centre
   sagSigma: 0.65,
-  centerZ: 2, // where the sheet sags to, and where the singularity opens
-  // Link wells stack, but the sheet stretches only so far before the
-  // collapse: their summed depth eases toward this ceiling so settled links
-  // stay on screen however they pile up.
+  centerZ: 2, // where the sheet sags to
+  // Link wells stack, but the sheet stretches only so far: their summed
+  // depth eases toward this ceiling so settled links stay on screen however
+  // they pile up.
   maxLinkDepth: 1.2,
 
   // Links
@@ -47,17 +47,11 @@ export const FIELD_DEFAULTS = {
   rippleWavelength: 0.05,
   rippleLife: 0.2,
 
-  // Collapse: a well that deepens while it narrows. Kept shallow enough that
-  // the throat stays inside the view.
-  collapseSeconds: 2.6,
-  collapseEase: 2.2, // exponent: higher waits longer, then rushes
-  funnelDepth: 1.05,
-  funnelSigmaStart: 0.9,
-  funnelSigmaShrink: 0.76,
-  wellNarrowing: 0.5, // link dents tighten by this fraction as it collapses
-  swirl: 0.6, // how much links spiral rather than slide straight in
-  dissipateSeconds: 1.3,
-  dissipateDrop: 0.9,
+  // Ending: the camera moves in on the dents (scene.ts reads how far along
+  // it is from `framingAmount`), then the patch turns for good.
+  framingSeconds: 1.6,
+  orbitSeconds: 48, // one full turn
+  orbitHoldEase: 4, // how fast the turn stops for an open card, and resumes
 };
 export type FieldTuning = typeof FIELD_DEFAULTS;
 // ─────────────────────────────────────────────────────────────────────────────
@@ -69,40 +63,40 @@ type Common = {
   y: number;
   vx: number;
   vz: number;
-  opacity: number;
 };
 
 // A link is in the air, sliding on the sheet, or at rest. Only the first two
 // carry motion bookkeeping, so the phases are separate types rather than one
-// type with optional fields. `sinking` is the collapse: every link, whatever
-// it was doing, is pulled down the funnel.
+// type with optional fields.
 type Falling = Common & { kind: "falling"; vy: number; bounced: boolean };
 type Sliding = Common & { kind: "sliding"; calmFor: number; slidFor: number };
 type Resting = Common & { kind: "resting" };
-type Sinking = Common & { kind: "sinking" };
-export type Body = Falling | Sliding | Resting | Sinking;
+export type Body = Falling | Sliding | Resting;
 
 type Ripple = { x: number; z: number; amp: number; age: number };
 
+// After the last link, the view frames the dents and starts turning around
+// them, and never stops. `spin` is the turn so far, in radians; `speed` is
+// the current share (0 → 1) of full orbit speed, so the turn can ease in and
+// ease out around an open card.
 type Stage =
   | { kind: "tasting" }
-  | { kind: "collapsing"; t: number }
-  | { kind: "dissipating"; t: number }
-  | { kind: "gone" };
+  | { kind: "framing"; t: number; spin: number; speed: number }
+  | { kind: "orbiting"; spin: number; speed: number };
 
 export type Sim = {
   bodies: Body[];
   ripples: Ripple[];
   stage: Stage;
   reducedMotion: boolean;
+  /** While true the orbit eases to a stop, so an open card stays by its
+   *  link. TasteSection sets it. */
+  holdOrbit: boolean;
   time: number;
   tune: FieldTuning;
 };
 
-export type SimEvent =
-  | { kind: "settled"; id: string }
-  | { kind: "collapsed" }
-  | { kind: "dissipated" };
+export type SimEvent = { kind: "settled"; id: string } | { kind: "framed" };
 
 export function createSim(
   reducedMotion: boolean,
@@ -113,6 +107,7 @@ export function createSim(
     ripples: [],
     stage: { kind: "tasting" },
     reducedMotion,
+    holdOrbit: false,
     time: 0,
     tune,
   };
@@ -123,24 +118,10 @@ export function createSim(
 const gaussian = (d2: number, sigma: number) =>
   Math.exp(-d2 / (2 * sigma * sigma));
 
-/** 0 → 1 progress of the collapse, eased in so the funnel accelerates. */
-export function collapseAmount(sim: Sim): number {
-  switch (sim.stage.kind) {
-    case "tasting":
-      return 0;
-    case "collapsing":
-      return Math.pow(sim.stage.t, sim.tune.collapseEase);
-    case "dissipating":
-    case "gone":
-      return 1;
-  }
-}
-
 /** How far the sheet sinks at (x, z). `skip` leaves one body's own well out,
  *  so a sliding link feels the others' slopes and not its own dent. */
 export function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
   const tune = sim.tune;
-  const collapse = collapseAmount(sim);
   const count = sim.bodies.length;
 
   const dcx = x;
@@ -148,22 +129,13 @@ export function depthAt(sim: Sim, x: number, z: number, skip?: Body): number {
   const centerD2 = dcx * dcx + dcz * dcz;
   let wells = tune.sagPerLink * count * gaussian(centerD2, tune.sagSigma);
 
-  const sigma = tune.wellSigma * (1 - tune.wellNarrowing * collapse);
   for (const body of sim.bodies) {
     if (body === skip || body.kind === "falling") continue;
     const dx = x - body.x;
     const dz = z - body.z;
-    wells += tune.linkMass * gaussian(dx * dx + dz * dz, sigma);
+    wells += tune.linkMass * gaussian(dx * dx + dz * dz, tune.wellSigma);
   }
   let depth = tune.maxLinkDepth * Math.tanh(wells / tune.maxLinkDepth);
-
-  if (collapse > 0) {
-    // Deepens while it narrows, which reads as the funnel in the black-hole
-    // diagram.
-    const funnelSigma =
-      tune.funnelSigmaStart - tune.funnelSigmaShrink * collapse;
-    depth += tune.funnelDepth * collapse * gaussian(centerD2, funnelSigma);
-  }
 
   for (const ripple of sim.ripples) {
     const dx = x - ripple.x;
@@ -197,7 +169,7 @@ export function spawnBody(
   const tune = sim.tune;
   const x = (Math.random() - 0.5) * tune.spawnSpreadX;
   const z = tune.centerZ + (Math.random() - 0.5) * tune.spawnSpreadZ;
-  const common = { id, x, z, vx: 0, vz: 0, opacity: 1 };
+  const common = { id, x, z, vx: 0, vz: 0 };
 
   if (sim.reducedMotion) {
     sim.bodies.push({
@@ -214,10 +186,9 @@ export function spawnBody(
   sim.bodies.push({ ...common, kind: "falling", y, vy: 0, bounced: false });
 }
 
-export function startCollapse(sim: Sim): void {
+export function startFraming(sim: Sim): void {
   if (sim.stage.kind !== "tasting") return;
-  sim.stage = { kind: "collapsing", t: 0 };
-  sim.bodies = sim.bodies.map((body) => ({ ...body, kind: "sinking" }));
+  sim.stage = { kind: "framing", t: 0, spin: 0, speed: 0 };
 }
 
 /** Advances the simulation by `dt` seconds. */
@@ -232,20 +203,21 @@ export function step(sim: Sim, dt: number): SimEvent[] {
   });
 
   const stage = sim.stage;
-  if (stage.kind === "collapsing") {
-    const duration = sim.reducedMotion ? 0.8 : tune.collapseSeconds;
+  if (stage.kind === "framing") {
+    const duration = sim.reducedMotion ? 0.5 : tune.framingSeconds;
     stage.t = Math.min(1, stage.t + dt / duration);
+    // The turn gathers speed across the framing, so it never visibly starts.
+    stage.speed = sim.holdOrbit ? 0 : stage.t;
+    stage.spin += spinStep(sim, stage.speed, dt);
     if (stage.t >= 1) {
-      sim.stage = { kind: "dissipating", t: 0 };
-      events.push({ kind: "collapsed" });
+      sim.stage = { kind: "orbiting", spin: stage.spin, speed: stage.speed };
+      events.push({ kind: "framed" });
     }
-  } else if (stage.kind === "dissipating") {
-    const duration = sim.reducedMotion ? 0.4 : tune.dissipateSeconds;
-    stage.t = Math.min(1, stage.t + dt / duration);
-    if (stage.t >= 1) {
-      sim.stage = { kind: "gone" };
-      events.push({ kind: "dissipated" });
-    }
+  } else if (stage.kind === "orbiting") {
+    const target = sim.holdOrbit ? 0 : 1;
+    stage.speed +=
+      (target - stage.speed) * (1 - Math.exp(-tune.orbitHoldEase * dt));
+    stage.spin += spinStep(sim, stage.speed, dt);
   }
 
   sim.bodies = sim.bodies.map((body) => {
@@ -257,6 +229,13 @@ export function step(sim: Sim, dt: number): SimEvent[] {
   });
 
   return events;
+}
+
+/** Radians turned in `dt` at `speed` (0 → 1) of full orbit speed. Reduced
+ *  motion frames the dents and holds still. */
+function spinStep(sim: Sim, speed: number, dt: number): number {
+  if (sim.reducedMotion) return 0;
+  return ((Math.PI * 2) / sim.tune.orbitSeconds) * speed * dt;
 }
 
 function advanceBody(sim: Sim, body: Body, dt: number): Body {
@@ -333,35 +312,26 @@ function advanceBody(sim: Sim, body: Body, dt: number): Body {
 
     case "resting":
       return { ...body, y: -depthAt(sim, body.x, body.z) };
-
-    case "sinking": {
-      // Spiral into the singularity and fall down the funnel with it.
-      const dx = -body.x;
-      const dz = tune.centerZ - body.z;
-      const pull = 1.2 + 4 * collapseAmount(sim);
-      const x = body.x + dx * Math.min(1, pull * dt) + dz * tune.swirl * dt;
-      const z = body.z + dz * Math.min(1, pull * dt) - dx * tune.swirl * dt;
-      const y = -depthAt(sim, x, z);
-      const opacity =
-        sim.stage.kind === "collapsing" ? 1 - Math.pow(sim.stage.t, 3) : 0;
-      return { ...body, x, z, y, opacity };
-    }
   }
 }
 
 // ── For the renderer ─────────────────────────────────────────────────────────
 
-/** How far the sheet has faded (1 → 0) and dropped away while dissipating. */
-export type Dissolve = { fade: number; drop: number };
-
-export function dissolve(sim: Sim): Dissolve {
+/** 0 → 1 progress of the move into the final shot, eased in and out. */
+export function framingAmount(sim: Sim): number {
   switch (sim.stage.kind) {
     case "tasting":
-    case "collapsing":
-      return { fade: 1, drop: 0 };
-    case "dissipating":
-      return { fade: 1 - sim.stage.t, drop: sim.stage.t * sim.tune.dissipateDrop };
-    case "gone":
-      return { fade: 0, drop: sim.tune.dissipateDrop };
+      return 0;
+    case "framing": {
+      const t = sim.stage.t;
+      return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    }
+    case "orbiting":
+      return 1;
   }
+}
+
+/** How far the view has turned around the dents, in radians. */
+export function orbitAngle(sim: Sim): number {
+  return sim.stage.kind === "tasting" ? 0 : sim.stage.spin;
 }
