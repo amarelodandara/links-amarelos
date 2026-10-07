@@ -3,6 +3,7 @@ import { editions } from "./editions.generated";
 import { InstagramFeed } from "./compositions/InstagramFeed";
 import { SubstackCarrossel } from "./compositions/SubstackCarrossel";
 import { Square } from "./compositions/Square";
+import { CAIU_NA_REDE, CaiuNaRede } from "./compositions/CaiuNaRede";
 import { Stories } from "./compositions/Stories";
 import { EditionEditor } from "./editor/EditionEditor";
 import {
@@ -39,6 +40,27 @@ export const RemotionRoot: React.FC = () => {
         fps={FPS}
         width={EDITOR.width}
         height={EDITOR.height}
+      />
+
+      {/* Template novo em construção — ainda não ligado às edições. */}
+      <Composition
+        id="CaiuNaRede"
+        component={CaiuNaRede}
+        durationInFrames={CAIU_NA_REDE.durationInSeconds * FPS}
+        fps={FPS}
+        width={CAIU_NA_REDE.width}
+        height={CAIU_NA_REDE.height}
+        defaultProps={{
+          lema: "caiu na rede, é link!",
+          link: {
+            title: "onde dá pra conversar",
+            description:
+              "entenda quantas pessoas não votaram ou votaram em candidatos que podem ser nossos aliados",
+            action: "visitar",
+            image: "caiunarede/onde-da-pra-conversar.jpg",
+            imagePosition: "6% 50%",
+          },
+        }}
       />
 
       {editions.map((entry) => {
