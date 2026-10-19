@@ -7,11 +7,9 @@ import { BEATS as CAIU_NA_REDE_BEATS, CAIU_NA_REDE, CaiuNaRede } from "./composi
 import { Stories } from "./compositions/Stories";
 import { CASCADE_STORIES, CascadeStories, cascadeStoriesFrames } from "./compositions/portfolio/CascadeStories";
 import { videoDurationInFrames } from "./compositions/scenes/ChantScene";
-import { EditionEditor } from "./editor/EditionEditor";
 import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
-  EDITOR,
   SQUARE,
   FPS,
   STORIES,
@@ -38,20 +36,6 @@ const CAIU_NA_REDE_LINK = {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
-      {/*
-       * Ferramenta, não peça de saída: o form de criação/edição das edições.
-       * O render em lote percorre as edições por id, então esta composition
-       * nunca entra no pacote renderizado.
-       */}
-      <Composition
-        id="Editor"
-        component={EditionEditor}
-        durationInFrames={1}
-        fps={FPS}
-        width={EDITOR.width}
-        height={EDITOR.height}
-      />
-
       {/* Template novo em construção — ainda não ligado às edições. */}
       <Composition
         id="CaiuNaRede"

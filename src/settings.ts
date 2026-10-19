@@ -62,9 +62,6 @@ export type StillLayout = Extract<Layout, { ctaStillFrame: number }>;
 
 export const LAYOUTS = settings.layouts;
 
-/** Tela do form da composition `Editor` — ferramenta, não formato de saída. */
-export const EDITOR = settings.formats.editor;
-
 /** Duração de cada cena do vídeo, em frames. Soma = DURATION_IN_FRAMES. */
 export const SCENES = {
   opening: Math.round(settings.timing.openingSeconds * FPS),

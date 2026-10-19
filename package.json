@@ -2,16 +2,11 @@
   "name": "teaser-studio",
   "version": "0.1.0",
   "private": true,
-  "description": "Estúdio de teasers — Links Amarelos / Ondas Amarelas / Hyperlinks",
+  "description": "Est\u00fadio de teasers \u2014 Links Amarelos / Ondas Amarelas / Hyperlinks",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "sync": "node scripts/gen-tokens.mjs && node scripts/sync-editions.mjs",
-    "preapp": "npm run sync",
-    "app": "node scripts/app.mjs",
-    "prestudio": "npm run sync",
-    "studio": "node scripts/studio.mjs",
-    "watch": "node scripts/watch-editions.mjs",
     "prerender": "npm run sync",
     "render": "remotion render",
     "prerender:all": "npm run sync",
@@ -20,14 +15,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@base-ui/react": "^1.7.0",
     "@paper-design/shaders-react": "^0.0.80",
     "@remotion/cli": "^4.0.507",
     "@remotion/google-fonts": "^4.0.507",
-    "@remotion/player": "^4.0.507",
-    "@remotion/studio": "^4.0.507",
     "@remotion/zod-types": "^4.0.507",
-    "agentation": "^3.0.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "remotion": "^4.0.507",
@@ -41,8 +32,7 @@
     "@types/react-dom": "^19.2.0",
     "@types/three": "^0.186.0",
     "oxlint": "^1.78.0",
-    "typescript": "^5.9.2",
-    "vite": "^8.2.1"
+    "typescript": "^5.9.2"
   },
   "allowScripts": {
     "esbuild": true
