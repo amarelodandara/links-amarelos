@@ -70,7 +70,7 @@ export const PreviewColumn: React.FC<{
           ref={playerRef}
           component={piece.component}
           inputProps={piece.props(entry)}
-          durationInFrames={piece.durationInFrames}
+          durationInFrames={piece.durationInFrames(entry)}
           fps={piece.fps}
           compositionWidth={piece.width}
           compositionHeight={piece.height}
@@ -95,7 +95,7 @@ export const PreviewColumn: React.FC<{
             value={String(slide)}
             onChange={(next) => setSlide(Number(next))}
           >
-            {Array.from({ length: piece.durationInFrames }, (_, i) => (
+            {Array.from({ length: piece.durationInFrames(entry) }, (_, i) => (
               <Chip key={i} value={String(i)}>
                 {i + 1}
               </Chip>

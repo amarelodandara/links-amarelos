@@ -4,7 +4,8 @@ import { InstagramFeed } from "../src/compositions/InstagramFeed";
 import { SubstackCarrossel } from "../src/compositions/SubstackCarrossel";
 import { Square } from "../src/compositions/Square";
 import { Stories } from "../src/compositions/Stories";
-import { CAROUSEL, CAROUSEL_SLIDE_COUNT, DURATION_IN_FRAMES, FPS, SQUARE, STORIES } from "../src/settings";
+import { videoDurationInFrames } from "../src/compositions/scenes/ChantScene";
+import { CAROUSEL, CAROUSEL_SLIDE_COUNT, FPS, SQUARE, STORIES } from "../src/settings";
 
 /**
  * As 4 peças de saída, do ponto de vista do preview: qual componente, em que
@@ -40,7 +41,8 @@ export interface Piece {
   width: number;
   height: number;
   fps: number;
-  durationInFrames: number;
+  /** Por edição: o vídeo encurta quando a cena do meio é o chant. */
+  durationInFrames: (entry: EditionEntry) => number;
   component: ComponentType<PieceProps>;
   props: (entry: EditionEntry) => PieceProps;
   /** Peça estática: o player mostra frame a frame, sem play contínuo. */
@@ -61,7 +63,7 @@ export const PIECES: Piece[] = [
     width: STORIES.width,
     height: STORIES.height,
     fps: FPS,
-    durationInFrames: DURATION_IN_FRAMES,
+    durationInFrames: (entry) => videoDurationInFrames(entry.edition),
     component: Stories,
     props: (entry) => ({ entry, label: "Story do Instagram" }),
     posterFrame: 60,
@@ -73,7 +75,7 @@ export const PIECES: Piece[] = [
     width: SQUARE.width,
     height: SQUARE.height,
     fps: FPS,
-    durationInFrames: DURATION_IN_FRAMES,
+    durationInFrames: (entry) => videoDurationInFrames(entry.edition),
     component: Square,
     props: (entry) => ({ entry, label: "X / BlueSky" }),
     posterFrame: 60,
@@ -86,7 +88,7 @@ export const PIECES: Piece[] = [
     width: SQUARE.width,
     height: SQUARE.height,
     fps: 1,
-    durationInFrames: CAROUSEL_SLIDE_COUNT,
+    durationInFrames: () => CAROUSEL_SLIDE_COUNT,
     component: InstagramFeed,
     props: (entry) => ({ entry, label: "Feed do Instagram" }),
     isStills: true,
@@ -99,7 +101,7 @@ export const PIECES: Piece[] = [
     width: CAROUSEL.width,
     height: CAROUSEL.height,
     fps: 1,
-    durationInFrames: CAROUSEL_SLIDE_COUNT,
+    durationInFrames: () => CAROUSEL_SLIDE_COUNT,
     component: SubstackCarrossel,
     props: (entry) => ({ entry, label: "Carrossel do Substack" }),
     isStills: true,

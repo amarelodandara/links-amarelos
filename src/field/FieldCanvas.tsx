@@ -18,7 +18,10 @@ export const FieldCanvas: React.FC<{
   view?: ViewTuning;
   /** Quanto (0 → 1) da vista de lado já entrou neste frame. */
   side?: number;
-}> = ({ width, height, script, colors, view = VIEW_DEFAULTS, side = 0 }) => {
+  /** Pixels desenhados por px de layout: 2 pra um render com `--scale=2`
+   *  sair nítido, em vez de esticar o canvas. */
+  resolution?: number;
+}> = ({ width, height, script, colors, view = VIEW_DEFAULTS, side = 0, resolution = 1 }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -28,17 +31,30 @@ export const FieldCanvas: React.FC<{
   useLayoutEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const scene = createFieldScene(canvas, { width, height }, colors, view);
+    // A largura da linha é em px do canvas, então escala junto.
+    const scene = createFieldScene(
+      canvas,
+      { width: width * resolution, height: height * resolution },
+      colors,
+      { ...view, lineWidth: view.lineWidth * resolution },
+    );
     sceneRef.current = scene;
     return () => {
       scene.dispose();
       sceneRef.current = null;
     };
-  }, [width, height, colors, view]);
+  }, [width, height, colors, view, resolution]);
 
   useLayoutEffect(() => {
     sceneRef.current?.render(simulateAt(script, frame / fps), side);
   });
 
-  return <canvas ref={canvasRef} width={width} height={height} style={{ width, height, display: "block" }} />;
+  return (
+    <canvas
+      ref={canvasRef}
+      width={width * resolution}
+      height={height * resolution}
+      style={{ width, height, display: "block" }}
+    />
+  );
 };

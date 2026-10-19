@@ -30,6 +30,20 @@ export const editions: EditionEntry[] = [
     }
   },
   {
+    "slug": "017-voces-sabem",
+    "dir": "links-ondas/017-voces-sabem",
+    "edition": {
+      "editionNumber": 17,
+      "type": "links-ondas",
+      "airDate": "2026-10-17",
+      "chant": [
+        "vocês sabem",
+        "a única coisa possível"
+      ],
+      "tabs": []
+    }
+  },
+  {
     "slug": "017-edicao-de-exemplo",
     "dir": "hyperlinks/017-edicao-de-exemplo",
     "edition": {

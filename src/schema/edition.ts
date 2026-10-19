@@ -35,7 +35,15 @@ export const editionSchema = z.object({
    * emergiu do design no Paper. Só o Hyperlinks usa; opcional.
    */
   theme: z.string().min(1).optional(),
-  tabs: z.array(tabSchema).length(4, "toda edição precisa de exatamente 4 tabs"),
+  /**
+   * Frases que substituem as 4 tabs: com elas, a cena do meio enche a tela
+   * alternando as frases, uma por linha, e `tabs` fica vazio.
+   */
+  chant: z.array(z.string().min(1)).min(1).optional(),
+  tabs: z.array(tabSchema),
+}).refine((edition) => (edition.chant ? edition.tabs.length === 0 : edition.tabs.length === 4), {
+  message: "toda edição precisa de exatamente 4 tabs (ou nenhuma, se tiver chant)",
+  path: ["tabs"],
 });
 
 export type Edition = z.infer<typeof editionSchema>;

@@ -3,18 +3,28 @@ import { editions } from "./editions.generated";
 import { InstagramFeed } from "./compositions/InstagramFeed";
 import { SubstackCarrossel } from "./compositions/SubstackCarrossel";
 import { Square } from "./compositions/Square";
-import { CAIU_NA_REDE, CaiuNaRede } from "./compositions/CaiuNaRede";
+import { BEATS as CAIU_NA_REDE_BEATS, CAIU_NA_REDE, CaiuNaRede } from "./compositions/CaiuNaRede";
 import { Stories } from "./compositions/Stories";
+import { CASCADE_STORIES, CascadeStories, cascadeStoriesFrames } from "./compositions/portfolio/CascadeStories";
+import { videoDurationInFrames } from "./compositions/scenes/ChantScene";
 import { EditionEditor } from "./editor/EditionEditor";
 import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
-  DURATION_IN_FRAMES,
   EDITOR,
   SQUARE,
   FPS,
   STORIES,
 } from "./settings";
+
+const CAIU_NA_REDE_LINK = {
+  title: "onde dá pra conversar",
+  description:
+    "entenda quantas pessoas não votaram ou votaram em candidatos que podem ser nossos aliados",
+  action: "visitar",
+  image: "caiunarede/onde-da-pra-conversar.jpg",
+  imagePosition: "6% 50%",
+};
 
 /**
  * Uma pasta por edição no seletor lateral do Studio, com as três compositions
@@ -52,16 +62,38 @@ export const RemotionRoot: React.FC = () => {
         height={CAIU_NA_REDE.height}
         defaultProps={{
           lema: "caiu na rede, é link!",
-          link: {
-            title: "onde dá pra conversar",
-            description:
-              "entenda quantas pessoas não votaram ou votaram em candidatos que podem ser nossos aliados",
-            action: "visitar",
-            image: "caiunarede/onde-da-pra-conversar.jpg",
-            imagePosition: "6% 50%",
-          },
+          link: CAIU_NA_REDE_LINK,
         }}
       />
+
+      {/* Recortes do CaiuNaRede pro portfólio, só a animação, sem texto. */}
+      <Folder name="portfolio">
+        {/* Até o instante em que a janela do link abriria. Campo em 2×, pra
+            renderizar com --scale=2. */}
+        <Composition
+          id="CaiuNaRedeCampo"
+          component={CaiuNaRede}
+          durationInFrames={Math.round(CAIU_NA_REDE_BEATS.card * FPS)}
+          fps={FPS}
+          width={CAIU_NA_REDE.width}
+          height={CAIU_NA_REDE.height}
+          defaultProps={{
+            lema: "caiu na rede, é link!",
+            link: CAIU_NA_REDE_LINK,
+            fieldOnly: true,
+            fieldResolution: 2,
+          }}
+        />
+        <Composition
+          id="CascadeStories"
+          component={CascadeStories}
+          durationInFrames={cascadeStoriesFrames}
+          fps={FPS}
+          width={CASCADE_STORIES.width}
+          height={CASCADE_STORIES.height}
+          defaultProps={{ link: CAIU_NA_REDE_LINK }}
+        />
+      </Folder>
 
       {editions.map((entry) => {
         const id = `${entry.edition.type}-${String(entry.edition.editionNumber).padStart(3, "0")}`;
@@ -71,7 +103,7 @@ export const RemotionRoot: React.FC = () => {
             <Composition
               id={`InstagramStories-${id}`}
               component={Stories}
-              durationInFrames={DURATION_IN_FRAMES}
+              durationInFrames={videoDurationInFrames(entry.edition)}
               fps={FPS}
               width={STORIES.width}
               height={STORIES.height}
@@ -80,7 +112,7 @@ export const RemotionRoot: React.FC = () => {
             <Composition
               id={`XBlueSky-${id}`}
               component={Square}
-              durationInFrames={DURATION_IN_FRAMES}
+              durationInFrames={videoDurationInFrames(entry.edition)}
               fps={FPS}
               width={SQUARE.width}
               height={SQUARE.height}

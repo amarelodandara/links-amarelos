@@ -5,6 +5,7 @@ import { Background } from "../design/Background";
 import { themes } from "../design/theme";
 import type { StillLayout } from "../settings";
 import { SCENES } from "../settings";
+import { ChantScene } from "./scenes/ChantScene";
 import { CtaScene } from "./scenes/CtaScene";
 import { OpeningScene } from "./scenes/OpeningScene";
 import { TabsScene } from "./scenes/TabsScene";
@@ -65,7 +66,11 @@ export const StillDeck: React.FC<{ entry: EditionEntry; layout: StillLayout }> =
       ) : null}
       {slide >= 1 && slide <= 4 ? (
         <AtFrame slide={slide} frame={settledTab(slide - 1)}>
-          <TabsScene entry={entry} theme={theme} layout={layout} />
+          {entry.edition.chant ? (
+            <ChantScene lines={entry.edition.chant} theme={theme} layout={layout} />
+          ) : (
+            <TabsScene entry={entry} theme={theme} layout={layout} />
+          )}
         </AtFrame>
       ) : null}
       {slide === 5 ? (

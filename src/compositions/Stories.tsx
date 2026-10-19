@@ -3,6 +3,7 @@ import type { EditionEntry } from "../schema/edition";
 import { Background } from "../design/Background";
 import { themes } from "../design/theme";
 import { LAYOUTS, SCENES } from "../settings";
+import { ChantScene, middleSceneFrames } from "./scenes/ChantScene";
 import { CtaScene } from "./scenes/CtaScene";
 import { OpeningScene } from "./scenes/OpeningScene";
 import { TabsScene } from "./scenes/TabsScene";
@@ -17,6 +18,7 @@ import { TabsScene } from "./scenes/TabsScene";
  */
 export const Stories: React.FC<{ entry: EditionEntry }> = ({ entry }) => {
   const theme = themes[entry.edition.type];
+  const middle = middleSceneFrames(entry.edition);
   const layout = LAYOUTS.stories;
 
   return (
@@ -25,10 +27,14 @@ export const Stories: React.FC<{ entry: EditionEntry }> = ({ entry }) => {
       <Sequence durationInFrames={SCENES.opening}>
         <OpeningScene edition={entry.edition} theme={theme} layout={layout} />
       </Sequence>
-      <Sequence from={SCENES.opening} durationInFrames={SCENES.perTab * 4}>
-        <TabsScene entry={entry} theme={theme} layout={layout} />
+      <Sequence from={SCENES.opening} durationInFrames={middle}>
+        {entry.edition.chant ? (
+          <ChantScene lines={entry.edition.chant} theme={theme} layout={layout} />
+        ) : (
+          <TabsScene entry={entry} theme={theme} layout={layout} />
+        )}
       </Sequence>
-      <Sequence from={SCENES.opening + SCENES.perTab * 4} durationInFrames={SCENES.cta}>
+      <Sequence from={SCENES.opening + middle} durationInFrames={SCENES.cta}>
         <CtaScene edition={entry.edition} theme={theme} layout={layout} />
       </Sequence>
     </AbsoluteFill>

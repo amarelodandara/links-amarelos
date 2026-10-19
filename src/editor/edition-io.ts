@@ -67,6 +67,8 @@ export interface Draft {
   name: string;
   airDate: string;
   theme: string;
+  /** Sem campo no form: só atravessa, pra regravar não apagar. */
+  chant: string[];
   tabs: DraftTab[];
 }
 
@@ -77,6 +79,7 @@ export const draftFromEntry = (entry: EditionEntry): Draft => ({
   name: nameFromSlug(entry.slug),
   airDate: entry.edition.airDate,
   theme: entry.edition.theme ?? "",
+  chant: entry.edition.chant ?? [],
   tabs: entry.edition.tabs.map((tab) => ({
     author: tab.author,
     image: tab.image,
@@ -90,6 +93,7 @@ export const emptyDraft = (): Draft => ({
   name: "",
   airDate: "",
   theme: "",
+  chant: [],
   tabs: Array.from({ length: 4 }, () => ({ author: "", image: "", file: null })),
 });
 
@@ -176,6 +180,11 @@ export const saveEdition = async ({
   const theme = draft.theme.trim();
   if (draft.type === "hyperlinks" && theme) {
     edition.theme = theme;
+  }
+
+  const chant = draft.chant.map((line) => line.trim()).filter(Boolean);
+  if (chant.length) {
+    edition.chant = chant;
   }
 
   await writer.writeFile(

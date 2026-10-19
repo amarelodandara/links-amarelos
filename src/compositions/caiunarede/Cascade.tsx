@@ -19,10 +19,29 @@ export type CascadeStack = {
   scale: number;
   /** Passo entre janelas, em px do post. */
   step: number;
+  /** Frames entre a primeira e a segunda janela e entre as duas últimas; os
+   *  do meio vão de um ao outro. Começar espaçado e terminar em 1 dá a pilha
+   *  que dispara, como o sistema travando. Sem isso, ritmo fixo. */
+  gaps?: readonly [first: number, last: number];
 };
 
 // Uma janela nova a cada tantos frames.
 const FRAMES_PER_WINDOW = 3;
+
+/** Frame (dentro da sequência) em que a janela `i` da pilha abre. */
+export function windowOpensAt(stack: CascadeStack, i: number): number {
+  const [first, last] = stack.gaps ?? [FRAMES_PER_WINDOW, FRAMES_PER_WINDOW];
+  let at = stack.from;
+  for (let k = 0; k < i; k++) {
+    const t = stack.count > 2 ? k / (stack.count - 2) : 0;
+    at += Math.max(1, Math.round(first + (last - first) * t));
+  }
+  return at;
+}
+
+/** Frame em que a última janela de todas já abriu. */
+export const cascadeEnd = (stacks: readonly CascadeStack[]) =>
+  Math.max(...stacks.map((stack) => windowOpensAt(stack, stack.count - 1) + 1));
 
 export const Cascade: React.FC<{
   stacks: readonly CascadeStack[];
@@ -34,8 +53,10 @@ export const Cascade: React.FC<{
   return (
     <>
       {stacks.map((stack, s) => {
-        const open = Math.min(stack.count, Math.floor((frame - stack.from) / FRAMES_PER_WINDOW) + 1);
-        return Array.from({ length: Math.max(0, open) }, (_, i) => (
+        const open = Array.from({ length: stack.count }, (_, i) => windowOpensAt(stack, i)).filter(
+          (at) => at <= frame,
+        ).length;
+        return Array.from({ length: open }, (_, i) => (
           <div
             key={`${s}-${i}`}
             style={{

@@ -63,9 +63,13 @@ export const collectEditions = () => {
       }
 
       const tabs = Array.isArray(edition.tabs) ? edition.tabs : [];
-      if (tabs.length !== REQUIRED_TABS) {
+      // Com `chant`, a frase toma o lugar das tabs e elas ficam de fora.
+      const requiredTabs = edition.chant?.length ? 0 : REQUIRED_TABS;
+      if (tabs.length !== requiredTabs) {
         errors.push(
-          `${dir}/edition.json: ${tabs.length} tab(s), mas toda edição precisa de exatamente ${REQUIRED_TABS}`,
+          edition.chant?.length
+            ? `${dir}/edition.json: tem "chant", então "tabs" deve ficar vazio`
+            : `${dir}/edition.json: ${tabs.length} tab(s), mas toda edição precisa de exatamente ${REQUIRED_TABS}`,
         );
       }
 

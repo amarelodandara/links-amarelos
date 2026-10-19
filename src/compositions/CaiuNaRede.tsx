@@ -41,10 +41,15 @@ export type CaiuNaRedeProps = {
     /** Que pedaço da og:image aparece na miniatura (`object-position`). */
     imagePosition?: string;
   };
+  /** Só o campo, pro portfólio: o lema nas duas faixas e nada do card em
+   *  diante (cursor, janela, cascata). Tempos e movimento iguais ao post. */
+  fieldOnly?: boolean;
+  /** Pixels do campo por px de layout (ver FieldCanvas). */
+  fieldResolution?: number;
 };
 
 /** A aba do card é a mesma em todo post. */
-const CARD_TAG = "recomendação especial";
+export const CARD_TAG = "recomendação especial";
 
 export const CAIU_NA_REDE = {
   width: 1080,
@@ -61,19 +66,19 @@ const BORDER = `3px solid ${c.sunDark}`;
 // Fora do componente: o FieldCanvas recria a cena WebGL se a identidade mudar.
 // O quadrado é amarelo cheio (#FFCC00), então o campo inverte o da landing:
 // fundo amarelo, grade e links brancos.
-const FIELD_COLORS = {
+export const FIELD_COLORS = {
   paper: c.sun,
   line: "#FFFFFF",
   ink: c.brandBlack,
 } satisfies FieldColors;
 
-const CARD_PALETTE = LINK_CARD_PALETTES.onSun;
+export const CARD_PALETTE = LINK_CARD_PALETTES.onSun;
 
 const DROP_SECONDS = 0.6;
 
 // Um corpo caindo no espaço-tempo: um link só, pesado, que cai rápido e
 // afunda a folha bem fundo. Afunda e fica — sem voltar, sem ondas.
-const FIELD_SCRIPT = {
+export const FIELD_SCRIPT = {
   seed: 9,
   drops: [DROP_SECONDS],
   framingDelaySeconds: 0,
@@ -110,7 +115,7 @@ const FIELD_LINK_ID = "link-0";
 // As batidas saem da física: o resto do post só começa quando link e folha
 // já pararam lá no fundo.
 const SUNK = fieldMoments(FIELD_SCRIPT).sunkAt;
-const BEATS = {
+export const BEATS = {
   /** Campo encolhe e, junto, a câmera desce um pouco pro lado, pra a
    *  profundidade aparecer. */
   shrink: SUNK + 0.2,
@@ -132,12 +137,16 @@ const BEATS = {
 
 const SHRINK_SCALE = 0.45;
 const SHRINK_LIFT = 140;
+// Sem o card embaixo, o campo encolhido vai pro centro do quadrado. O poço
+// fica baixo no canvas, então em vez de subir ele desce (px do post, medido
+// no último frame).
+const FIELD_ONLY_LIFT = -13;
 const CURSOR_WIDTH = 36;
 // De onde o cursor vem: fora da faixa de baixo, à direita. Sai pra direita.
 const CURSOR_FROM = { x: 960, y: 1420 };
 const CURSOR_TO = { x: 1140, y: 900 };
 
-const FIELD_VIEW = {
+export const FIELD_VIEW = {
   ...VIEW_DEFAULTS,
   lineWidth: 2.2,
   endDistance: 4.2,
@@ -157,7 +166,12 @@ const STACKS = [
   { x: 40, y: 1040, from: 64, count: 9, scale: 2.6, step: 26 },
 ] satisfies CascadeStack[];
 
-export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps }) => {
+export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({
+  lema,
+  link: linkProps,
+  fieldOnly = false,
+  fieldResolution = 1,
+}) => {
   const link: LinkCardContent = {
     title: linkProps.title,
     description: linkProps.description,
@@ -178,6 +192,7 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
   });
   const side = shrink;
   const fieldScale = 1 - (1 - SHRINK_SCALE) * shrink;
+  const lift = (fieldOnly ? FIELD_ONLY_LIFT : SHRINK_LIFT) * shrink;
 
   // Onde o link está no post: a posição no canvas passa pela mesma escala e
   // subida do campo (origem no centro do canvas).
@@ -190,7 +205,7 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
   );
   const linkAt = onCanvas && {
     x: SIDE_BORDER + FIELD_WIDTH / 2 + (onCanvas.x - FIELD_WIDTH / 2) * fieldScale,
-    y: BAND_HEIGHT + FIELD_HEIGHT / 2 + (onCanvas.y - FIELD_HEIGHT / 2) * fieldScale - SHRINK_LIFT * shrink,
+    y: BAND_HEIGHT + FIELD_HEIGHT / 2 + (onCanvas.y - FIELD_HEIGHT / 2) * fieldScale - lift,
   };
   const travel = interpolate(frame, [at(BEATS.cursor), at(BEATS.cursor + BEATS.cursorSeconds)], [0, 1], {
     extrapolateLeft: "clamp",
@@ -229,7 +244,7 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
         <div style={{ flexShrink: 0, height: FIELD_HEIGHT, overflow: "clip", backgroundColor: c.sun }}>
           <div
             style={{
-              transform: `translateY(${-SHRINK_LIFT * shrink}px) scale(${fieldScale})`,
+              transform: `translateY(${-lift}px) scale(${fieldScale})`,
               transformOrigin: "50% 50%",
             }}
           >
@@ -240,13 +255,14 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
               colors={FIELD_COLORS}
               view={FIELD_VIEW}
               side={side}
+              resolution={fieldResolution}
             />
           </div>
         </div>
         <div style={{ height: BAND_HEIGHT, display: "flex", flexDirection: "column" }}>
           <Marquee
-            text={link.title}
-            color={c.brandBlack}
+            text={fieldOnly ? lema : link.title}
+            color={fieldOnly ? c.sunDark : c.brandBlack}
             background={c.sunLighter}
             border={BORDER}
             direction="right"
@@ -255,14 +271,16 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
         </div>
       </AbsoluteFill>
 
-      <Sequence from={at(BEATS.cascade)} layout="none">
-        <Cascade stacks={STACKS} content={link} palette={CARD_PALETTE} />
-      </Sequence>
+      {fieldOnly || (
+        <Sequence from={at(BEATS.cascade)} layout="none">
+          <Cascade stacks={STACKS} content={link} palette={CARD_PALETTE} />
+        </Sequence>
+      )}
 
       {/* O card do link fica por cima de tudo: a recomendação é o que tem
           que ler, mesmo com as janelas se empilhando em volta. Abre como
           janela no Windows: de uma vez, inteira, sem crescer nem quicar. */}
-      {frame >= at(BEATS.card) && (
+      {!fieldOnly && frame >= at(BEATS.card) && (
         <div
           style={{
             position: "absolute",
@@ -277,7 +295,7 @@ export const CaiuNaRede: React.FC<CaiuNaRedeProps> = ({ lema, link: linkProps })
       )}
 
       {/* O cursor que clica no link e abre a janela, por cima de tudo. */}
-      {linkAt && frame >= at(BEATS.cursor) && leave < 1 && (
+      {!fieldOnly && linkAt && frame >= at(BEATS.cursor) && leave < 1 && (
         <div
           style={{
             position: "absolute",
