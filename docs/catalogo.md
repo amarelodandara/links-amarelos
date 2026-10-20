@@ -33,7 +33,7 @@ do destaque é a transcrição literal da fala, revisada, nunca resumida.
 | anúncio ("no ar agora!") | D0 | capa | still 4:5 + still 9:16 · texto com link | IG · Threads · X · Bluesky · Notes (restack) | crayola (`AnuncioFeed`, `AnuncioStories`); skill a fazer |
 | episódio completo | D0 | episódio inteiro | vídeo 16:9, capítulos = blocos | YouTube | novo |
 | página do episódio | D0, depois do post | edição inteira (feed RSS) | página web | linksamarelos.com | novo |
-| destaque | D+ terças | trecho | vídeo 9:16 com legenda | Reels · TikTok · Shorts | novo |
+| destaque | D+ terças | trecho | vídeo 9:16 com legenda | Reels · TikTok · Shorts | crayola (`Destaque`); skill `destaque` |
 | resumo | D+ semana 1 | bloco | carrossel IG · 3 posts de texto | IG · Threads | novo |
 | curadoria | D+ semana 1 | link | fio de texto | Bluesky · X | novo |
 | citação | D+ sábados | citação | card 4:5 · texto | IG feed · Threads · X · Bluesky · Notes | novo |
@@ -65,6 +65,32 @@ Exemplo com o #10 (só documentação; o subtítulo segue a regra, com "minha"):
 - **Onde vai**: feed no IG, Threads e X; stories no IG. Bluesky e Notes não
   levam imagem (cartão do link e restack).
 - **Não tem**: versão em vídeo.
+
+## destaque
+
+Exemplo com o #10, trecho 0:00–1:20 (só documentação):
+
+| falando | fim |
+|---|---|
+| ![destaque #10, falando](exemplos/destaque-10-falando.png) | ![destaque #10, fim](exemplos/destaque-10-fim.png) |
+
+- **Design**: artboards `destaque — 1 falando`, `destaque — 2 fim` e
+  `destaque — 3 capa do grid` da página Pieces do Paper. Medidas em
+  `settings.json` → `formats.destaque`.
+- **Entra**: o mp3 do episódio, os tempos de cada trecho (passados pela
+  Dandara), a capa e os CTAs (ver `input.md`).
+- **Player**: o mp3 player no centro; o visor amarelo tem o letreiro
+  "ondas amarelas #N.mp3 ✦" correndo sem parar, em Geist Pixel.
+- **Ondas**: forma contínua espelhada, em três azuis (code-light, code,
+  code-dark) com mistura overlay. A altura segue o volume da voz (janela de
+  0,25 s, escalada pelo próprio trecho); o espectro só dá textura.
+- **Legenda**: o que foi falado, palavra por palavra, revisado pela Dandara.
+  Páginas de até 6 palavras, quebrando no fim de frase; a palavra falada fica
+  marcada em sun.
+- **Fim**: 3 s depois do trecho. Em 0,6 s o player encolhe, as ondas
+  silenciam e descem a capa inclinada e os ícones dos CTAs.
+- **Duração**: a do trecho que a Dandara escolher (o #10 teve 80 s e 90 s).
+- **Zonas do Reels**: topo (200px), rodapé (420px) e a lateral direita livres.
 
 ## Que peça pra que conteúdo
 

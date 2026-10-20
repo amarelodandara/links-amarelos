@@ -6,6 +6,7 @@ import { Square } from "./compositions/Square";
 import { BEATS as CAIU_NA_REDE_BEATS, CAIU_NA_REDE, CaiuNaRede } from "./compositions/CaiuNaRede";
 import { Stories } from "./compositions/Stories";
 import { Anuncio, anuncioSchema } from "./compositions/Anuncio";
+import { Destaque, calculateDestaqueMetadata, destaqueSchema } from "./compositions/Destaque";
 import { CASCADE_STORIES, CascadeStories, cascadeStoriesFrames } from "./compositions/portfolio/CascadeStories";
 import { videoDurationInFrames } from "./compositions/scenes/ChantScene";
 import {
@@ -61,6 +62,30 @@ export const RemotionRoot: React.FC = () => {
           />
         ))}
       </Folder>
+
+      {/*
+       * Destaque (Reels). Como o anúncio, lê de fora de /content: o render
+       * aponta --public-dir pra outputs/links+ondas-N e passa --props (ver
+       * scripts/render-destaque.mjs). A duração vem do trecho.
+       */}
+      <Composition
+        id="Destaque"
+        component={Destaque}
+        schema={destaqueSchema}
+        calculateMetadata={calculateDestaqueMetadata}
+        durationInFrames={1}
+        fps={FPS}
+        width={settings.formats.destaque.width}
+        height={settings.formats.destaque.height}
+        defaultProps={{
+          numero: 10,
+          audio: "destaque-0000.mp3",
+          cover: "capa-episodio.png",
+          durationMs: 80000,
+          words: [{ text: "…", startMs: 0, endMs: 1000 }],
+          ctas: ["substack", "spotify"],
+        }}
+      />
 
       {/* Template novo em construção — ainda não ligado às edições. */}
       <Composition

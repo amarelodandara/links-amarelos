@@ -103,6 +103,28 @@
       "textWidthPx": 708,
       "ctaSquareWidthPx": 272,
       "ctaGapPx": 22
+    },
+    "destaque": {
+      "$comment": "Destaque (Reels, 9:16): trecho do episódio com legenda. Medidas dos artboards 'destaque — 1 falando' (falando) e 'destaque — 2 fim' (fim) da página Pieces do Paper. O fim dura endSeconds depois do trecho; transitionSeconds é a passagem de um layout pro outro.",
+      "width": 1080,
+      "height": 1920,
+      "endSeconds": 3,
+      "transitionSeconds": 0.6,
+      "falando": {
+        "player": { "left": 326, "top": 230, "width": 427, "height": 1048 },
+        "visor": { "left": 485, "top": 544, "width": 88, "height": 312, "fontSize": 37, "lineHeight": 46, "textLeft": 21 },
+        "wavesCenterY": 754
+      },
+      "fim": {
+        "player": { "left": 405, "top": 763, "width": 269, "height": 658 },
+        "visor": { "left": 506, "top": 960, "width": 55, "height": 196, "fontSize": 23, "lineHeight": 28, "textLeft": 13 },
+        "wavesCenterY": 1092,
+        "cover": { "left": 382, "top": 263, "size": 300, "rotateDeg": -3 },
+        "ctas": { "top": 609, "gapPx": 40 }
+      },
+      "waves": { "height": 484, "pointStepPx": 24, "layers": [1, 0.7, 0.38], "fullScalePercentile": 0.9, "rmsWindowSeconds": 0.25 },
+      "marqueePxPerSecond": 80,
+      "caption": { "left": 100, "top": 1310, "width": 840, "fontSize": 58, "lineHeight": 72, "maxWordsPerPage": 6 }
     }
   },
   "timing": {

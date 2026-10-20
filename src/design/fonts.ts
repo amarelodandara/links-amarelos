@@ -2,6 +2,7 @@ import { loadFont as loadManrope } from "@remotion/google-fonts/Manrope";
 import { loadFont as loadSpaceMono } from "@remotion/google-fonts/SpaceMono";
 import { loadFont as loadGeist } from "@remotion/google-fonts/Geist";
 import { loadFont as loadGeistMono } from "@remotion/google-fonts/GeistMono";
+import { loadFont as loadGeistPixel } from "@remotion/google-fonts/GeistPixel";
 
 /** Pesos usados nos designs do Paper: Manrope 500/600/700/800, Space Mono 700 (+ itálico). */
 const manrope = loadManrope("normal", { weights: ["500", "600", "700", "800"] });
@@ -17,3 +18,8 @@ const geistMono = loadGeistMono("normal", { weights: ["400"] });
 
 export const GEIST = geist.fontFamily;
 export const GEIST_MONO = geistMono.fontFamily;
+
+/** Geist Pixel: o letreiro do visor do mp3 player, no destaque. */
+const geistPixel = loadGeistPixel("normal", { weights: ["400"] });
+
+export const GEIST_PIXEL = geistPixel.fontFamily;

@@ -2,7 +2,7 @@
   "name": "teaser-studio",
   "version": "0.1.0",
   "private": true,
-  "description": "Est\u00fadio de teasers \u2014 Links Amarelos / Ondas Amarelas / Hyperlinks",
+  "description": "Estúdio de teasers — Links Amarelos / Ondas Amarelas / Hyperlinks",
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
@@ -16,8 +16,11 @@
   },
   "dependencies": {
     "@paper-design/shaders-react": "^0.0.80",
+    "@remotion/captions": "4.0.507",
     "@remotion/cli": "^4.0.507",
     "@remotion/google-fonts": "^4.0.507",
+    "@remotion/install-whisper-cpp": "4.0.507",
+    "@remotion/media-utils": "4.0.507",
     "@remotion/zod-types": "^4.0.507",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

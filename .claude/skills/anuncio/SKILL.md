@@ -22,7 +22,11 @@ post. Se algo estiver errado, pare e peça pra Dandara corrigir no rascunho.
 ### 1. Lançamento e pasta
 
 Descubra `N` (pelo pedido ou perguntando). A pasta é `input/links+ondas-N/`.
-Ela precisa ter:
+
+Primeiro normalize os nomes dos arquivos, seguindo "Normalização dos nomes"
+em `docs/input.md`: a Dandara joga os arquivos como vierem e não renomeia.
+
+Depois a pasta precisa ter:
 
 | Arquivo | Checagem |
 |---|---|
@@ -53,8 +57,9 @@ existe e confirme.
 
 ### 4. Render
 
-Grave um arquivo de props por layout em `outputs/links+ondas-N/`
-(`anuncio-feed.json` e `anuncio-stories.json`), mudando só o `layout`:
+Grave um arquivo de props por layout em `outputs/links+ondas-N/_trabalho/`
+(`anuncio-feed.json` e `anuncio-stories.json`), mudando só o `layout`. A raiz
+de `outputs/links+ondas-N/` fica só com o que vai pro ar:
 
 ```json
 {
@@ -69,9 +74,9 @@ E renderize. A capa vem de `input/`, por isso o `--public-dir`:
 
 ```bash
 npx remotion still AnuncioFeed "outputs/links+ondas-N/anuncio-feed.png" \
-  --public-dir=input --props="outputs/links+ondas-N/anuncio-feed.json"
+  --public-dir=input --props="outputs/links+ondas-N/_trabalho/anuncio-feed.json"
 npx remotion still AnuncioStories "outputs/links+ondas-N/anuncio-stories.png" \
-  --public-dir=input --props="outputs/links+ondas-N/anuncio-stories.json"
+  --public-dir=input --props="outputs/links+ondas-N/_trabalho/anuncio-stories.json"
 ```
 
 Abra os dois PNGs (Read) e confira: capa inteira, subtítulo sem cortar, só
