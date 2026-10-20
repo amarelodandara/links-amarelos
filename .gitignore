@@ -7,3 +7,7 @@ node_modules/
 
 # Remotion
 .remotion/
+
+# Material de cada lançamento (rascunho, capa) — a Dandara coloca, fica fora do git (ver docs/input.md)
+/input/*
+!/input/.gitkeep

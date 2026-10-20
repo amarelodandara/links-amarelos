@@ -30,6 +30,7 @@ verdade de cores, tipografia e logos.
 ## Outros docs
 
 - `edicao.md`: anatomia de um lançamento
+- `input.md`: a pasta `input/`, com o que cada skill precisa por lançamento
 - `ciclo.md`: ciclo de vida, calendário e plataformas, com diagramas
 - `divulgacao.md`: objetivo, regras e contas da divulgação
 - `catalogo.md`: catálogo de peças

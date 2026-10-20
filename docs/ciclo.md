@@ -17,7 +17,7 @@ flowchart LR
     AUD["Audacity<br/>gravação + edição"]
     FIG["Figma<br/>capas (template fixo)"]
     CRA["crayola<br/>Remotion"]
-    PAP["Paper<br/>anúncio (template fixo)"]
+    PAP["crayola<br/>anúncio (template fixo)"]
   end
 
   subgraph CONTEUDO["conteúdo"]
@@ -34,7 +34,7 @@ flowchart LR
     TF["teaser feed<br/>6 stills 1:1"]
     TX["teaser X/Bluesky<br/>vídeo 1:1"]
     TC["carrossel Substack<br/>6 stills 14:10 ?"]
-    AN["anúncio 'no ar agora!'<br/>4:5"]
+    AN["anúncio 'no ar agora!'<br/>4:5 + 9:16"]
     CR["caiu na rede<br/>post de um link ?"]
   end
 
@@ -94,7 +94,7 @@ fixa o fechamento na segunda e a ordem dos passos.
 | teaser feed | peça | crayola | 6 stills 1080×1080 | Instagram feed | D-2 | ativo |
 | teaser X/Bluesky | peça | crayola | vídeo 1080×1080 | X, Bluesky (@nydndr) | D-2 | gerado, ainda não postado |
 | carrossel Substack | peça | crayola | 6 stills 1456×1040 | Substack ? | ? | gerado, uso não confirmado |
-| anúncio "no ar agora!" | peça | Paper, capa colada no layout | 1600×2000 (4:5) | Instagram | D0 | ativo |
+| anúncio "no ar agora!" | peça | crayola | stills 1080×1350 (4:5) e 1080×1920 (9:16) | Instagram, Threads, X | D0 | ativo |
 | caiu na rede, é link! | peça | crayola | vídeo 1080×1350 | Instagram ? | ? | protótipo, um link da #10 |
 | página do episódio no site | conteúdo | site, a partir do feed RSS do Substack | página com os links | linksamarelos.com | depois de D0 | decidido, não existe ainda |
 | peças de D+ | peça | crayola (a construir) | ver `catalogo.md` | ver `catalogo.md` | D+ | aprovadas, não existem |

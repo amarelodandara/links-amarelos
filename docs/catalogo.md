@@ -30,7 +30,7 @@ do destaque é a transcrição literal da fala, revisada, nunca resumida.
 | Peça | Momento | Átomo | Formato | Plataformas | Estado |
 |---|---|---|---|---|---|
 | teaser | D-2 | conteúdos escolhidos | vídeo 9:16 · stills 1:1 · vídeo 1:1 | IG stories e feed · X · Bluesky | existe (crayola), estrutura vai mudar |
-| anúncio ("no ar agora!") | D0 | capa | 4:5 + stories · texto com link | IG · Threads · X · Bluesky · Notes (restack) | existe (Paper), vai pro crayola |
+| anúncio ("no ar agora!") | D0 | capa | still 4:5 + still 9:16 · texto com link | IG · Threads · X · Bluesky · Notes (restack) | crayola (`AnuncioFeed`, `AnuncioStories`); skill a fazer |
 | episódio completo | D0 | episódio inteiro | vídeo 16:9, capítulos = blocos | YouTube | novo |
 | página do episódio | D0, depois do post | edição inteira (feed RSS) | página web | linksamarelos.com | novo |
 | destaque | D+ terças | trecho | vídeo 9:16 com legenda | Reels · TikTok · Shorts | novo |
@@ -39,6 +39,32 @@ do destaque é a transcrição literal da fala, revisada, nunca resumida.
 | citação | D+ sábados | citação | card 4:5 · texto | IG feed · Threads · X · Bluesky · Notes | novo |
 | link do mês | D+ quintas | link | vídeo 4:5 | IG · Threads · X · Bluesky | protótipo |
 | fechamento | D+ semana 3 | e digo mais | card ou texto | IG stories · Notes · Bluesky | novo |
+
+## anúncio
+
+Exemplo com o #10 (só documentação; o subtítulo segue a regra, com "minha"):
+
+| feed 4:5 (1080×1350) | stories 9:16 (1080×1920) |
+|---|---|
+| ![anúncio #10, feed](exemplos/anuncio-10-feed.png) | ![anúncio #10, stories](exemplos/anuncio-10-stories.png) |
+
+- **Design**: artboards `anuncio — feed 4:5` e `anuncio — stories 9:16`, página
+  Pieces do Paper. Medidas em `settings.json` → `formats.anuncio`.
+- **Entra**: capa do episódio, subtítulo da edição e os CTAs (ver `input.md`).
+- **Fixo**: "no ar agora!", linhas e cores.
+- **CTAs**: só ícones, sem verbo, em linha no quadrado da direita, sempre na
+  ordem Substack, Spotify, YouTube. Entram só as plataformas onde o lançamento
+  sai. Só Spotify entre os agregadores de podcast: no Brasil a audiência está
+  lá.
+- **Cores dos ícones**: as do site (Substack `#FF681A`, Spotify `#1ED760`); o
+  YouTube, que o site ainda não tem, usa `#FF0000`.
+- **Margem**: 60px nas laterais, por causa do recorte 3:4 do grid do
+  Instagram.
+- **Stories**: 0–200px e abaixo de ~1650px livres pra interface do Instagram.
+  O sticker de link é posto no app, logo abaixo da faixa.
+- **Onde vai**: feed no IG, Threads e X; stories no IG. Bluesky e Notes não
+  levam imagem (cartão do link e restack).
+- **Não tem**: versão em vídeo.
 
 ## Que peça pra que conteúdo
 

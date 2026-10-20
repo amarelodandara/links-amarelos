@@ -1,10 +1,11 @@
-import { Composition, Folder } from "remotion";
+import { Composition, Folder, Still } from "remotion";
 import { editions } from "./editions.generated";
 import { InstagramFeed } from "./compositions/InstagramFeed";
 import { SubstackCarrossel } from "./compositions/SubstackCarrossel";
 import { Square } from "./compositions/Square";
 import { BEATS as CAIU_NA_REDE_BEATS, CAIU_NA_REDE, CaiuNaRede } from "./compositions/CaiuNaRede";
 import { Stories } from "./compositions/Stories";
+import { Anuncio, anuncioSchema } from "./compositions/Anuncio";
 import { CASCADE_STORIES, CascadeStories, cascadeStoriesFrames } from "./compositions/portfolio/CascadeStories";
 import { videoDurationInFrames } from "./compositions/scenes/ChantScene";
 import {
@@ -13,6 +14,7 @@ import {
   SQUARE,
   FPS,
   STORIES,
+  settings,
 } from "./settings";
 
 const CAIU_NA_REDE_LINK = {
@@ -36,6 +38,30 @@ const CAIU_NA_REDE_LINK = {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/*
+       * Anúncio "no ar agora!" (D0). As imagens vêm de /input, não de /content:
+       * renderize com --public-dir=input e --props (ver a skill anuncio). Os
+       * defaultProps são o exemplo do #10 que está no catálogo.
+       */}
+      <Folder name="anuncio">
+        {(["feed", "stories"] as const).map((layout) => (
+          <Still
+            key={layout}
+            id={layout === "feed" ? "AnuncioFeed" : "AnuncioStories"}
+            component={Anuncio}
+            schema={anuncioSchema}
+            width={settings.formats.anuncio[layout].width}
+            height={settings.formats.anuncio[layout].height}
+            defaultProps={{
+              layout,
+              subtitle: "minha seleção de outubro: você sabe.",
+              cover: "links+ondas-10/capa-episodio.png",
+              ctas: ["substack", "spotify"],
+            }}
+          />
+        ))}
+      </Folder>
+
       {/* Template novo em construção — ainda não ligado às edições. */}
       <Composition
         id="CaiuNaRede"

@@ -34,8 +34,14 @@ do vault; viram hyperlinks inline no Substack, na pós-produção.
 ### O rascunho é a fonte antes do lançamento
 
 O teaser sai na quinta (D-2), quando o post do Substack **ainda não existe**.
-Qualquer peça feita antes de D0 lê o arquivo do Obsidian. Depois de D0 a
-fonte passa a ser o feed do Substack (ver `ciclo.md`).
+Por isso as skills leem uma cópia do rascunho que a Dandara coloca em
+`input/links+ondas-N/`, junto com os outros arquivos do lançamento (ver
+`input.md`). As skills não leem o vault do Obsidian direto.
+
+O subtítulo fica na primeira linha do rascunho, depois do frontmatter (#8,
+#9). No #10 ele só foi escrito no Substack; daqui pra frente ele precisa estar
+no rascunho. O rascunho e o post publicado podem divergir (#9: rascunho
+"agosto", publicado "setembro"), por isso as skills pedem confirmação do mês.
 
 Como achar a URL de cada wikilink:
 

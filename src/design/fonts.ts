@@ -3,8 +3,8 @@ import { loadFont as loadSpaceMono } from "@remotion/google-fonts/SpaceMono";
 import { loadFont as loadGeist } from "@remotion/google-fonts/Geist";
 import { loadFont as loadGeistMono } from "@remotion/google-fonts/GeistMono";
 
-/** Pesos usados nos designs do Paper: Manrope 500/600/700, Space Mono 700 (+ itálico). */
-const manrope = loadManrope("normal", { weights: ["500", "600", "700"] });
+/** Pesos usados nos designs do Paper: Manrope 500/600/700/800, Space Mono 700 (+ itálico). */
+const manrope = loadManrope("normal", { weights: ["500", "600", "700", "800"] });
 const spaceMonoRegular = loadSpaceMono("normal", { weights: ["700"] });
 loadSpaceMono("italic", { weights: ["700"] });
 
