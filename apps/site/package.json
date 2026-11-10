@@ -20,6 +20,7 @@
     "three": "^0.186.1"
   },
   "devDependencies": {
+    "@links/config": "*",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^24.5.0",
     "@types/react": "^19.2.18",
