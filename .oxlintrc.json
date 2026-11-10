@@ -12,14 +12,17 @@
     ".pi/**",
     ".roo/**",
     ".windsurf/**",
-    ".next/**",
-    ".next-verify/**",
-    "out/**",
-    "build/**",
-    "tools/oxlint/anti-slop/**"
+    "tools/oxlint/anti-slop/**",
+    "**/.next/**",
+    "**/.next-verify/**",
+    "**/out/**",
+    "**/build/**"
   ],
   "jsPlugins": [
-    { "name": "anti-slop", "specifier": "./tools/oxlint/anti-slop/index.ts" }
+    {
+      "name": "anti-slop",
+      "specifier": "./tools/oxlint/anti-slop/index.ts"
+    }
   ],
   "rules": {
     "anti-slop/no-chained-type-assertions": "error",
