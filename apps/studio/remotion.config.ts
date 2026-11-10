@@ -12,5 +12,6 @@ Config.setInteractivityEnabled(false);
 Config.setCodec("h264");
 Config.setOverwriteOutput(true);
 
-// Imagens das tabs vêm de /content — servidas como arquivos estáticos.
-Config.setPublicDir("./content");
+// Imagens das tabs e outras mídias vêm de @links/content — servidas como
+// arquivos estáticos. Relativo a apps/studio, de onde o remotion roda.
+Config.setPublicDir("../../packages/content/assets");

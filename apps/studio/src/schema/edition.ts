@@ -1,71 +1,41 @@
-import { z } from "zod";
-
 /**
- * Schema do `edition.json` (seção 3 do plano).
- *
- * Regras que o schema garante sozinho:
- * - exatamente 4 tabs (ela escolhe manualmente as 4 mais interessantes);
- * - cada tab só carrega o nome do autor — nada de título de conteúdo;
- * - `type` é o que decide tema e CTA final, não existe campo "tema".
- *
- * O que o schema NÃO garante (validado em runtime, ver `scripts/sync-editions.mjs`):
- * - que os arquivos de imagem apontados por cada tab existam de fato em /assets.
+ * The studio's view of an edition: what the scenes read. Built from the
+ * shared @links/content editions in `src/editions.ts`; the rules that used to
+ * live in a zod schema (exactly 4 tabs or a chant, an air date) are now types
+ * there, checked at compile time.
  */
 
-export const editionTypeSchema = z.enum(["links-ondas", "hyperlinks"]);
+/** Picks the whole visual theme and the final CTA. Studio name for a series:
+ *  links-amarelos ships as "links + ondas". */
+export type EditionType = "links-ondas" | "hyperlinks";
 
-export type EditionType = z.infer<typeof editionTypeSchema>;
+export type Tab = {
+  author: string;
+  /** Path relative to the public dir (packages/content/assets). */
+  image: string;
+};
 
-export const tabSchema = z.object({
-  author: z.string().min(1, "author não pode ser vazio"),
-  image: z
-    .string()
-    .min(1)
-    .regex(/^assets\//, 'image deve ser um caminho relativo começando com "assets/"'),
-});
+export type Edition = {
+  editionNumber: number;
+  type: EditionType;
+  /** YYYY-MM-DD. */
+  airDate: string;
+  /** Opening "{tema aqui}". Only hyperlinks uses it. */
+  theme?: string;
+  /** Phrases that replace the 4 tabs; with them, `tabs` is empty. */
+  chant?: string[];
+  tabs: Tab[];
+};
 
-export const editionSchema = z.object({
-  editionNumber: z.number().int().positive(),
-  type: editionTypeSchema,
-  airDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, "airDate deve estar no formato YYYY-MM-DD"),
-  /**
-   * Tema da edição, exibido na abertura como "{tema aqui}" — parâmetro que
-   * emergiu do design no Paper. Só o Hyperlinks usa; opcional.
-   */
-  theme: z.string().min(1).optional(),
-  /**
-   * Frases que substituem as 4 tabs: com elas, a cena do meio enche a tela
-   * alternando as frases, uma por linha, e `tabs` fica vazio.
-   */
-  chant: z.array(z.string().min(1)).min(1).optional(),
-  tabs: z.array(tabSchema),
-}).refine((edition) => (edition.chant ? edition.tabs.length === 0 : edition.tabs.length === 4), {
-  message: "toda edição precisa de exatamente 4 tabs (ou nenhuma, se tiver chant)",
-  path: ["tabs"],
-});
+/** An edition plus where its outputs go. */
+export type EditionEntry = {
+  /** Folder slug, e.g. "009-abracadabra". */
+  slug: string;
+  /** Output path under outputs/, e.g. "links-ondas/009-abracadabra". */
+  dir: string;
+  edition: Edition;
+};
 
-export type Edition = z.infer<typeof editionSchema>;
-
-/** Edição + de onde ela foi lida, para montar caminhos de asset e de output. */
-export const editionEntrySchema = z.object({
-  /** Slug da pasta, ex: "042-nome-da-edicao". */
-  slug: z.string().min(1),
-  /** Caminho relativo a /content, ex: "links-ondas/042-nome-da-edicao". */
-  dir: z.string().min(1),
-  edition: editionSchema,
-});
-
-export type EditionEntry = z.infer<typeof editionEntrySchema>;
-
-/**
- * Destino do CTA final. Derivado do `type` — hyperlinks não tem post longo no
- * Substack, então aponta pro Spotify (seção 2).
- */
-export const ctaTargetForType = (type: EditionType): "substack" | "spotify" =>
-  type === "hyperlinks" ? "spotify" : "substack";
-
-/** Caminho de um asset da tab, relativo à publicDir (= /content). */
+/** A tab's image, as `staticFile` takes it. */
 export const tabAssetPath = (entry: EditionEntry, tabIndex: number): string =>
-  `${entry.dir}/${entry.edition.tabs[tabIndex].image}`;
+  entry.edition.tabs[tabIndex].image;

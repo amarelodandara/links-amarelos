@@ -23,7 +23,7 @@ import {
   toCaptions,
   transcribe,
 } from "@remotion/install-whisper-cpp";
-import { root } from "./lib/editions.mjs";
+import { root } from "./lib/root.mjs";
 
 const WHISPER_PATH = join(root, "whisper.cpp");
 const WHISPER_VERSION = "1.5.5";

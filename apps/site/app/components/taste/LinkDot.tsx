@@ -1,8 +1,8 @@
 "use client";
 
 import { Popover } from "@base-ui/react/popover";
-import type { Link } from "../../data/links";
-import { editionsOf } from "../../data/links";
+import type { Link } from "@links/content";
+import { editionsOf } from "@links/content";
 import LinkCard from "../LinkCard";
 
 type LinkDotProps = {

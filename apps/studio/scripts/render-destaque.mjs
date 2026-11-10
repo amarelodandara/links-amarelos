@@ -14,7 +14,7 @@
 import { spawnSync } from "node:child_process";
 import { copyFileSync, existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { root } from "./lib/editions.mjs";
+import { root } from "./lib/root.mjs";
 
 const args = process.argv.slice(2);
 const still = args.find((a) => a.startsWith("--frame="))?.split("=")[1];

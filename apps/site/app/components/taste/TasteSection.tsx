@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import type { Link } from "../../data/links";
-import { pickTaste } from "../../data/links";
+import type { Link } from "@links/content";
+import { pickTaste } from "@links/content";
 import HoldButton from "./HoldButton";
 import LinkDot from "./LinkDot";
 import TasteEnding from "./TasteEnding";

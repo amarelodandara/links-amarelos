@@ -1,5 +1,5 @@
 import { Composition, Folder, Still } from "remotion";
-import { editions } from "./editions.generated";
+import { editions } from "./editions";
 import { InstagramFeed } from "./compositions/InstagramFeed";
 import { SubstackCarrossel } from "./compositions/SubstackCarrossel";
 import { Square } from "./compositions/Square";

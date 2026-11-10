@@ -2,31 +2,21 @@
 /**
  * Renderiza o pacote completo de uma edição (seção 7 do plano).
  *
- *   npm run render:all -- links-ondas/042-edicao-de-exemplo
+ *   npm run render:all -- links-ondas/009-abracadabra
  *   npm run render:all               # todas as edições
  *
  * Saída em /outputs/<type>/<slug>/ — fora do controle de versão, sobe manual
- * pro Google Drive (seção 8). O `npm run sync` que roda antes já garante que
- * nenhuma edição com assets faltando chegue até aqui.
+ * pro Google Drive (seção 8). O `prerender:all` roda o check-assets de
+ * @links/content antes, então nenhuma edição com asset faltando chega aqui.
  */
 import { spawnSync } from "node:child_process";
 import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 import { renumberSequence } from "./lib/sequence.mjs";
-import { collectEditions, root } from "./lib/editions.mjs";
-
-// Lê /content direto pela mesma varredura do sync. A versão anterior fatiava o
-// array de dentro do editions.generated.ts, mas o primeiro "[" do arquivo é o da
-// anotação de tipo (`EditionEntry[]`), não o do array — o JSON.parse sempre
-// falhava.
-const { entries: editions, errors } = collectEditions();
-
-if (errors.length > 0) {
-  console.error("\nEdições inválidas — corrija antes de renderizar:\n");
-  for (const e of errors) console.error(`  • ${e}`);
-  console.error("");
-  process.exit(1);
-}
+import { root } from "./lib/root.mjs";
+// Node 24 roda TS direto: a mesma lista que o Root.tsx usa, vinda de
+// @links/content. O `prerender:all` já checou que nenhum asset falta.
+import { editions } from "../src/editions.ts";
 
 const filter = process.argv[2];
 const targets = filter ? editions.filter((e) => e.dir === filter) : editions;

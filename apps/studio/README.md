@@ -10,7 +10,6 @@ Contexto da marca e vocabulário: `CLAUDE.md` e `docs/`.
 ## Motor
 
 ```bash
-npm run sync          # valida /content e regenera o índice de edições
 npm run render <CompositionId> outputs/<arquivo>
 npm run render:all [<tipo>/<numero-slug>]   # pacote completo de uma edição
 npx remotion studio   # só pra depurar timing, frame a frame
@@ -20,14 +19,18 @@ npm run typecheck
 ## Estrutura
 
 ```
-/content/<tipo>/<numero-slug>/edition.json + /assets   # entrada, versionado
+packages/content/src/editions.ts                       # edições (no monorepo)
+packages/content/assets/<id da edição>/                # imagens das tabs
 /outputs                                               # saída, gitignored
 /brand                                                 # logos e texturas
 settings.json                                          # formatos, timing (cores: packages/brand)
 /src/compositions                                      # peças Remotion
-/scripts                                               # sync, render, fetch-og
+/scripts                                               # render, fetch-og, transcribe
 ```
 
-`edition.json`: `editionNumber`, `type` (`links-ondas` | `hyperlinks`),
-`airDate`, 4 `tabs` com `author` e `image`; `theme` opcional em `hyperlinks`.
-A validação recusa rodar se faltar tab, autor ou imagem no disco.
+Edições são TS tipado em `packages/content/src/editions.ts`. Uma edição com
+`promo` vira peças: `kind: "tabs"` com exatamente 4 `tabs` (`author`, `image`)
+ou `kind: "chant"` com as frases; `theme` opcional (hyperlinks); `airDate`
+obrigatório. O typecheck recusa tab faltando ou sobrando; o `check-assets`
+(roda antes de todo render) recusa imagem que não existe em
+`packages/content/assets/<id>/`.

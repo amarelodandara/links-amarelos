@@ -1,9 +1,9 @@
 // @ts-check
 /**
  * Baixa a og:image de um link — a imagem que aparece quando ele é
- * compartilhado — pra dentro de /content, de onde o Remotion serve arquivos.
+ * compartilhado — pra dentro de packages/content/assets, de onde o Remotion serve arquivos.
  *
- *   node scripts/fetch-og.mjs <url> <destino relativo a content/, sem extensão>
+ *   node scripts/fetch-og.mjs <url> <destino relativo a packages/content/assets/, sem extensão>
  *   node scripts/fetch-og.mjs https://exemplo.com/post caiunarede/onde-da-pra-conversar
  *
  * Imprime o caminho final (com a extensão que o servidor indicar), que é o
@@ -12,7 +12,7 @@
  */
 import { mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
-import { root } from "./lib/editions.mjs";
+import { assetsDir } from "./lib/root.mjs";
 
 const [url, target] = process.argv.slice(2);
 if (!url || !target) {
@@ -40,7 +40,7 @@ const type = image.headers.get("content-type") ?? "";
 const ext = { "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif" }[type.split(";")[0]] ?? ".jpg";
 
 const relative = `${target}${ext}`;
-const out = join(root, "content", relative);
+const out = join(assetsDir, relative);
 await mkdir(dirname(out), { recursive: true });
 await writeFile(out, Buffer.from(await image.arrayBuffer()));
 console.log(relative);

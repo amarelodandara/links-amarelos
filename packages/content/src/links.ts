@@ -1,65 +1,11 @@
-// Every link ever sent out, and the editions that sent them. This is the
-// stand-in for a future links database + API, so the shape mirrors two tables:
-// `EDITIONS` and `LINKS`, joined by edition id.
-//
-// ── Format (for whoever fills this in) ───────────────────────────────────────
-//
-// Edition — one piece of content, released in one or more media.
-//   id       "<series>-<number>", e.g. "links-amarelos-3". Unique.
-//   series   "links-amarelos" today. "hyperlinks" joins later.
-//   number   the edition number.
-//   title    the edition's subtitle, e.g. "maestros, saltos e seriedade".
-//   media    where it was released. links amarelos #N (Substack) and
-//            ondas amarelas #N (podcast) are the SAME edition in two media:
-//            { newsletter?: url, podcast?: url }.
-//
-// Link — one thing that was curated.
-//   id       kebab-case slug, unique, stable (used to remember visited links).
-//   url      the link itself.
-//   title    Dandara's own take on the link, lowercase, in Portuguese.
-//            NOT the source's headline.
-//   authors  who made the linked thing. May be empty.
-//   editions ids of the editions it appeared in. Every id must exist in
-//            EDITIONS.
-//
-// The compiler checks every entry against the types below; edition id
-// references are checked at module load in development.
-// ─────────────────────────────────────────────────────────────────────────────
+import { EDITIONS } from "./editions.ts";
+import type { Edition, Link } from "./types.ts";
 
-export type Series = "links-amarelos";
+// Every link ever sent out. The stand-in for a future links database + API:
+// LINKS joins EDITIONS by edition id, like two tables would. The compiler
+// checks every entry against `Link`; edition id references are checked at
+// module load in development.
 
-export type Edition = {
-  id: string;
-  series: Series;
-  number: number;
-  title: string;
-  media: {
-    newsletter?: string;
-    podcast?: string;
-  };
-};
-
-export type Link = {
-  id: string;
-  url: string;
-  title: string;
-  authors: string[];
-  editions: string[];
-};
-
-export const EDITIONS = [
-  {
-    id: "links-amarelos-3",
-    series: "links-amarelos",
-    number: 3,
-    title: "maestros, saltos e seriedade",
-    media: {
-      newsletter: "https://amarelodandara.substack.com/links-amarelos-3",
-    },
-  },
-] satisfies Edition[];
-
-// Seeded from the v1 section. Authors and editions are still to be filled in.
 export const LINKS = [
   {
     id: "hello-stranger",

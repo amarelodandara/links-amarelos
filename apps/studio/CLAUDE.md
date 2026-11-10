@@ -51,8 +51,11 @@ segunda ordem: não gere nem altere nada dele.
 
 ## Motor
 
+Edições moram em `packages/content/src/editions.ts` (TS tipado, sem JSON);
+imagens das tabs em `packages/content/assets/<id>/`. Pra uma edição nova,
+acrescente a entrada lá, nunca um `edition.json`.
+
 ```bash
-npm run sync          # valida /content e regenera o índice de edições
 npm run render <CompositionId> outputs/<arquivo>
 npm run render:all [<segmento>/<numero-slug>]   # kit completo de uma edição
 npm run typecheck

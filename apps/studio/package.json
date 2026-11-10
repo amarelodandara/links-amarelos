@@ -6,15 +6,15 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "sync": "node scripts/sync-editions.mjs",
-    "prerender": "npm run sync",
+    "prerender": "npm run check-assets -w @links/content",
     "render": "remotion render",
-    "prerender:all": "npm run sync",
+    "prerender:all": "npm run check-assets -w @links/content",
     "render:all": "node scripts/render-all.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@links/brand": "*",
+    "@links/content": "*",
     "@paper-design/shaders-react": "^0.0.80",
     "@remotion/captions": "4.0.507",
     "@remotion/cli": "^4.0.507",
