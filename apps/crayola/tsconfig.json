@@ -1,7 +1,15 @@
 {
   "extends": "@links/config/tsconfig.base.json",
   "compilerOptions": {
-    "types": ["node"]
+    "types": [
+      "node"
+    ]
   },
-  "include": ["src", "remotion.config.ts", "scripts"]
+  "include": [
+    "src",
+    "remotion.config.ts",
+    "scripts",
+    "playground",
+    "vite.config.ts"
+  ]
 }

@@ -1,0 +1,151 @@
+@import "@links/brand/tokens.css";
+
+/* Specimen sheet: same tokens and type as the playground board. */
+
+:root {
+  --ink: var(--brand-black);
+  --ink-soft: color-mix(in srgb, var(--brand-black) 55%, transparent);
+  --ink-faint: color-mix(in srgb, var(--brand-black) 12%, transparent);
+  --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Space Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--sans);
+  background-color: var(--brand-white);
+  background-image: radial-gradient(var(--ink-faint) 1px, transparent 1.2px);
+  background-size: 24px 24px;
+}
+
+.sheet {
+  display: grid;
+  gap: 56px;
+  padding: 24px 40px 80px;
+}
+
+.masthead {
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink-soft);
+}
+
+.masthead p {
+  margin: 0;
+}
+
+.masthead a {
+  color: inherit;
+}
+
+.section {
+  display: grid;
+  gap: 24px;
+}
+
+.section-head {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  border-bottom: 1.5px solid var(--ink);
+  padding-bottom: 8px;
+}
+
+.section-n {
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.section-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.row-label {
+  margin: 0;
+  display: grid;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.row-label span {
+  color: var(--ink-soft);
+  font-size: 11px;
+}
+
+.row-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.pair {
+  display: flex;
+  gap: 6px;
+}
+
+.specimen {
+  margin: 0;
+  display: grid;
+  gap: 6px;
+  justify-items: start;
+}
+
+.specimen-frame {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  border: 1px solid var(--ink-faint);
+  background: #fff;
+}
+
+.specimen-frame > svg,
+.specimen-frame > div {
+  display: block;
+}
+
+.specimen figcaption {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+/* Don'ts: crossed out in ink. */
+.dont .cross {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.dont .cross line {
+  stroke: var(--ink);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+}
+
+.dont figcaption {
+  color: var(--ink);
+}

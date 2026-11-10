@@ -1,0 +1,25 @@
+# Visit https://soloterm.com to learn more
+name: links-amarelos
+icon: null
+processes:
+  Logo playground:
+    command: npm run playground
+    working_dir: null
+    auto_start: true
+    auto_restart: true
+    restart_when_changed: []
+    env: {}
+  Website:
+    command: npm run dev:website
+    working_dir: null
+    auto_start: false
+    auto_restart: true
+    restart_when_changed: []
+    env: {}
+  Crayola studio:
+    command: npm run crayola
+    working_dir: null
+    auto_start: false
+    auto_restart: false
+    restart_when_changed: []
+    env: {}

@@ -8,6 +8,7 @@
   "scripts": {
     "dev:website": "turbo run dev --filter=@links/website",
     "crayola": "npm run studio -w @links/crayola",
+    "playground": "npm run playground -w @links/crayola",
     "build": "turbo run build",
     "lint": "oxlint && turbo run lint",
     "typecheck": "turbo run typecheck",

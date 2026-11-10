@@ -3,3 +3,8 @@ declare module "*.png" {
   const src: string;
   export default src;
 }
+/** Files imported as a URL (Vite `?url`): the playgrounds use it for textures. */
+declare module "*?url" {
+  const src: string;
+  export default src;
+}

@@ -22,3 +22,21 @@ export const colors = {
 } as const;
 
 export type ColorName = keyof typeof colors;
+
+/** Every token name, in palette order: for pickers that must list them all. */
+export const COLOR_NAMES = [
+  "brandBlack",
+  "brandWhite",
+  "brandWhiteCode",
+  "sunLighter",
+  "sunLight",
+  "sun",
+  "sunDark",
+  "codeLighter",
+  "codeLight",
+  "code",
+  "codeDark",
+  "substack",
+  "spotify",
+  "youtube",
+] as const satisfies readonly ColorName[];

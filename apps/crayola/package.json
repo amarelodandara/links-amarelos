@@ -11,7 +11,8 @@
     "prerender:all": "npm run check-assets -w @links/content",
     "render:all": "node scripts/render-all.mjs",
     "typecheck": "tsc --noEmit",
-    "studio": "remotion studio"
+    "studio": "remotion studio",
+    "playground": "vite"
   },
   "dependencies": {
     "@links/brand": "*",
@@ -35,7 +36,11 @@
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "@types/three": "^0.186.0",
-    "typescript": "^6.0.3"
+    "@vitejs/plugin-react": "^6.3.0",
+    "dialkit": "^2.2.0",
+    "motion": "^14.12.0",
+    "typescript": "^6.0.3",
+    "vite": "^8.3.7"
   },
   "allowScripts": {
     "esbuild": true

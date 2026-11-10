@@ -1,0 +1,299 @@
+@import "@links/brand/tokens.css";
+
+/*
+ * The logo playground as a lab board: the mark in a frame at the center, each
+ * group of parameters in its own numbered frame, wired to it. Colors are the
+ * brand tokens only; type is the brand pair (Manrope, Space Mono).
+ */
+
+:root {
+  --ink: var(--brand-black);
+  --ink-soft: color-mix(in srgb, var(--brand-black) 55%, transparent);
+  --ink-faint: color-mix(in srgb, var(--brand-black) 12%, transparent);
+  --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Space Mono", ui-monospace, monospace;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  color: var(--ink);
+  font-family: var(--sans);
+  background-color: var(--brand-white);
+  background-image:
+    radial-gradient(var(--ink-faint) 1px, transparent 1.2px),
+    radial-gradient(ellipse at 78% 12%, var(--sun-light), transparent 50%),
+    radial-gradient(ellipse at 12% 72%, var(--code-light), transparent 48%),
+    radial-gradient(ellipse at 88% 92%, var(--sun-lighter), transparent 45%);
+  background-size: 24px 24px, 100% 100%, 100% 100%, 100% 100%;
+  background-attachment: fixed;
+}
+
+/* ── Board ─────────────────────────────────────────────────────────────── */
+
+.board {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(380px, 540px) minmax(260px, 1fr);
+  grid-template-areas:
+    "head    head head"
+    "presets logo orbit"
+    "sun     logo cursor"
+    "backdrop logo view";
+  align-items: center;
+  gap: 40px 72px;
+  min-height: 100vh;
+  padding: 24px 40px 56px;
+}
+
+.masthead {
+  grid-area: head;
+  display: flex;
+  justify-content: space-between;
+  font-family: var(--mono);
+  font-size: 12px;
+  text-transform: lowercase;
+  color: var(--ink-soft);
+}
+
+.masthead p {
+  margin: 0;
+}
+
+.masthead a {
+  color: inherit;
+}
+
+.links {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: visible;
+}
+
+.links line {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.links circle {
+  fill: var(--ink);
+}
+
+/* ── Frames ────────────────────────────────────────────────────────────── */
+
+.node {
+  position: relative;
+  z-index: 1;
+  margin: 0;
+  width: 100%;
+  max-width: 300px;
+}
+
+.node[data-frame="logo"] {
+  grid-area: logo;
+  max-width: none;
+}
+.node[data-frame="presets"] { grid-area: presets; justify-self: end; }
+.node[data-frame="sun"] { grid-area: sun; justify-self: start; }
+.node[data-frame="orbit"] { grid-area: orbit; justify-self: start; }
+.node[data-frame="cursor"] { grid-area: cursor; justify-self: end; }
+.node[data-frame="backdrop"] { grid-area: backdrop; justify-self: center; }
+.node[data-frame="view"] { grid-area: view; justify-self: center; }
+
+.frame {
+  border: 1.5px solid var(--ink);
+  background: var(--brand-white);
+  padding: 12px;
+}
+
+.frame-title {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.node figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.node figcaption span + span {
+  color: var(--ink-soft);
+}
+
+/* DialKit controls, dressed in the brand tokens. */
+.frame.dialkit-root {
+  font-family: var(--sans);
+  --dial-text-root: var(--ink);
+  --dial-text-focus: var(--ink);
+  --dial-text-primary: var(--ink);
+  --dial-text-section: var(--ink-soft);
+  --dial-text-label: var(--ink-soft);
+  --dial-text-secondary: var(--ink-soft);
+  --dial-text-tertiary: var(--ink-faint);
+  --dial-surface: color-mix(in srgb, var(--brand-black) 5%, transparent);
+  --dial-surface-hover: color-mix(in srgb, var(--brand-black) 9%, transparent);
+  --dial-surface-active: var(--sun-light);
+  --dial-surface-subtle: var(--sun-lighter);
+  --dial-border: var(--ink-faint);
+  --dial-border-hover: var(--ink-soft);
+  --dial-focus-ring: var(--code);
+  --dial-dropdown-bg: var(--brand-white);
+  --dial-radius: 0;
+  --dial-row-height: 32px;
+  --dial-row-gap: 4px;
+  display: grid;
+  gap: var(--dial-row-gap);
+}
+
+/* ── Logo frame ────────────────────────────────────────────────────────── */
+
+.frame-logo {
+  position: relative;
+  aspect-ratio: 1;
+  padding: 0;
+  background: #fff;
+}
+
+.frame-logo[data-surface="sun-lighter"] { background: var(--sun-lighter); }
+.frame-logo[data-surface="sun"] { background: var(--sun); }
+.frame-logo[data-surface="code"] { background: var(--code); }
+.frame-logo[data-surface="brand-black"] { background: var(--brand-black); }
+
+.stage,
+.drag-layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.drag-layer {
+  cursor: grab;
+  touch-action: none;
+}
+
+.drag-layer:active {
+  cursor: grabbing;
+}
+
+/* The fixed 1000×1000 grid, drawn over the logo (playground only). */
+.grid-overlay line {
+  stroke: var(--code);
+  stroke-opacity: 0.25;
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.grid-overlay [data-axis="center"] line {
+  stroke-opacity: 0.6;
+}
+
+.grid-overlay text {
+  fill: var(--code);
+  fill-opacity: 0.7;
+  font-family: var(--mono);
+  font-size: 18px;
+}
+
+/* Registration marks just outside each corner. */
+.crosshair {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: var(--ink);
+}
+
+.crosshair::before {
+  left: 6px;
+  top: 0;
+  width: 1px;
+  height: 14px;
+}
+
+.crosshair::after {
+  top: 6px;
+  left: 0;
+  width: 14px;
+  height: 1px;
+}
+
+.crosshair[data-corner="tl"] { top: -18px; left: -18px; }
+.crosshair[data-corner="tr"] { top: -18px; right: -18px; }
+.crosshair[data-corner="bl"] { bottom: -18px; left: -18px; }
+.crosshair[data-corner="br"] { bottom: -18px; right: -18px; }
+
+/* ── Presets ───────────────────────────────────────────────────────────── */
+
+.tiles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.tile {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: inherit;
+  cursor: pointer;
+}
+
+.tile:hover {
+  background: var(--sun-lighter);
+}
+
+.tile[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: #fff;
+}
+
+/* ── Narrow screens: one column, no wiring ─────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .board {
+    grid-template-columns: 1fr;
+    grid-template-areas: "head" "logo" "presets" "sun" "orbit" "cursor" "backdrop" "view";
+    padding: 16px;
+  }
+
+  .node,
+  .node[data-frame] {
+    justify-self: stretch;
+    max-width: none;
+  }
+
+  .links {
+    display: none;
+  }
+}
