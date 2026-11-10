@@ -1,5 +1,35 @@
 @import "tailwindcss";
 
+/* LinkCard's interaction states. Each matches the real pseudo-class, or an
+   ancestor's data-preview naming it, so /playground/link-card can pin every
+   state on screen at once. Style the card's states through these, not
+   through plain hover:/active:/focus-visible:, or the playground can't show
+   them. */
+@custom-variant link-hover {
+    &:hover { @slot; }
+    [data-preview~="link-hover"] & { @slot; }
+}
+@custom-variant link-active {
+    &:active { @slot; }
+    [data-preview~="link-active"] & { @slot; }
+}
+@custom-variant link-focus {
+    &:focus-visible { @slot; }
+    [data-preview~="link-focus"] & { @slot; }
+}
+@custom-variant close-hover {
+    &:hover { @slot; }
+    [data-preview~="close-hover"] & { @slot; }
+}
+@custom-variant close-active {
+    &:active { @slot; }
+    [data-preview~="close-active"] & { @slot; }
+}
+@custom-variant close-focus {
+    &:focus-visible { @slot; }
+    [data-preview~="close-focus"] & { @slot; }
+}
+
 :root {
     /* Light-only site — declared so native controls (scrollbars, form fields,
        date pickers) don't get painted dark by the OS preference. */

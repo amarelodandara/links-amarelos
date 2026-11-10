@@ -3,6 +3,7 @@
 import { Popover } from "@base-ui/react/popover";
 import type { Link } from "../../data/links";
 import { editionsOf } from "../../data/links";
+import LinkCard from "../LinkCard";
 
 type LinkDotProps = {
   link: Link;
@@ -17,6 +18,27 @@ type LinkDotProps = {
 };
 
 const hostname = (url: string) => new URL(url).hostname.replace(/^www\./, "");
+
+// What the card says you will do at the other end, by where the link goes.
+// Anywhere not listed gets its bare hostname.
+const DESTINATIONS = [
+  { hosts: ["youtube.com", "youtu.be"], source: "assista no youtube", action: "ver" },
+  { hosts: ["tiktok.com"], source: "assista no tiktok", action: "ver" },
+  { hosts: ["substack.com"], source: "leia no substack", action: "ler" },
+  { hosts: ["open.spotify.com"], source: "ouça no spotify", action: "ouvir" },
+  { hosts: ["itch.io"], source: "jogue no itch.io", action: "jogar" },
+  { hosts: ["x.com"], source: "veja no x", action: "ver" },
+] satisfies { hosts: string[]; source: string; action: string }[];
+
+function destinationOf(url: string): { source: string; action: string } {
+  const host = hostname(url);
+  const match = DESTINATIONS.find((destination) =>
+    destination.hosts.some((h) => host === h || host.endsWith(`.${h}`)),
+  );
+  return match
+    ? { source: match.source, action: match.action }
+    : { source: host, action: "abrir" };
+}
 
 /** One link on the field: an invisible hit target over its WebGL sphere
  *  (which turns blue once visited), and the card that grows out of it. The circle only opens the card; the card is
@@ -72,53 +94,30 @@ export default function LinkDot({
           className="z-30"
         >
           <Popover.Popup
+            aria-label={link.title}
             // Cards also open on their own when a link lands, often while
             // the hold button is being pressed again. Moving focus then
             // would blur the button and cancel that hold, so focus only
             // follows a card someone opened or closed from the keyboard.
             initialFocus={(type) => type === "keyboard"}
             finalFocus={(type) => type === "keyboard"}
-            className="relative w-64 origin-(--transform-origin) rounded-2xl border border-brand-black bg-brand-white text-brand-black shadow-[0.25rem_0.25rem_0] shadow-brand-black/15 outline-none transition-[scale,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] data-ending-style:scale-50 data-ending-style:opacity-0 data-ending-style:duration-150 data-ending-style:ease-out data-starting-style:scale-50 data-starting-style:opacity-0">
-            <a
+            className="origin-(--transform-origin) outline-none transition-[scale,opacity] duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)] data-ending-style:scale-50 data-ending-style:opacity-0 data-ending-style:duration-150 data-ending-style:ease-out data-starting-style:scale-50 data-starting-style:opacity-0"
+          >
+            <LinkCard
               href={link.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={onVisit}
-              className="block rounded-2xl p-4 pr-10 outline-none hover:bg-sun-lighter focus-visible:ring-2 focus-visible:ring-code"
-            >
-              <Popover.Title className="font-manrope text-lg font-bold leading-snug tracking-tight">
-                {link.title}
-              </Popover.Title>
-              {link.authors.length > 0 && (
-                <p className="mt-1 font-manrope text-sm">
-                  por {link.authors.join(", ")}
-                </p>
-              )}
-              <p className="mt-3 flex items-center justify-between gap-2 font-space-mono text-xs lowercase text-brand-black/70">
-                <span className="truncate">{hostname(link.url)}</span>
-                <span aria-hidden>↗</span>
-              </p>
-              {editions.length > 0 && (
-                <p className="mt-2 border-t border-brand-black/15 pt-2 font-space-mono text-xs lowercase text-brand-black/70">
-                  {editions
-                    .map((edition) => `links amarelos #${edition.number}`)
-                    .join(" · ")}
-                </p>
-              )}
-            </a>
-            <Popover.Close
-              aria-label="pular este link"
-              className="absolute top-2 right-2 flex size-7 items-center justify-center rounded-full text-brand-black/60 outline-none hover:bg-brand-black/10 hover:text-brand-black focus-visible:ring-2 focus-visible:ring-code"
-            >
-              <svg aria-hidden viewBox="0 0 12 12" className="size-3">
-                <path
-                  d="M2 2l8 8M10 2l-8 8"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                />
-              </svg>
-            </Popover.Close>
+              title={link.title}
+              tag={
+                editions.length > 0
+                  ? editions
+                      .map((edition) => `links amarelos #${edition.number}`)
+                      .join(" · ")
+                  : undefined
+              }
+              {...destinationOf(link.url)}
+              onVisit={onVisit}
+              onClose={() => onOpenChange(false)}
+              closeLabel="pular este link"
+            />
           </Popover.Popup>
         </Popover.Positioner>
       </Popover.Portal>
