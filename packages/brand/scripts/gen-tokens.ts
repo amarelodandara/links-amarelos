@@ -1,6 +1,6 @@
 /**
- * Writes tokens.css from src/colors.ts, so CSS consumers (the site's
- * globals.css) read the same palette the studio reads in TS.
+ * Writes tokens.css from src/colors.ts, so CSS consumers (the website's
+ * globals.css) read the same palette crayola reads in TS.
  *
  * Run with `npm run tokens -w @links/brand` after changing a color. The
  * output is committed: the site build does not depend on running this.

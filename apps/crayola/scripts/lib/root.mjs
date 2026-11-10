@@ -2,7 +2,7 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-/** apps/studio — where outputs/, input/ and remotion.config.ts live. */
+/** apps/crayola — where outputs/, input/ and remotion.config.ts live. */
 export const root = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 /** packages/content/assets — the Remotion public dir: edition tab images and

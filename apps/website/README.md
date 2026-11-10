@@ -15,7 +15,7 @@ Part of the links-amarelos monorepo. From the repo root:
 
 ```bash
 npm install
-npm run dev:site  # http://localhost:3000
+npm run dev:website # http://localhost:3000
 ```
 
 ## Commands
@@ -44,7 +44,7 @@ app/
 ## Contributing
 
 1. Fork the repo and create a branch from `main`
-2. Run `npm run dev:site` and confirm your changes work locally
+2. Run `npm run dev:website` and confirm your changes work locally
 3. Run `npm run typecheck && npm run lint` — fix any errors before opening a PR
 4. Open a pull request with a clear description of what changed and why
 

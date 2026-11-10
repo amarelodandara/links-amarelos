@@ -1,6 +1,6 @@
-# Studio (ex-crayola)
+# Crayola
 
-Vive em `apps/studio` no monorepo links-amarelos. Caminhos abaixo são
+Vive em `apps/crayola` no monorepo links-amarelos. Caminhos abaixo são
 relativos a esta pasta.
 
 
@@ -41,7 +41,7 @@ idioma e termos, `docs/` sempre vence os exemplos delas.
 ## Estilo
 
 A fonte da verdade visual (cores, tipografia, logos) é o site, em
-`apps/site` deste monorepo. O estúdio segue o site; quando os dois
+`apps/website` deste monorepo. O crayola segue o site; quando os dois
 divergirem, quem vale é o site.
 
 ## Escopo atual

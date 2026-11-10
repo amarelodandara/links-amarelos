@@ -5,7 +5,7 @@ metadata:
   version: 2.2.1
 ---
 
-> Caminhos relativos a `apps/studio/` (o estúdio no monorepo). Rode os comandos a partir de lá.
+> Caminhos relativos a `apps/crayola/` (o crayola no monorepo). Rode os comandos a partir de lá.
 
 # Video
 

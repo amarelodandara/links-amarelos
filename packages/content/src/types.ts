@@ -15,11 +15,11 @@ export type Tab = {
 };
 
 /**
- * What the studio needs to make an edition's promo kit. Discriminated by
+ * What crayola needs to make an edition's promo kit. Discriminated by
  * `kind`: an edition shows either exactly four tabs or a chant, never both.
  */
 export type Promo = {
-  /** Folder slug the studio uses for outputs, e.g. "abracadabra" →
+  /** Folder slug crayola uses for outputs, e.g. "abracadabra" →
    *  outputs/links-ondas/009-abracadabra. */
   slug: string;
   /** Opening theme ("{tema aqui}"). Only hyperlinks uses it. */

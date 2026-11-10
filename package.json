@@ -6,13 +6,13 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:site": "turbo run dev --filter=@links/site",
-    "studio": "npm run studio -w @links/studio",
+    "dev:website": "turbo run dev --filter=@links/website",
+    "crayola": "npm run studio -w @links/crayola",
     "build": "turbo run build",
     "lint": "oxlint && turbo run lint",
     "typecheck": "turbo run typecheck",
-    "render": "npm run render -w @links/studio --",
-    "render:all": "npm run render:all -w @links/studio --"
+    "render": "npm run render -w @links/crayola --",
+    "render:all": "npm run render:all -w @links/crayola --"
   },
   "devDependencies": {
     "@oxlint/plugins": "^1.79.0",

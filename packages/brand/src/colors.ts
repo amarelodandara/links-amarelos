@@ -1,6 +1,6 @@
 /**
- * The Links Amarelos palette. Single source for the site (as CSS custom
- * properties, via tokens.css) and the studio (read directly in TS).
+ * The Links Amarelos palette. Single source for the website (as CSS custom
+ * properties, via tokens.css) and crayola (read directly in TS).
  *
  * Keys are camelCase; scripts/gen-tokens.ts turns `sunDark` into `--sun-dark`.
  */

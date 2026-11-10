@@ -13,5 +13,5 @@ Config.setCodec("h264");
 Config.setOverwriteOutput(true);
 
 // Imagens das tabs e outras mídias vêm de @links/content — servidas como
-// arquivos estáticos. Relativo a apps/studio, de onde o remotion roda.
+// arquivos estáticos. Relativo a apps/crayola, de onde o remotion roda.
 Config.setPublicDir("../../packages/content/assets");

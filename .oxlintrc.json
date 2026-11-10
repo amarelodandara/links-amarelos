@@ -17,9 +17,9 @@
     "**/.next-verify/**",
     "**/out/**",
     "**/build/**",
-    "apps/studio/outputs/**",
-    "apps/studio/whisper.cpp/**",
-    "apps/studio/input/**"
+    "apps/crayola/outputs/**",
+    "apps/crayola/whisper.cpp/**",
+    "apps/crayola/input/**"
   ],
   "jsPlugins": [
     {
