@@ -315,6 +315,8 @@ export function App() {
                 onChange={(v) => setCrayon({ seed: v })} />
               <Slider label="grain" value={config.style.grain} min={0} max={1} step={0.01}
                 onChange={(v) => setCrayon({ grain: v })} />
+              <Slider label="paper" value={config.style.paper} min={0} max={1} step={0.01}
+                onChange={(v) => setCrayon({ paper: v })} />
               <Slider label="grain x" value={config.style.grainX} min={0.005} max={2} step={0.005}
                 onChange={(v) => setCrayon({ grainX: v })} />
               <Slider label="grain y" value={config.style.grainY} min={0.005} max={2} step={0.005}

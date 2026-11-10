@@ -81,8 +81,13 @@ export type CrayonSun = {
   waves: number;
   /** Picks the hand: same seed, same drawing. */
   seed: number;
-  /** How much paper shows through the wax: 0 solid, 1 mostly paper. */
+  /** How much paper shows between the wax: 0 solid, 1 mostly paper. */
   grain: number;
+  /**
+   * How light the paper between the wax looks: a lighter tone of the same
+   * color, never see-through. 0 hides the gaps, 1 makes them white.
+   */
+  paper: number;
   /** Grain frequency across; higher is finer. */
   grainX: number;
   /** Grain frequency down; differing from across stretches it into streaks. */
@@ -98,6 +103,7 @@ export const DEFAULT_CRAYON: CrayonSun = {
   waves: 5,
   seed: 3,
   grain: 0.35,
+  paper: 0.45,
   grainX: 0.9,
   grainY: 0.06,
   roughness: 6,

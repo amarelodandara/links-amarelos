@@ -21,7 +21,7 @@ export const PRESETS: LogoPreset[] = [
     label: "crayola",
     cursors: ["arrow", "vector-arrow", "text"],
     config: {
-      style: { kind: "crayon", wobble: 6, waves: 3, seed: 33, grain: 0.26, grainX: 1.05, grainY: 0.29, roughness: 16.5, cursor: false },
+      style: { kind: "crayon", wobble: 6, waves: 3, seed: 33, grain: 0.26, paper: 0.45, grainX: 1.05, grainY: 0.29, roughness: 16.5, cursor: false },
       sun: { cx: 500, cy: 500 },
       orbit: { radius: 481, inclination: 77.5, tilt: 8, angle: 58.2 },
       cursor: "arrow",

@@ -7,7 +7,7 @@ const style = (s: SunStyle): string =>
   s.kind === "flat"
     ? `{ kind: "flat" }`
     : s.kind === "crayon"
-      ? `{ kind: "crayon", wobble: ${num(s.wobble)}, waves: ${num(s.waves)}, seed: ${num(s.seed)}, grain: ${num(s.grain)}, grainX: ${num(s.grainX)}, grainY: ${num(s.grainY)}, roughness: ${num(s.roughness)}, cursor: ${s.cursor} }`
+      ? `{ kind: "crayon", wobble: ${num(s.wobble)}, waves: ${num(s.waves)}, seed: ${num(s.seed)}, grain: ${num(s.grain)}, paper: ${num(s.paper)}, grainX: ${num(s.grainX)}, grainY: ${num(s.grainY)}, roughness: ${num(s.roughness)}, cursor: ${s.cursor} }`
       : `{ kind: "globe", meridians: ${num(s.meridians)}, parallels: ${num(s.parallels)}, inclination: ${num(s.inclination)}, tilt: ${num(s.tilt)}, matchOrbit: ${s.matchOrbit}, turn: ${num(s.turn)}, spin: ${num(s.spin)}, line: ${num(s.line)}, outline: ${s.outline}, cap: ${JSON.stringify(s.cap)}, color: ${JSON.stringify(s.color)}, opacity: ${num(s.opacity)} }`;
 
 /** presets.ts source for these presets, in the same shape the file is written by hand. */

@@ -35,6 +35,11 @@ type LogoProps = {
   showOrbit?: boolean;
   /** Draw the first frame only, even when the globe spins: the static version. */
   still?: boolean;
+  /**
+   * Let the drawing spill past the 1000 grid instead of clipping at it: for
+   * motion, where the cursor travels the orbit beyond the grid's edge.
+   */
+  bleed?: boolean;
   className?: string;
   ref?: Ref<SVGSVGElement>;
 };
@@ -52,6 +57,7 @@ export function Logo({
   title,
   showOrbit = false,
   still = false,
+  bleed = false,
   className,
   ref,
 }: LogoProps) {
@@ -157,10 +163,12 @@ export function Logo({
       role={title ? "img" : undefined}
       aria-hidden={title ? undefined : true}
       className={className}
+      overflow={bleed ? "visible" : undefined}
     >
       {title && <title>{title}</title>}
       {crayon && (
-        // Crayon: paper shows through the wax (grain), and every edge goes ragged (roughness).
+        // Crayon: gaps in the wax (grain) show a lighter tone of the same color
+        // (paper), never what is behind the logo; every edge goes ragged (roughness).
         <defs>
           <filter id={crayonId} x="-10%" y="-10%" width="120%" height="120%">
             <feTurbulence
@@ -172,9 +180,18 @@ export function Logo({
             />
             <feColorMatrix in="wax" type="matrix" values={grainMatrix(crayon)} result="paper" />
             <feComposite in="SourceGraphic" in2="paper" operator="in" result="grained" />
+            <feComponentTransfer in="SourceGraphic" result="underlay">
+              <feFuncR type="linear" slope={1 - crayon.paper} intercept={crayon.paper} />
+              <feFuncG type="linear" slope={1 - crayon.paper} intercept={crayon.paper} />
+              <feFuncB type="linear" slope={1 - crayon.paper} intercept={crayon.paper} />
+            </feComponentTransfer>
+            <feMerge result="layered">
+              <feMergeNode in="underlay" />
+              <feMergeNode in="grained" />
+            </feMerge>
             <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves={2} seed={crayon.seed + 1} result="hand" />
             <feDisplacementMap
-              in="grained"
+              in="layered"
               in2="hand"
               scale={crayon.roughness}
               xChannelSelector="R"

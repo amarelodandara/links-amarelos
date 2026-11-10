@@ -85,12 +85,17 @@ export function meridiansPath(globe: GlobeLines, cx: number, cy: number, turn: n
     const uy = -nx / across;
     const [ax, ay] = toPage(ux, uy, globe, cx, cy);
     const [bx, by] = toPage(-ux, -uy, globe, cx, cy);
-    // The visible half bulges towards the circle's nearest point to the viewer.
+    // The visible half bulges towards the circle's nearest point to the viewer,
+    // which is the end of the ellipse's minor axis.
     const [px, py] = toPage((-nz * nx) / across, (-nz * ny) / across, globe, cx, cy);
     const sweep = (ax - ox) * (py - oy) - (ay - oy) * (px - ox) > 0 ? 1 : 0;
     const angle = Math.atan2(ay - oy, ax - ox) / RAD;
     const ry = SUN_RADIUS * Math.abs(nz);
-    parts.push(`M${fmt(ax)} ${fmt(ay)}A${SUN_RADIUS} ${fmt(ry)} ${fmt(angle)} 0 ${sweep} ${fmt(bx)} ${fmt(by)}`);
+    // Two quarter arcs through that point, not one half arc: a half arc's two
+    // possible paths are the same length, so after rounding a renderer may
+    // take the wrong one and the line flickers (worst near the poles).
+    const arc = `A${SUN_RADIUS} ${fmt(ry)} ${fmt(angle)} 0 ${sweep}`;
+    parts.push(`M${fmt(ax)} ${fmt(ay)}${arc} ${fmt(px)} ${fmt(py)}${arc} ${fmt(bx)} ${fmt(by)}`);
   }
   return parts.join("");
 }
