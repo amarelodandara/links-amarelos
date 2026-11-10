@@ -10,7 +10,8 @@
     "render": "remotion render",
     "prerender:all": "npm run check-assets -w @links/content",
     "render:all": "node scripts/render-all.mjs",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "studio": "remotion studio"
   },
   "dependencies": {
     "@links/brand": "*",

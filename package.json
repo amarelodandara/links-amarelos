@@ -6,13 +6,18 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:site": "npm run dev -w @links/site",
-    "build": "npm run build --workspaces --if-present",
-    "lint": "oxlint && npm run lint --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "dev:site": "turbo run dev --filter=@links/site",
+    "studio": "npm run studio -w @links/studio",
+    "build": "turbo run build",
+    "lint": "oxlint && turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "render": "npm run render -w @links/studio --",
+    "render:all": "npm run render:all -w @links/studio --"
   },
   "devDependencies": {
     "@oxlint/plugins": "^1.79.0",
-    "oxlint": "^1.79.0"
-  }
+    "oxlint": "^1.79.0",
+    "turbo": "^2.11.10"
+  },
+  "packageManager": "npm@11.16.0"
 }
