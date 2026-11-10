@@ -10,6 +10,13 @@ import { Destaque, calculateDestaqueMetadata, destaqueSchema } from "./compositi
 import { CASCADE_STORIES, CascadeStories, cascadeStoriesFrames } from "./compositions/portfolio/CascadeStories";
 import { videoDurationInFrames } from "./compositions/scenes/ChantScene";
 import {
+  LOGO_SHOWCASE_FORMATS,
+  LogoShowcase,
+  calculateLogoShowcaseMetadata,
+  logoShowcaseDefaults,
+  logoShowcaseSchema,
+} from "./compositions/LogoShowcase";
+import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
   SQUARE,
@@ -39,6 +46,24 @@ const CAIU_NA_REDE_LINK = {
 export const RemotionRoot: React.FC = () => {
   return (
     <>
+      {/* The logo variants and their cursors, one video per aspect ratio. */}
+      <Folder name="logo">
+        {Object.entries(LOGO_SHOWCASE_FORMATS).map(([ratio, size]) => (
+          <Composition
+            key={ratio}
+            id={`LogoShowcase-${ratio}`}
+            component={LogoShowcase}
+            schema={logoShowcaseSchema}
+            defaultProps={logoShowcaseDefaults}
+            calculateMetadata={calculateLogoShowcaseMetadata}
+            durationInFrames={1}
+            fps={FPS}
+            width={size.width}
+            height={size.height}
+          />
+        ))}
+      </Folder>
+
       {/*
        * Anúncio "no ar agora!" (D0). As imagens vêm de /input, não de /content:
        * renderize com --public-dir=input e --props (ver a skill anuncio). Os
