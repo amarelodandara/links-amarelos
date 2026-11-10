@@ -36,7 +36,7 @@ export default function ApoioPage() {
             <br />
             canarinhos
           </h1>
-          <p className="font-manrope text-xl text-sun-lighter max-w-xl leading-relaxed">
+          <p className="font-sans text-xl text-sun-lighter max-w-xl leading-relaxed">
             Além de ajudar a manter os links amarelos + ondas amarelas
             gratuitos, seu apoio possibilita incríveis realizações amarelas.
           </p>
@@ -52,11 +52,11 @@ export default function ApoioPage() {
 
           <div className="space-y-1">
             <p className="font-unbounded text-4xl">Qualquer valor</p>
-            <p className="font-space-mono text-sm">
+            <p className="font-mono text-sm">
               sem recorrência, sem compromisso
             </p>
           </div>
-          <ul className="font-manrope text-sm space-y-2">
+          <ul className="font-sans text-sm space-y-2">
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0" />
               <span>
@@ -80,7 +80,7 @@ export default function ApoioPage() {
           >
             fazer uma doação
           </Button>
-          <p className="flex items-center gap-1 font-manrope text-xs text-brand-black/60">
+          <p className="flex items-center gap-1 font-sans text-xs text-brand-black/60">
             <LockIcon className="size-3" />
             pagamento seguro via{" "}
             <Image
@@ -102,29 +102,29 @@ export default function ApoioPage() {
         </div>
         <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-sun-light">
           <div className="space-y-2 p-6">
-            <p className="font-manrope font-semibold tracking-tight">
+            <p className="font-sans font-semibold tracking-tight">
               Grátis para sempre
             </p>
-            <p className="font-manrope leading-relaxed text-brand-black text-sm">
+            <p className="font-sans leading-relaxed text-brand-black text-sm">
               O apoio pago de alguns é o que permite que as edições sejam
               gratuitas para todo mundo.
             </p>
           </div>
           <div className="space-y-2 p-6">
-            <p className="font-manrope font-semibold tracking-tight">
+            <p className="font-sans font-semibold tracking-tight">
               Orgânico, lindo
             </p>
-            <p className="font-manrope leading-relaxed text-brand-black text-sm">
+            <p className="font-sans leading-relaxed text-brand-black text-sm">
               Não otimiza para engajamento, não contém anúncios. Vide de
               assinantes, vive de comunidade.
             </p>
           </div>
           <div className="space-y-4 bg-sun-light p-6">
             <div className="space-y-2">
-              <p className="font-manrope font-semibold tracking-tight">
+              <p className="font-sans font-semibold tracking-tight">
                 Novas realizações
               </p>
-              <p className="font-manrope text-sm  leading-relaxed">
+              <p className="font-sans text-sm  leading-relaxed">
                 Com as contas da casa todas pagas, as doações passam a
                 patrocinar projetos novos em mídias novas.
               </p>

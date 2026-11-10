@@ -170,7 +170,7 @@ export default function TuningPanel({
     "rounded border border-brand-black/30 px-2 py-0.5 hover:bg-sun-light";
 
   return (
-    <aside className="fixed right-3 bottom-3 z-[1000] w-72 rounded-md border border-brand-black bg-sun-lighter font-space-mono text-[11px] text-brand-black shadow-lg">
+    <aside className="fixed right-3 bottom-3 z-[1000] w-72 rounded-md border border-brand-black bg-sun-lighter font-mono text-[11px] text-brand-black shadow-lg">
       <div className="flex items-center justify-between gap-2 border-b border-brand-black/20 px-3 py-2">
         <Button className="font-bold" onClick={() => setOpen((o) => !o)}>
           {open ? "▾" : "▸"} field {changed > 0 && `· ${changed} changed`}

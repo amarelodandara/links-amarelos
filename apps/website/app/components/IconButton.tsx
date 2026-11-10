@@ -37,7 +37,7 @@ export default function IconButton({
       </Tooltip.Trigger>
       <Tooltip.Portal>
         <Tooltip.Positioner side="top" sideOffset={8}>
-          <Tooltip.Popup className="rounded-sm border border-sun-light bg-white px-2 py-1 font-space-mono text-xs lowercase text-stone-900 shadow-sm">
+          <Tooltip.Popup className="rounded-sm border border-sun-light bg-white px-2 py-1 font-mono text-xs lowercase text-stone-900 shadow-sm">
             {label}
             <Tooltip.Arrow className="size-2 -mt-1 rotate-45 border-b border-r border-sun-light bg-white" />
           </Tooltip.Popup>

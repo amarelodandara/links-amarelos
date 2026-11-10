@@ -58,7 +58,7 @@ export default function SobrePage() {
         <h1 className="font-unbounded text-4xl md:text-6xl text-sun-lighter tracking-tight leading-tight">
           links amarelos<br></br>e muito mais
         </h1>
-        <p className="font-manrope text-xl text-sun-lighter max-w-xl leading-relaxed">
+        <p className="font-sans text-xl text-sun-lighter max-w-xl leading-relaxed">
           Curadorias que te levam aos lugares lindos que a internet ainda tem
           pra oferecer e você se esqueceu.
         </p>
@@ -73,7 +73,7 @@ export default function SobrePage() {
           nome="Links Amarelos"
           explainer="A curadoria mensal que começou tudo, direto na sua caixa de entrada"
         >
-          <p className="font-manrope leading-relaxed p-6">
+          <p className="font-sans leading-relaxed p-6">
             Uma newsletter mensal que reúne o melhor que uma designer altamente
             técnica, careca, negra e personality hire encontrou por aí.
           </p>
@@ -84,7 +84,7 @@ export default function SobrePage() {
           nome="Ondas Amarelas"
           explainer="Quando os links amarelos ganham voz, todo mês no seu ouvidor de áudio favorito"
         >
-          <p className="font-manrope leading-relaxed p-6">
+          <p className="font-sans leading-relaxed p-6">
             O que acontece quando os links amarelos ganham voz! Uma versão
             expandida da conversa também lançada mensalmente no seu ouvidor de
             áudio favorito.
@@ -96,7 +96,7 @@ export default function SobrePage() {
           nome="Hyperlinks Amarelos"
           explainer="Quando um link é grande demais pra caber em uma edição ou episódio"
         >
-          <p className="font-manrope leading-relaxed p-6">
+          <p className="font-sans leading-relaxed p-6">
             Quando um link extrapola os limites de uma newsletter e não consegue
             conviver com outras recomendações em um podcast de meia hora, ele
             ganha um espaço dedicado em forma de ensaio por áudio.
@@ -123,10 +123,10 @@ export default function SobrePage() {
             No que acreditamos
           </p>
         </div>
-        <div className="px-8 py-12 space-y-4 font-manrope">
+        <div className="px-8 py-12 space-y-4 font-sans">
           <p className="text-xl font-semibold tracking-tight leading-relaxed">
             Aqui os links não começam com{" "}
-            <span className="font-space-mono bg-sun px-1">
+            <span className="font-mono bg-sun px-1">
               https://
               <TypingCycler />
             </span>
@@ -154,13 +154,13 @@ export default function SobrePage() {
                 Quem faz
               </p>
             </div>
-            <div className="px-8 py-12 space-y-4 font-manrope">
+            <div className="px-8 py-12 space-y-4 font-sans">
               <p className="text-xl font-semibold tracking-tight leading-relaxed">
                 {" "}
                 Amarelo Dandara é, para os próximos, Nicoly Dandara.
               </p>
 
-              <p className="font-manrope leading-relaxed max-w-prose">
+              <p className="font-sans leading-relaxed max-w-prose">
                 Há tempos perambula pela internet e retorna com links que fazem
                 todo mundo se perguntar: de onde isso saiu? Com os links
                 amarelos, &ldquo;todo mundo&rdquo; pode passar a significar
@@ -179,10 +179,10 @@ export default function SobrePage() {
           </div>
 
           <div className="px-8 py-12 space-y-4 text-center bg-[url('/bg-texture-white.svg')] bg-repeat flex flex-col justify-center items-center">
-            <p className="font-manrope text-xl font-semibold tracking-tight">
+            <p className="font-sans text-xl font-semibold tracking-tight">
               Pronto para começar?
             </p>
-            <p className="font-manrope w-4/5 leading-relaxed">
+            <p className="font-sans w-4/5 leading-relaxed">
               Assine grátis pra receber a curadoria todo mês ou apoie o projeto
               pra patrocinar os próximos passos.
             </p>

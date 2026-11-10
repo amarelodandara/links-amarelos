@@ -3,15 +3,15 @@
 /*
  * The logo playground as a lab board: the mark in a frame at the center, each
  * group of parameters in its own numbered frame, wired to it. Colors are the
- * brand tokens only; type is the brand pair (Manrope, Space Mono).
+ * brand tokens only; type is the brand family (Geist, Geist Mono).
  */
 
 :root {
   --ink: var(--brand-black);
   --ink-soft: color-mix(in srgb, var(--brand-black) 55%, transparent);
   --ink-faint: color-mix(in srgb, var(--brand-black) 12%, transparent);
-  --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --mono: "Space Mono", ui-monospace, monospace;
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
 }
 
 *,

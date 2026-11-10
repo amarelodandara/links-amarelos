@@ -79,7 +79,7 @@ export default function LinkCard({
           </span>
           <span
             aria-hidden
-            className="font-space-mono text-base leading-6 text-white/70"
+            className="font-mono text-base leading-6 text-white/70"
           >
             ↗
           </span>

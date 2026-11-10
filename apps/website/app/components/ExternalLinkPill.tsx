@@ -64,7 +64,7 @@ export default function ExternalLinkPill({
       <div className={`${iconSize} flex shrink-0`} aria-hidden="true">
         <Icon className="size-full" />
       </div>
-      <span className="font-space-mono">{label}</span>
+      <span className="font-mono">{label}</span>
     </Link>
   );
 }

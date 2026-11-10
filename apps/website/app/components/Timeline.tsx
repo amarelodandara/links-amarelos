@@ -12,11 +12,11 @@ function TimelineContent({ item }: { item: TimelineItem }) {
   const isInternal = item.href?.startsWith("/");
   return (
     <div className="space-y-1.5 min-w-0">
-      <p className="font-space-mono text-xs text-brand-black/50">{item.ano}</p>
-      <p className="font-manrope font-semibold text-brand-black leading-snug">
+      <p className="font-mono text-xs text-brand-black/50">{item.ano}</p>
+      <p className="font-sans font-semibold text-brand-black leading-snug">
         {item.titulo}
       </p>
-      <p className="font-manrope text-sm text-brand-black/70 leading-relaxed">
+      <p className="font-sans text-sm text-brand-black/70 leading-relaxed">
         {item.desc}
       </p>
       {item.href && (

@@ -148,9 +148,9 @@ export default function LinkCardPlayground() {
   const [visits, setVisits] = useState(0);
 
   return (
-    <main className="min-h-screen space-y-10 bg-brand-white px-6 py-12 font-space-mono">
+    <main className="min-h-screen space-y-10 bg-brand-white px-6 py-12 font-mono">
       <div className="space-y-1">
-        <h1 className="font-manrope text-2xl font-semibold text-stone-900">
+        <h1 className="font-sans text-2xl font-semibold text-stone-900">
           LinkCard
         </h1>
         <p className="text-sm text-stone-600">

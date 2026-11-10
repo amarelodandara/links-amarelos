@@ -79,9 +79,9 @@ function headlineFontSize(tagline: string) {
 
 export async function renderOgImage(tagline: string) {
   const row1Text = ROW1_LINES.join("");
-  const [manrope, spaceMono, redacted] = await Promise.all([
-    loadGoogleFont("Manrope", 700, tagline),
-    loadGoogleFont("Space Mono", 400, row1Text),
+  const [geist, geistMono, redacted] = await Promise.all([
+    loadGoogleFont("Geist", 700, tagline),
+    loadGoogleFont("Geist Mono", 400, row1Text),
     loadGoogleFont("Redacted", 400, row1Text),
   ]);
 
@@ -176,7 +176,7 @@ export async function renderOgImage(tagline: string) {
             >
               <div
                 style={{
-                  fontFamily: "Manrope",
+                  fontFamily: "Geist",
                   fontWeight: 700,
                   fontSize: headlineFontSize(tagline),
                   lineHeight: 1.15,
@@ -220,8 +220,8 @@ export async function renderOgImage(tagline: string) {
     {
       ...OG_SIZE,
       fonts: [
-        { name: "Manrope", data: manrope, weight: 700, style: "normal" },
-        { name: "Space Mono", data: spaceMono, weight: 400, style: "normal" },
+        { name: "Geist", data: geist, weight: 700, style: "normal" },
+        { name: "Geist Mono", data: geistMono, weight: 400, style: "normal" },
         { name: "Redacted", data: redacted, weight: 400, style: "normal" },
       ],
     },

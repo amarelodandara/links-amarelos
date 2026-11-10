@@ -18,7 +18,7 @@ const TONES = {
 };
 
 export const PILL_BASE =
-  "lowercase rounded-full text-xs font-space-mono px-2 py-0.5 border w-fit";
+  "lowercase rounded-full text-xs font-mono px-2 py-0.5 border w-fit";
 
 type SectionPillProps = {
   children: ReactNode;

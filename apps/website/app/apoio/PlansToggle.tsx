@@ -23,7 +23,7 @@ export default function PlansToggle() {
         <div className="p-8 flex flex-col gap-6 flex-1">
           <div
             aria-hidden="true"
-            className="invisible flex items-center gap-0.5 self-end rounded-full border border-transparent p-0.5 font-space-mono text-xs"
+            className="invisible flex items-center gap-0.5 self-end rounded-full border border-transparent p-0.5 font-mono text-xs"
           >
             <span className="rounded-full px-3 py-1">mensal</span>
           </div>
@@ -35,22 +35,22 @@ export default function PlansToggle() {
           </div>
           <div>
             <p className="font-unbounded text-4xl">Grátis</p>
-            <p className="font-space-mono text-sm">para sempre</p>
+            <p className="font-mono text-sm">para sempre</p>
           </div>
-          <p className="font-manrope text-sm leading-relaxed">
+          <p className="font-sans text-sm leading-relaxed">
             Aproveite a curadoria clássica
           </p>
           <ul className="space-y-2 flex-1">
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-brand-black" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 <span className="font-semibold">links amarelos</span> a
                 curadoria mensal que você lê
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-brand-black" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 <span className="font-semibold">ondas amarelas</span> a
                 curadoria mensal que você ouve
               </span>
@@ -64,7 +64,7 @@ export default function PlansToggle() {
             >
               Assinar grátis
             </Button>
-            <p className="flex items-center gap-1 font-manrope text-xs text-brand-black/60">
+            <p className="flex items-center gap-1 font-sans text-xs text-brand-black/60">
               <LockIcon className="size-3" />
               assinatura segura, gerenciada pelo Substack
             </p>
@@ -85,7 +85,7 @@ export default function PlansToggle() {
               if (picked) setAnual(picked === "anual");
             }}
             aria-label="Período de cobrança"
-            className="flex items-center gap-0.5 self-end rounded-full border border-white/30 p-0.5 font-space-mono text-xs"
+            className="flex items-center gap-0.5 self-end rounded-full border border-white/30 p-0.5 font-mono text-xs"
           >
             <Toggle value="mensal" className={PERIOD_CLASS}>
               mensal
@@ -105,7 +105,7 @@ export default function PlansToggle() {
               {anual ? (
                 <>
                   R$ 90
-                  <sup className="font-space-mono text-xs font-normal align-super ml-1 text-code-light">
+                  <sup className="font-mono text-xs font-normal align-super ml-1 text-code-light">
                     3 meses saem de graça!
                   </sup>
                 </>
@@ -113,38 +113,38 @@ export default function PlansToggle() {
                 "R$ 10"
               )}
             </p>
-            <p className="font-space-mono text-sm mt-1">
+            <p className="font-mono text-sm mt-1">
               {anual ? "por ano" : "por mês"}
             </p>
           </div>
-          <p className="font-manrope text-sm leading-relaxed">
+          <p className="font-sans text-sm leading-relaxed">
             Mergulhe em links amarelos
           </p>
           <ul className="space-y-2 flex-1">
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-code-light" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 <span className="font-semibold">links amarelos</span> a
                 curadoria mensal que você lê
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-code-light" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 <span className="font-semibold">ondas amarelas</span> a
                 curadoria mensal que você ouve
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-code-light" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 <span className="font-semibold">hyperlinks amarelos</span>{" "}
                 ensaios profundos de assuntos amarelissímos
               </span>
             </li>
             <li className="flex items-start gap-2">
               <CheckIcon className="size-4 mt-0.5 shrink-0 text-code-light" />
-              <span className="font-manrope w-4/5">
+              <span className="font-sans w-4/5">
                 seu nome no painel de apoiadores e no final de todo episódio
               </span>
             </li>
@@ -157,7 +157,7 @@ export default function PlansToggle() {
             >
               {anual ? "Assinar por R$ 90/ano" : "Assinar por R$ 10/mês"}
             </Button>
-            <p className="flex items-center gap-1 font-manrope text-xs text-white/60">
+            <p className="flex items-center gap-1 font-sans text-xs text-white/60">
               <LockIcon className="size-3" />
               assinatura segura, gerenciada pelo Substack
             </p>

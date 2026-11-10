@@ -64,7 +64,7 @@ export default function TypingCycler() {
     // Plain inline, not inline-flex: at text-3xl on a narrow screen an
     // unbreakable "https://tiktok ⏸" unit overflows the column.
     <span>
-      <span className="font-space-mono bg-sun px-1">
+      <span className="font-mono bg-sun px-1">
         https://
         {/* data-md="skip" keeps the half-typed word out of "copiar tudo" —
             the sr-only span below is what gets serialized instead. */}

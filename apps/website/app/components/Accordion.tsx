@@ -47,7 +47,7 @@ export default function Accordion({
           <div
             className="absolute inset-0 bg-[url('/bg-texture-cutting-pad.svg')] bg-cover pointer-events-none transition-opacity duration-300 pointer-coarse:hidden opacity-0 group-[&:not([data-panel-open]):hover]/trigger:opacity-100"
           />
-          <span className="relative font-space-mono text-xs shrink-0 w-6 mt-1 text-sun-dark transition-colors duration-300 pointer-fine:group-[&:not([data-panel-open]):hover]/trigger:text-white">
+          <span className="relative font-mono text-xs shrink-0 w-6 mt-1 text-sun-dark transition-colors duration-300 pointer-fine:group-[&:not([data-panel-open]):hover]/trigger:text-white">
             {numero}
           </span>
 
@@ -55,12 +55,12 @@ export default function Accordion({
             <span className="block font-unbounded text-xl sm:text-2xl md:text-4xl lg:text-5xl tracking-tight leading-none text-brand-dark whitespace-nowrap [mask-image:linear-gradient(to_right,black_75%,transparent_100%)] md:[mask-image:none]">
               {nome}
             </span>
-            <p className="font-manrope mt-2 leading-snug hidden md:block">
+            <p className="font-sans mt-2 leading-snug hidden md:block">
               {explainer}
             </p>
           </div>
 
-          <span className="relative text-sun-dark font-space-mono text-xl shrink-0 transition-[transform,color] duration-300 mt-0.5 group-data-[panel-open]/trigger:rotate-45 pointer-fine:group-[&:not([data-panel-open]):hover]/trigger:text-white">
+          <span className="relative text-sun-dark font-mono text-xl shrink-0 transition-[transform,color] duration-300 mt-0.5 group-data-[panel-open]/trigger:rotate-45 pointer-fine:group-[&:not([data-panel-open]):hover]/trigger:text-white">
             +
           </span>
         </BaseAccordion.Trigger>
@@ -72,7 +72,7 @@ export default function Accordion({
           {hasContent ? (
             children
           ) : (
-            <p className="font-space-mono text-sm lowercase py-4 px-6">
+            <p className="font-mono text-sm lowercase py-4 px-6">
               {emptyMessage}
             </p>
           )}

@@ -1,9 +1,7 @@
 import type { ReactNode } from "react";
 import {
   Inter,
-  Manrope,
   Unbounded,
-  Space_Mono,
   Redacted,
 } from "next/font/google";
 import "./globals.css";
@@ -35,20 +33,9 @@ const inter = Inter({
   subsets: ["latin"],
 });
 
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
 const unbounded = Unbounded({
   variable: "--font-unbounded",
   subsets: ["latin"],
-});
-
-const spaceMono = Space_Mono({
-  variable: "--font-space-mono",
-  subsets: ["latin"],
-  weight: ["400", "700"],
 });
 
 const redacted = Redacted({
@@ -90,7 +77,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${GeistPixelGrid.variable} ${GeistPixelCircle.variable} ${GeistPixelTriangle.variable} ${GeistPixelLine.variable} ${manrope.variable} ${unbounded.variable} ${spaceMono.variable} ${redacted.variable} h-full antialiased`}
+      className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${GeistPixelGrid.variable} ${GeistPixelCircle.variable} ${GeistPixelTriangle.variable} ${GeistPixelLine.variable} ${unbounded.variable} ${redacted.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         {/* Shared delay group: moving between two icon buttons opens the second

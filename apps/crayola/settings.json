@@ -147,8 +147,8 @@
     "tileSizePx": 144
   },
   "typography": {
-    "sans": "Manrope",
-    "mono": "Space Mono",
+    "sans": "Geist",
+    "mono": "Geist Mono",
     "openingTitle": { "sizePx": 76, "weight": 500, "trackingEm": -0.02, "lineHeightPx": 84 },
     "openingByline": { "sizePx": 36, "weight": 500, "trackingEm": 0.01, "lineHeightPx": 38 },
     "hyperlinksTheme": { "sizePx": 82, "weight": 700, "trackingEm": 0.01, "underlinePx": 5 },

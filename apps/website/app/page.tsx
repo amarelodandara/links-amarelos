@@ -36,11 +36,11 @@ export default function Home() {
 
               <div className="w-full mr-3">
                 <div className="flex items-center justify-between">
-                  <p className="font-manrope font-bold tracking-tight">
+                  <p className="font-sans font-bold tracking-tight">
                     links amarelos #3
                   </p>
                 </div>
-                <p className="font-manrope text-sm">
+                <p className="font-sans text-sm">
                   maestros, saltos e seriedade
                 </p>
               </div>
@@ -59,11 +59,11 @@ export default function Home() {
               />
               <div className="w-full mr-3">
                 <div className="flex items-center justify-between">
-                  <p className="font-manrope font-bold tracking-tight">
+                  <p className="font-sans font-bold tracking-tight">
                     ondas amarelas #6
                   </p>
                 </div>
-                <p className="font-manrope text-sm">
+                <p className="font-sans text-sm">
                   autorrealização, autocriação
                 </p>
               </div>
@@ -82,7 +82,7 @@ export default function Home() {
           <div className="flex flex-col items-center py-16 aspect-square justify-around bg-[url('/bg-texture-cutting-pad.svg')] bg-cover">
             <SectionPill className="mx-auto">Explore</SectionPill>
 
-            <div className="font-manrope text-center mx-auto space-y-4">
+            <div className="font-sans text-center mx-auto space-y-4">
               <p className="w-2/3 mx-auto text-xl  font-semibold tracking-tigther leading-snug">
                 Newsletters e podcasts <br></br> são só o começo
               </p>
@@ -102,7 +102,7 @@ export default function Home() {
               Apoie
             </SectionPill>
 
-            <div className="font-manrope text-center mx-auto space-y-4 ">
+            <div className="font-sans text-center mx-auto space-y-4 ">
               <p className="w-2/3 mx-auto text-xl  font-semibold tracking-tigther leading-snug">
                 Junte-se aos canarinhos ou doe expontaneamente
               </p>
@@ -129,13 +129,13 @@ export default function Home() {
 
             <div className="flex flex-col items-center gap-2">
               <div>
-                <p className="font-manrope text-2xl font-bold tracking-tighter">
+                <p className="font-sans text-2xl font-bold tracking-tighter">
                   links amarelos #8
                 </p>
                 <p className="font-unbounded">ondas amarelas #8</p>
               </div>
 
-              <p className="w-3/4 font-manrope text-center text-sm">
+              <p className="w-3/4 font-sans text-center text-sm">
                 uma semana de pensamento com o Espírito Santo, amém
               </p>
             </div>
@@ -193,14 +193,14 @@ export default function Home() {
 
                 <div className="text-center flex flex-col items-center">
                   <div className="flex items-start gap-2">
-                    <p className="font-manrope font-bold text-lg tracking-tight">
+                    <p className="font-sans font-bold text-lg tracking-tight">
                       hyperlinks #1
                     </p>
 
                     <SectionPill className="mx-auto">grátis</SectionPill>
                   </div>
 
-                  <p className="text-sm w-4/5 font-manrope">
+                  <p className="text-sm w-4/5 font-sans">
                     o primeiro episódio dos hyperlinks{" "}
                     <span className="font-redacted text-sun-light">
                       amarelos
@@ -236,7 +236,7 @@ export default function Home() {
                 </div>
 
                 <div className="">
-                  <p className="font-manrope text-xl font-bold tracking-tight">
+                  <p className="font-sans text-xl font-bold tracking-tight">
                     links amarelos #9
                   </p>
                   <p className="font-unbounded text-sm">ondas amarelas #9</p>
@@ -246,7 +246,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="relative grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-0 py-20 font-manrope border-t border-sun bg-sun-light overflow-hidden">
+        <section className="relative grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-0 py-20 font-sans border-t border-sun bg-sun-light overflow-hidden">
           <div className=" px-12 flex flex-col justify-end gap-6">
             {" "}
             <p className="text-xl font-semibold tracking-tight leading-snug">
@@ -259,7 +259,7 @@ export default function Home() {
             </Button>
           </div>
 
-          <div className="font-manrope px-12">
+          <div className="font-sans px-12">
             <ul className="space-y-2 lowercase">
               <li className="">
                 <span className="font-semibold tracking-tight">Curadoria </span>

@@ -14,7 +14,7 @@ import {
   type CalculateMetadataFunction,
 } from "remotion";
 import { DITHERING, settings } from "../settings";
-import { GEIST_PIXEL, SANS } from "../design/fonts";
+import { PIXEL, SANS } from "../design/fonts";
 import { PLATFORM_ORDER, PlatformIcon } from "../design/PlatformIcon";
 import playerPng from "../design/assets/mp3-player.png";
 
@@ -223,7 +223,7 @@ const mirroredPath = (xs: number[], h: number[], cy: number) => {
  * Duas cópias do texto: quando a primeira passa inteira, volta ao zero e a
  * segunda está exatamente onde ela estava — o loop não tem emenda.
  */
-const Marquee: React.FC<{
+export const Marquee: React.FC<{
   text: string;
   left: number;
   top: number;
@@ -235,7 +235,7 @@ const Marquee: React.FC<{
 }> = ({ text, left, top, width, height, fontSize, lineHeight, textLeft }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const font = `${fontSize}px "${GEIST_PIXEL}"`;
+  const font = `${fontSize}px "${PIXEL}"`;
   const copyWidth = useMemo(() => {
     const ctx = document.createElement("canvas").getContext("2d");
     if (!ctx) return 1;
@@ -255,7 +255,7 @@ const Marquee: React.FC<{
           transformOrigin: "0% 0%",
           transform: `translateX(${-offset}px)`,
           whiteSpace: "pre",
-          fontFamily: GEIST_PIXEL,
+          fontFamily: PIXEL,
           fontSize,
           lineHeight: `${lineHeight}px`,
           color: c.sunLight,

@@ -137,7 +137,7 @@ function OgCanvas() {
               <img src="/icon.svg" alt="" className="w-32 h-32 shrink-0" />
             </div>
             <div className="col-span-4 min-w-0 flex items-center px-6 overflow-hidden bg-sun">
-              <p className="font-manrope font-semibold tracking-tight text-6xl leading-tight text-brand-black">
+              <p className="font-sans font-semibold tracking-tight text-6xl leading-tight text-brand-black">
                 Uma curadoria mensal do melhor que a internet ainda tem pra
                 oferecer
               </p>
@@ -163,7 +163,7 @@ function OgCanvas() {
           </div>
         </div>
       </div>
-      <span className="absolute top-3 left-3 text-[11px] font-space-mono text-brand-black/40">
+      <span className="absolute top-3 left-3 text-[11px] font-mono text-brand-black/40">
         {OG_WIDTH}×{OG_HEIGHT}
       </span>
     </div>
@@ -172,10 +172,10 @@ function OgCanvas() {
 
 export default function PlaygroundPage() {
   return (
-    <main className="font-space-mono min-h-screen bg-brand-white px-6 py-12">
+    <main className="font-mono min-h-screen bg-brand-white px-6 py-12">
       <div className="space-y-8">
         <div className="space-y-1">
-          <h1 className="text-2xl font-manrope font-semibold text-stone-900">
+          <h1 className="text-2xl font-sans font-semibold text-stone-900">
             Playground
           </h1>
           <p className="text-sm text-stone-600">
@@ -196,7 +196,7 @@ export default function PlaygroundPage() {
                 <p className="text-[11px] font-semibold text-stone-800">
                   {name}
                 </p>
-                <p className="text-[10px] text-stone-500 font-space-mono">
+                <p className="text-[10px] text-stone-500 font-mono">
                   {value}
                 </p>
                 <p className="text-[10px] text-stone-400 leading-snug">
@@ -220,7 +220,7 @@ export default function PlaygroundPage() {
                 <p className="text-[11px] font-semibold text-stone-800">
                   {name}
                 </p>
-                <p className="text-[10px] text-stone-500 font-space-mono">
+                <p className="text-[10px] text-stone-500 font-mono">
                   {value}
                 </p>
                 <p className="text-[10px] text-stone-400 leading-snug">
@@ -244,7 +244,7 @@ export default function PlaygroundPage() {
                 <p className="text-[11px] font-semibold text-stone-800">
                   {name}
                 </p>
-                <p className="text-[10px] text-stone-500 font-space-mono">
+                <p className="text-[10px] text-stone-500 font-mono">
                   {value}
                 </p>
                 <p className="text-[10px] text-stone-400 leading-snug">

@@ -304,7 +304,7 @@ export default function TasteSection() {
                 first link drops. */}
             <p
               aria-live="polite"
-              className={`absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-brand-black bg-(--sun) font-space-mono text-xs font-bold text-brand-black transition-[scale,opacity] duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
+              className={`absolute -top-2 -right-2 flex size-6 items-center justify-center rounded-full border border-brand-black bg-(--sun) font-mono text-xs font-bold text-brand-black transition-[scale,opacity] duration-400 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
                 released.length > 0
                   ? "scale-100 opacity-100"
                   : "pointer-events-none scale-0 opacity-0"

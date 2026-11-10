@@ -72,15 +72,15 @@ function RealizacaoCard({
           />
         ) : (
           <div className="size-20 rounded-sm border-2 border-dashed border-sun/40 flex items-center justify-center shrink-0">
-            <span className="font-space-mono text-xs text-sun-dark">
+            <span className="font-mono text-xs text-sun-dark">
               em breve
             </span>
           </div>
         )}
       </div>
 
-      <div className="min-w-0 space-y-2 font-manrope">
-        <h3 className="font-manrope font-semibold text-xl tracking-tight leading-tight lowercase">
+      <div className="min-w-0 space-y-2 font-sans">
+        <h3 className="font-sans font-semibold text-xl tracking-tight leading-tight lowercase">
           {name}
         </h3>
         {children}
@@ -120,7 +120,7 @@ export default function RealizacoesClient() {
           <br />
           links amarelos
         </h1>
-        <p className="font-manrope text-xl text-sun-lighter max-w-lg leading-relaxed">
+        <p className="font-sans text-xl text-sun-lighter max-w-lg leading-relaxed">
           Os links são só a semente, as realizações são os frutos.
         </p>
       </section>
@@ -195,11 +195,11 @@ export default function RealizacoesClient() {
               <tbody className="divide-y divide-sun">
                 <tr>
                   <td className="pr-4 py-1">câmera</td>
-                  <td className="py-1 text-right font-space-mono">não temos</td>
+                  <td className="py-1 text-right font-mono">não temos</td>
                 </tr>
                 <tr>
                   <td className="pr-4 py-1">canal no YouTube</td>
-                  <td className="py-1 text-right font-space-mono">não temos</td>
+                  <td className="py-1 text-right font-mono">não temos</td>
                 </tr>
               </tbody>
             </table>
@@ -345,10 +345,10 @@ export default function RealizacoesClient() {
 
       {/* Support CTA */}
       <section className="px-8 py-16 space-y-4 text-center bg-[url('/bg-texture-white.svg')] bg-repeat">
-        <p className="font-manrope text-xl font-semibold tracking-tight">
+        <p className="font-sans text-xl font-semibold tracking-tight">
           Essas realizações vivem do apoio de pessoas como você
         </p>
-        <p className="font-manrope text-center md:w-3/5 mx-auto leading-relaxed">
+        <p className="font-sans text-center md:w-3/5 mx-auto leading-relaxed">
           Cada assinante pago ajuda a manter o conteúdo principal gratuito e a
           financiar novos projetos.
         </p>

@@ -69,10 +69,10 @@ export default function TasteEnding({ onAgain }: TasteEndingProps) {
           />
           <div className="flex min-w-0 flex-1 flex-col items-start gap-2">
             <div>
-              <p className="font-manrope font-bold tracking-tight">
+              <p className="font-sans font-bold tracking-tight">
                 {media.name}
               </p>
-              <p className="font-space-mono text-xs lowercase text-brand-black/70">
+              <p className="font-mono text-xs lowercase text-brand-black/70">
                 {media.kind}
               </p>
             </div>

@@ -18,12 +18,12 @@ export default function Toaster() {
             className="flex items-start gap-3 rounded-sm border border-sun-light bg-white px-3 py-2 shadow-sm transition-all data-[ending-style]:opacity-0 data-[starting-style]:opacity-0 data-[ending-style]:translate-y-1 data-[starting-style]:translate-y-1 data-[type=error]:border-red-300"
           >
             <Toast.Content className="min-w-0 flex-1">
-              <Toast.Title className="font-manrope text-sm font-semibold lowercase text-stone-900" />
-              <Toast.Description className="font-space-mono text-xs lowercase text-stone-600" />
+              <Toast.Title className="font-sans text-sm font-semibold lowercase text-stone-900" />
+              <Toast.Description className="font-mono text-xs lowercase text-stone-600" />
             </Toast.Content>
             <Toast.Close
               aria-label="Fechar aviso"
-              className="shrink-0 rounded-sm px-1 font-space-mono text-xs text-stone-500 transition-colors hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1"
+              className="shrink-0 rounded-sm px-1 font-mono text-xs text-stone-500 transition-colors hover:text-stone-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-1"
             >
               ✕
             </Toast.Close>

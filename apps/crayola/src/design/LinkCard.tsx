@@ -1,6 +1,6 @@
 import { Img } from "remotion";
 import { settings } from "../settings";
-import { GEIST, GEIST_MONO } from "./fonts";
+import { SANS, MONO } from "./fonts";
 
 const c = settings.colors;
 
@@ -134,7 +134,7 @@ export const LinkCard: React.FC<{
           display: "flex",
           alignItems: "center",
           paddingLeft: 7,
-          fontFamily: GEIST_MONO,
+          fontFamily: MONO,
           fontSize: 8,
           color: "#000",
           whiteSpace: "nowrap",
@@ -205,12 +205,12 @@ export const LinkCard: React.FC<{
         }}
       >
         <div style={{ display: "flex", flexDirection: "column" }}>
-          <span style={{ fontFamily: GEIST, fontSize: 12, lineHeight: "16px", fontWeight: 500, color: c.brandBlack }}>
+          <span style={{ fontFamily: SANS, fontSize: 12, lineHeight: "16px", fontWeight: 500, color: c.brandBlack }}>
             {content.title}
           </span>
           <span
             style={{
-              fontFamily: GEIST_MONO,
+              fontFamily: MONO,
               fontSize: 8,
               lineHeight: "12px",
               color: `${c.brandBlack}B3`,
@@ -231,7 +231,7 @@ export const LinkCard: React.FC<{
             padding: "0 7px",
           }}
         >
-          <span style={{ fontFamily: GEIST_MONO, fontSize: 9, color: "#fff" }}>{content.action}</span>
+          <span style={{ fontFamily: MONO, fontSize: 9, color: "#fff" }}>{content.action}</span>
           <svg width={7} height={7} viewBox="0 0 7 7" fill="none" style={{ display: "block" }}>
             <path d="M1 6L6 1M2 1H6V5" stroke="#fff" strokeWidth={0.9} />
           </svg>

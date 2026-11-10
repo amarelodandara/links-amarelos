@@ -6,8 +6,8 @@
   --ink: var(--brand-black);
   --ink-soft: color-mix(in srgb, var(--brand-black) 55%, transparent);
   --ink-faint: color-mix(in srgb, var(--brand-black) 12%, transparent);
-  --sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
-  --mono: "Space Mono", ui-monospace, monospace;
+  --sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --mono: "Geist Mono", ui-monospace, monospace;
 }
 
 *,

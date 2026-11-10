@@ -116,7 +116,7 @@ export default function NavDrawer({
                       // bg-sun-light, and the white hover text measured 1.5:1
                       // on --sun. Both now stay brand-black; the yellow fill
                       // is what carries the hover state.
-                      className="flex px-6 py-3 font-manrope items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) text-brand-black hover:bg-(--sun) focus-visible:bg-(--sun) focus-visible:outline-none"
+                      className="flex px-6 py-3 font-sans items-center gap-2 [&:not(:last-child)]:border-b border-(--sun) text-brand-black hover:bg-(--sun) focus-visible:bg-(--sun) focus-visible:outline-none"
                     >
                       <span className="font-semibold lowercase text-lg tracking-tight">
                         {label}

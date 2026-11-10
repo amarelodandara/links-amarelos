@@ -169,7 +169,7 @@ export default function ManifestoPage() {
                   className="w-36 text-brand-black md:w-40"
                 />
                 <div className="space-y-1">
-                <p className="text-lg text-brand-black font-manrope lowercase font-semibold tracking-tight">
+                <p className="text-lg text-brand-black font-sans lowercase font-semibold tracking-tight">
                   Amarelo Dandara
                 </p>
                 <p className="text-sm">

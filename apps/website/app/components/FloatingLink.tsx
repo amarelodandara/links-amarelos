@@ -153,7 +153,7 @@ export default function FloatingLink({
               onMouseLeave={() => setHovered(false)}
             >
               <div className="bg-white border border-sun-light rounded-sm shadow-sm px-3 py-2 flex items-center gap-2">
-                <span className="font-manrope font-semibold text-sm text-stone-900 whitespace-nowrap">
+                <span className="font-sans font-semibold text-sm text-stone-900 whitespace-nowrap">
                   {title}
                 </span>
                 <IconButton

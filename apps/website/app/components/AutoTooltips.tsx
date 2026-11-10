@@ -131,7 +131,7 @@ export default function AutoTooltips() {
   return (
     <div className="flex flex-col gap-4  text-foreground">
       <div className="space-y-2">
-        <p className="font-manrope text-2xl tracking-tigther text-balance font-semibold">
+        <p className="font-sans text-2xl tracking-tigther text-balance font-semibold">
           Todo mês, recomendações de{" "}
           <span className={wordClass(0)}>textos</span>
           {", "}
@@ -143,12 +143,12 @@ export default function AutoTooltips() {
           {" ainda sem taxonomia vigente."}
         </p>
 
-        <p className="font-manrope text-lg">
+        <p className="font-sans text-lg">
           Uma curadoria opionada, profunda e otimista do melhor que a internet
           ainda tem pra oferecer.
         </p>
       </div>
-      <div className="bg-sun-light flex px-3 py-2 rounded-full text-xs font-space-mono justify-between items-center gap-2">
+      <div className="bg-sun-light flex px-3 py-2 rounded-full text-xs font-mono justify-between items-center gap-2">
         <div className="relative flex-1 overflow-hidden min-w-0">
           <span className="whitespace-nowrap block">
             {displayedUrl}
