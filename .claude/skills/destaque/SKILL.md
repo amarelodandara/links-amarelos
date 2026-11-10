@@ -3,6 +3,8 @@ name: destaque
 description: Gera o destaque (Reels 9:16) de um lançamento links + ondas — trecho do episódio com o mp3 player, as ondas da voz e a legenda palavra por palavra — a partir dos tempos que a Dandara passa, e diz onde e como postar. Use quando ela pedir destaque, reel, trecho do episódio, corte do podcast ou a peça de terça.
 ---
 
+> Caminhos relativos a `apps/studio/` (o estúdio no monorepo). Rode os comandos a partir de lá.
+
 # destaque
 
 Peça de D+ (terças, ver `docs/ciclo.md`): um trecho falado do episódio, em

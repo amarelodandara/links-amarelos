@@ -16,7 +16,10 @@
     "**/.next/**",
     "**/.next-verify/**",
     "**/out/**",
-    "**/build/**"
+    "**/build/**",
+    "apps/studio/outputs/**",
+    "apps/studio/whisper.cpp/**",
+    "apps/studio/input/**"
   ],
   "jsPlugins": [
     {

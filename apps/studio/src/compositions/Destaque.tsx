@@ -79,6 +79,7 @@ export const Destaque: React.FC<DestaqueProps> = ({ numero, audio, cover, durati
   return (
     <AbsoluteFill style={{ backgroundColor: c.sunLighter }}>
       <Audio src={staticFile(audio)} />
+      {/* eslint-disable anti-slop/no-shape-in-symbol-names -- `shape` é o nome da prop na lib, não escolha nossa. */}
       <Dithering
         speed={0}
         frame={(frame / fps) * 1000}

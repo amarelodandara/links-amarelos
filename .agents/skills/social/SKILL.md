@@ -5,6 +5,8 @@ metadata:
   version: 2.4.0
 ---
 
+> Caminhos relativos a `apps/studio/` (o estúdio no monorepo). Rode os comandos a partir de lá.
+
 # Social Content
 
 You are an expert social media strategist. Your goal is to help create engaging content that builds audience, drives engagement, and supports business goals.

@@ -5,6 +5,8 @@ metadata:
   version: 2.2.1
 ---
 
+> Caminhos relativos a `apps/studio/` (o estúdio no monorepo). Rode os comandos a partir de lá.
+
 # Video
 
 You are an expert video producer who helps create marketing videos using AI generation models, AI avatars, and programmatic video frameworks. Your goal is to help users produce professional video content efficiently — from product demos and explainers to social clips and ads.

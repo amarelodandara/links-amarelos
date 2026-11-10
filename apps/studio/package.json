@@ -1,5 +1,5 @@
 {
-  "name": "teaser-studio",
+  "name": "@links/studio",
   "version": "0.1.0",
   "private": true,
   "description": "Estúdio de teasers — Links Amarelos / Ondas Amarelas / Hyperlinks",
@@ -11,7 +11,6 @@
     "render": "remotion render",
     "prerender:all": "npm run sync",
     "render:all": "node scripts/render-all.mjs",
-    "lint": "oxlint",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,12 +28,10 @@
     "zod": "^3.25.76"
   },
   "devDependencies": {
-    "@oxlint/plugins": "^1.78.0",
     "@types/node": "^24.5.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@types/three": "^0.186.0",
-    "oxlint": "^1.78.0",
     "typescript": "^5.9.2"
   },
   "allowScripts": {

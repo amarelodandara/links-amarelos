@@ -18,7 +18,8 @@
   --code-light: #dbeafe;
   --code: #3b82f6;
   --code-dark: #1e40af;
-  --substack: #ff6719;
-  --spotify: #1db954;
+  --substack: #ff681a;
+  --spotify: #1ed760;
+  --youtube: #ff0000;
   --foreground: var(--brand-black);
 }

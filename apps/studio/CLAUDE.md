@@ -1,4 +1,8 @@
-# Crayola
+# Studio (ex-crayola)
+
+Vive em `apps/studio` no monorepo links-amarelos. Caminhos abaixo são
+relativos a esta pasta.
+
 
 Máquina de peças da marca **Links Amarelos**. Gera o que divulga cada edição
 nas redes, no site e no Substack. Não tem interface: o trabalho roda por
@@ -29,15 +33,15 @@ fio, nada.
 
 ## Skills de terceiros
 
-`social` e `video` (em `.agents/skills/`, de coreyhaines31/marketingskills,
-MIT) são referência de método: reaproveitamento, clipes, roteiro, calendário.
-Elas leem `.agents/product-marketing.md`, que manda pra `docs/`. Em voz,
+`social` e `video` (em `.agents/skills/` na raiz do monorepo, de
+coreyhaines31/marketingskills, MIT) são referência de método: reaproveitamento, clipes, roteiro, calendário.
+Elas leem `.agents/product-marketing.md` (na raiz), que manda pra `docs/`. Em voz,
 idioma e termos, `docs/` sempre vence os exemplos delas.
 
 ## Estilo
 
 A fonte da verdade visual (cores, tipografia, logos) é o site, em
-`~/Projects/links-amarelos`. O crayola segue o site; quando os dois
+`apps/site` deste monorepo. O estúdio segue o site; quando os dois
 divergirem, quem vale é o site.
 
 ## Escopo atual

@@ -3,6 +3,8 @@ name: anuncio
 description: Gera o anúncio "no ar agora!" (D0) de um lançamento links + ondas — still 4:5 pro feed e 9:16 pros stories — a partir de input/links+ondas-N/, e diz onde postar cada um, quando e com que cuidados. Use quando a Dandara pedir o anúncio, "no ar agora", a peça de D0 ou o kit de lançamento do #N.
 ---
 
+> Caminhos relativos a `apps/studio/` (o estúdio no monorepo). Rode os comandos a partir de lá.
+
 # anúncio ("no ar agora!")
 
 Peça de D0: avisa que a edição e o episódio saíram. Roda assim que a edição
