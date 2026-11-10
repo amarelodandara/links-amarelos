@@ -17,6 +17,20 @@ import {
   logoShowcaseSchema,
 } from "./compositions/LogoShowcase";
 import {
+  ColorShowcase,
+  calculateColorShowcaseMetadata,
+  colorShowcaseDefaults,
+  colorShowcaseSchema,
+} from "./compositions/ColorShowcase";
+import { BrandReel, brandReelDefaults, brandReelSchema, calculateBrandReelMetadata } from "./compositions/BrandReel";
+import { Mp3Loop, calculateMp3LoopMetadata, mp3LoopDefaults, mp3LoopSchema } from "./compositions/Mp3Loop";
+import {
+  TypeShowcase,
+  calculateTypeShowcaseMetadata,
+  typeShowcaseDefaults,
+  typeShowcaseSchema,
+} from "./compositions/TypeShowcase";
+import {
   CAROUSEL,
   CAROUSEL_SLIDE_COUNT,
   SQUARE,
@@ -56,6 +70,68 @@ export const RemotionRoot: React.FC = () => {
             schema={logoShowcaseSchema}
             defaultProps={logoShowcaseDefaults}
             calculateMetadata={calculateLogoShowcaseMetadata}
+            durationInFrames={1}
+            fps={FPS}
+            width={size.width}
+            height={size.height}
+          />
+        ))}
+      </Folder>
+
+      {/* Brand reel for a GIF: published pieces + the brand's parts. Needs --public-dir=outputs. */}
+      <Composition
+        id="BrandReel"
+        component={BrandReel}
+        schema={brandReelSchema}
+        defaultProps={brandReelDefaults}
+        calculateMetadata={calculateBrandReelMetadata}
+        durationInFrames={1}
+        fps={FPS}
+        width={1080}
+        height={1080}
+      />
+
+      {/* The destaque's mp3 player as a seamless loop, for a GIF. */}
+      <Composition
+        id="Mp3Loop"
+        component={Mp3Loop}
+        schema={mp3LoopSchema}
+        defaultProps={mp3LoopDefaults}
+        calculateMetadata={calculateMp3LoopMetadata}
+        durationInFrames={1}
+        fps={FPS}
+        width={1080}
+        height={1080}
+      />
+
+      {/* The Geist family in a phone browser, one video per aspect ratio. */}
+      <Folder name="type">
+        {Object.entries(LOGO_SHOWCASE_FORMATS).map(([ratio, size]) => (
+          <Composition
+            key={ratio}
+            id={`TypeShowcase-${ratio}`}
+            component={TypeShowcase}
+            schema={typeShowcaseSchema}
+            defaultProps={typeShowcaseDefaults}
+            calculateMetadata={calculateTypeShowcaseMetadata}
+            durationInFrames={1}
+            fps={FPS}
+            width={size.width}
+            height={size.height}
+          />
+        ))}
+      </Folder>
+
+      {/* The palette on a keyboard, one video per aspect ratio (same formats as the logo). */}
+      <Folder name="colors">
+        {Object.entries(LOGO_SHOWCASE_FORMATS).map(([ratio, size]) => (
+          <Composition
+            key={ratio}
+            id={`ColorShowcase-${ratio}`}
+            component={ColorShowcase}
+            schema={colorShowcaseSchema}
+            defaultProps={colorShowcaseDefaults}
+            calculateMetadata={calculateColorShowcaseMetadata}
             durationInFrames={1}
             fps={FPS}
             width={size.width}
