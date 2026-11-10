@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import react from "@vitejs/plugin-react";
@@ -50,9 +51,51 @@ function savePresets(): Plugin {
   };
 }
 
+const SCALES_FILE = fileURLToPath(new URL("../../packages/brand/src/scales.ts", import.meta.url));
+const TOKENS_SCRIPT = fileURLToPath(
+  new URL("../../packages/brand/scripts/gen-tokens.ts", import.meta.url),
+);
+/** First line of scales.ts as playground/serialize-scales.ts writes it. */
+const SCALES_HEADER = "// Color scales in OKLCH.";
+
+/**
+ * POST /__palette/scales writes the body to packages/brand/src/scales.ts, then
+ * regenerates tokens.css so CSS consumers see the change too.
+ */
+function saveScales(): Plugin {
+  return {
+    name: "palette-scales-save",
+    apply: "serve",
+    configureServer(server) {
+      server.middlewares.use("/__palette/scales", (req, res) => {
+        if (req.method !== "POST") {
+          res.statusCode = 405;
+          res.end();
+          return;
+        }
+        let body = "";
+        req.setEncoding("utf8");
+        req.on("data", (chunk: string) => {
+          body += chunk;
+        });
+        req.on("end", () => {
+          if (!body.startsWith(SCALES_HEADER)) {
+            res.statusCode = 400;
+            res.end("not a scales file");
+            return;
+          }
+          writeFileSync(SCALES_FILE, body, "utf8");
+          execFileSync(process.execPath, [TOKENS_SCRIPT]);
+          res.end("saved");
+        });
+      });
+    },
+  };
+}
+
 export default defineConfig({
   root: fileURLToPath(new URL("./playground", import.meta.url)),
-  plugins: [react(), savePresets()],
+  plugins: [react(), savePresets(), saveScales()],
   // Fixed address, so the bookmark always works: fail rather than move ports.
   server: { host: "127.0.0.1", port: 5199, strictPort: true },
 });

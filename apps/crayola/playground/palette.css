@@ -1,0 +1,177 @@
+/* The palette lab: every swatch in one row grouped by scale, the tuner on the right. */
+
+.palette {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  grid-template-areas:
+    "head   head"
+    "scales tuner";
+  align-items: start;
+  gap: 32px 40px;
+  min-height: 100vh;
+  padding: 24px 40px 56px;
+}
+
+.palette .masthead {
+  grid-area: head;
+}
+
+/* One line, never wrapping: each group grows by how many steps it has. */
+.scales {
+  grid-area: scales;
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 16px;
+  min-width: 0;
+}
+
+.scale {
+  flex-basis: 0;
+  min-width: 0;
+}
+
+.scale h2 {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.swatches {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border: 1.5px solid var(--ink);
+  background: var(--ink);
+  gap: 1.5px;
+}
+
+.swatch-cell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--brand-white);
+}
+
+.swatch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 200px;
+  padding: 8px;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+
+.swatch[aria-pressed="true"] {
+  outline: 3px solid var(--ink);
+  outline-offset: -6px;
+  z-index: 1;
+}
+
+.swatch:focus-visible {
+  outline: 3px solid var(--code-700);
+  outline-offset: -6px;
+}
+
+.swatch-step {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.swatch-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  line-height: 1.5;
+  opacity: 0.8;
+}
+
+/* Corner chip: what sRGB screens get instead of the P3 value. */
+.fallback {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 16px;
+  height: 16px;
+}
+
+/* The semantic name, under the swatch it names. */
+.swatch-name {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink-soft);
+}
+
+.swatch-name input {
+  width: 100%;
+  min-width: 0;
+  padding: 6px 6px;
+  border: 1.5px solid var(--ink-faint);
+  border-radius: 0;
+  background: #fff;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--ink);
+}
+
+.swatch-name input:focus-visible {
+  outline: none;
+  border-color: var(--ink);
+}
+
+.swatch-name input[aria-invalid="true"] {
+  border-color: #c2410c;
+}
+
+.swatch-name-problem {
+  color: #c2410c;
+}
+
+.tuner {
+  grid-area: tuner;
+  position: sticky;
+  top: 24px;
+}
+
+.compare {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  height: 72px;
+  margin-bottom: 4px;
+  border: 1.5px solid var(--ink);
+}
+
+.compare span {
+  display: flex;
+  align-items: end;
+  padding: 4px 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--ink);
+  text-shadow: 0 0 2px var(--brand-white);
+}
+
+.readout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 12px;
+  margin: 4px 0;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.readout dt {
+  color: var(--ink-soft);
+}
+
+.readout dd {
+  margin: 0;
+}
