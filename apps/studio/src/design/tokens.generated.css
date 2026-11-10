@@ -1,0 +1,24 @@
+/*
+ * GERADO por scripts/gen-tokens.mjs — não editar à mão.
+ * A fonte é a seção "colors" do settings.json.
+ *
+ * --background e --foreground são os papéis semânticos: o que a interface usa
+ * quando quer "o fundo" e "o texto", sem escolher um nome de marca.
+ */
+:root {
+  --background: #ffffff;
+  --brand-black: #110a03;
+  --brand-white: #fffbeb;
+  --brand-white-code: #f7faff;
+  --sun-lighter: #fef3c7;
+  --sun-light: #fde68a;
+  --sun: #ffcc00;
+  --sun-dark: #f59e0b;
+  --code-lighter: #eff6ff;
+  --code-light: #dbeafe;
+  --code: #3b82f6;
+  --code-dark: #1e40af;
+  --substack: #ff6719;
+  --spotify: #1db954;
+  --foreground: var(--brand-black);
+}

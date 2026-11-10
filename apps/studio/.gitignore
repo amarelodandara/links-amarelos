@@ -1,0 +1,16 @@
+node_modules/
+.DS_Store
+*.log
+
+# Assets renderizados — sobem manualmente pro Google Drive dedicado (seção 8)
+/outputs/
+
+# Remotion
+.remotion/
+
+# Material de cada lançamento (rascunho, capa) — a Dandara coloca, fica fora do git (ver docs/input.md)
+/input/*
+!/input/.gitkeep
+
+# whisper.cpp + modelo, baixados pelo scripts/transcribe.mjs
+/whisper.cpp/

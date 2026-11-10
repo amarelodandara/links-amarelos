@@ -1,0 +1,23 @@
+{
+  "editionNumber": 9,
+  "type": "links-ondas",
+  "airDate": "2026-08-22",
+  "tabs": [
+    {
+      "author": "Daniel Primata",
+      "image": "assets/01.png"
+    },
+    {
+      "author": "Marco Reis",
+      "image": "assets/02.png"
+    },
+    {
+      "author": "Brandon Sanderson",
+      "image": "assets/03.png"
+    },
+    {
+      "author": "Roberto Barreto",
+      "image": "assets/04.webp"
+    }
+  ]
+}

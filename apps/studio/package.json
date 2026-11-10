@@ -1,0 +1,43 @@
+{
+  "name": "teaser-studio",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Estúdio de teasers — Links Amarelos / Ondas Amarelas / Hyperlinks",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/gen-tokens.mjs && node scripts/sync-editions.mjs",
+    "prerender": "npm run sync",
+    "render": "remotion render",
+    "prerender:all": "npm run sync",
+    "render:all": "node scripts/render-all.mjs",
+    "lint": "oxlint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@paper-design/shaders-react": "^0.0.80",
+    "@remotion/captions": "4.0.507",
+    "@remotion/cli": "^4.0.507",
+    "@remotion/google-fonts": "^4.0.507",
+    "@remotion/install-whisper-cpp": "4.0.507",
+    "@remotion/media-utils": "4.0.507",
+    "@remotion/zod-types": "^4.0.507",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "remotion": "^4.0.507",
+    "three": "^0.186.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@oxlint/plugins": "^1.78.0",
+    "@types/node": "^24.5.0",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "@types/three": "^0.186.0",
+    "oxlint": "^1.78.0",
+    "typescript": "^5.9.2"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
