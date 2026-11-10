@@ -6,7 +6,7 @@
   "license": "UNLICENSED",
   "type": "module",
   "scripts": {
-    "sync": "node scripts/gen-tokens.mjs && node scripts/sync-editions.mjs",
+    "sync": "node scripts/sync-editions.mjs",
     "prerender": "npm run sync",
     "render": "remotion render",
     "prerender:all": "npm run sync",
@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@links/brand": "*",
     "@paper-design/shaders-react": "^0.0.80",
     "@remotion/captions": "4.0.507",
     "@remotion/cli": "^4.0.507",

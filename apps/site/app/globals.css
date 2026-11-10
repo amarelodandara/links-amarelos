@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@links/brand/tokens.css";
 
 /* LinkCard's interaction states. Each matches the real pseudo-class, or an
    ancestor's data-preview naming it, so /playground/link-card can pin every
@@ -35,17 +36,8 @@
        date pickers) don't get painted dark by the OS preference. */
     color-scheme: light;
 
-    --background: #ffffff;
-    --brand-black: #110a03;
-    --foreground: var(--brand-black);
-    --brand-white: #fffbeb;
-    --sun-lighter: #fef3c7;
-    --sun-light: #fde68a;
-    --sun: #ffcc00;
-    --sun-dark: #f59e0b;
-    --code-light: #dbeafe;
-    --code: #3b82f6;
-    --code-dark: #1e40af;
+    /* Palette: --background, --foreground and the brand colors come from
+       @links/brand (packages/brand/src/colors.ts), shared with the studio. */
 }
 
 @theme inline {

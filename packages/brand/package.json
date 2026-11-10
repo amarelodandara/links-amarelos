@@ -1,0 +1,19 @@
+{
+  "name": "@links/brand",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./tokens.css": "./tokens.css"
+  },
+  "scripts": {
+    "tokens": "node scripts/gen-tokens.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@links/config": "*",
+    "@types/node": "^24.5.0",
+    "typescript": "^6.0.3"
+  }
+}

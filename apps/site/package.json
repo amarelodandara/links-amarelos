@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",
+    "@links/brand": "*",
     "@vercel/analytics": "^2.0.1",
     "geist": "^1.7.2",
     "next": "16.2.9",

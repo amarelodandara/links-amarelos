@@ -133,22 +133,6 @@
     "secondsPerTab": 2.0,
     "ctaSeconds": 6.0
   },
-  "colors": {
-    "brandBlack": "#110A03",
-    "brandWhite": "#FFFBEB",
-    "brandWhiteCode": "#F7FAFF",
-    "sunLighter": "#FEF3C7",
-    "sunLight": "#FDE68A",
-    "sun": "#FFCC00",
-    "sunDark": "#F59E0B",
-    "codeLighter": "#EFF6FF",
-    "codeLight": "#DBEAFE",
-    "code": "#3B82F6",
-    "codeDark": "#1E40AF",
-    "substack": "#FF681A",
-    "spotify": "#1ED760",
-    "youtube": "#FF0000"
-  },
   "dithering": {
     "$comment": "Shader de fundo (@paper-design/shaders-react), mesmo preset nos dois temas.",
     "figure": "sphere",
@@ -177,7 +161,6 @@
     "ctaLink": { "sizePx": 40, "weight": 700, "lineHeightPx": 50 },
     "ctaDialogButton": { "sizePx": 24, "weight": 700, "trackingEm": 0.04 }
   },
-  "handle": "@linksamarelos",
   "ctaLinks": ["leia no substack", "ouça no spotify", "siga no instagram"],
   "ctaDialogs": {
     "$comment": "Cada CTA é uma caixa estilo diálogo do Windows 95: entram uma por vez, espalhadas. Sem easing de propósito — dialog antigo não anima, ele aparece de um frame pro outro. A posição de cada caixa é por proporção, em layouts.<formato>.ctaDialogs.",

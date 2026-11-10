@@ -23,7 +23,7 @@ npm run typecheck
 /content/<tipo>/<numero-slug>/edition.json + /assets   # entrada, versionado
 /outputs                                               # saída, gitignored
 /brand                                                 # logos e texturas
-settings.json                                          # formatos, timing, cores
+settings.json                                          # formatos, timing (cores: packages/brand)
 /src/compositions                                      # peças Remotion
 /scripts                                               # sync, render, fetch-og
 ```

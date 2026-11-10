@@ -1,6 +1,7 @@
 import { z } from "zod";
 import type { DitheringProps } from "@paper-design/shaders-react";
-import settings from "../settings.json";
+import { colors, handle } from "@links/brand";
+import settingsJson from "../settings.json";
 
 /**
  * Acesso tipado ao `settings.json` (seção 3.1 do plano). Substitui o antigo
@@ -8,7 +9,8 @@ import settings from "../settings.json";
  * visuais moram todas no JSON e este módulo só deriva o que é conveniência.
  */
 
-export { settings };
+/** Palette and handle come from @links/brand, shared with the site. */
+export const settings = { ...settingsJson, colors, handle };
 
 export const FPS = settings.fps;
 export const DURATION_IN_FRAMES = settings.durationInSeconds * settings.fps;
