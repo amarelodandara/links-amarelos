@@ -1,0 +1,43 @@
+{
+  "name": "@links/crayola",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Estúdio de teasers — Links Amarelos / Ondas Amarelas / Hyperlinks",
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "prerender": "npm run check-assets -w @links/content",
+    "render": "remotion render",
+    "prerender:all": "npm run check-assets -w @links/content",
+    "render:all": "node scripts/render-all.mjs",
+    "typecheck": "tsc --noEmit",
+    "studio": "remotion studio"
+  },
+  "dependencies": {
+    "@links/brand": "*",
+    "@links/content": "*",
+    "@paper-design/shaders-react": "^0.0.80",
+    "@remotion/captions": "4.0.507",
+    "@remotion/cli": "^4.0.507",
+    "@remotion/google-fonts": "^4.0.507",
+    "@remotion/install-whisper-cpp": "4.0.507",
+    "@remotion/media-utils": "4.0.507",
+    "@remotion/zod-types": "^4.0.507",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "remotion": "^4.0.507",
+    "three": "^0.186.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@links/config": "*",
+    "@types/node": "^24.5.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@types/three": "^0.186.0",
+    "typescript": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild": true
+  }
+}
