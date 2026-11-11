@@ -105,5 +105,9 @@ This is Next.js 16 — may differ from training data. Read
 internals. Heed deprecation notices.
 
 App Router: all routes live under `apps/website/app/`. `app/layout.tsx` wraps
-every page with the fonts and the nav. No dark mode — the palette is fixed to
-the light theme.
+every page with the fonts and the nav (hidden on `/`, where the network's HUD
+replaces it). Themes: light is the sun (yellow), dark leans on code
+(source/terminal). The home network maps colors through `--rede-*` roles in
+`globals.css`; a saved choice sits in `localStorage.theme` and lands on
+`<html data-theme>` before paint, otherwise the OS preference wins. Pages
+other than the home are still light-only until they migrate.

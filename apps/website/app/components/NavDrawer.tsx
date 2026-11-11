@@ -4,29 +4,7 @@ import type { CSSProperties } from "react";
 import { useRef, useState } from "react";
 import Link from "next/link";
 import { Popover } from "@base-ui/react/popover";
-
-const pages = [
-  {
-    href: "/sobre",
-    label: "Sobre",
-    tagline: "Conheça a história por trás dos links",
-  },
-  {
-    href: "/manifesto",
-    label: "Manifesto",
-    tagline: "Os quatro princípios que guiam tudo",
-  },
-  {
-    href: "/apoio",
-    label: "Apoio",
-    tagline: "Faça parte da comunidade",
-  },
-  {
-    href: "/realizacoes",
-    label: "Realizações",
-    tagline: "Descubra o que o apoio ajuda a realizar",
-  },
-];
+import { PAGES } from "../lib/pages";
 
 export default function NavDrawer({
   strokeWidth = 1.5,
@@ -105,7 +83,7 @@ export default function NavDrawer({
         >
           <Popover.Popup className="w-[var(--anchor-width)] border-b border-(--sun) bg-sun-light transition-[opacity,transform] duration-300 data-[starting-style]:opacity-0 data-[starting-style]:-translate-y-1 data-[ending-style]:opacity-0 data-[ending-style]:-translate-y-1">
             <nav aria-label="Páginas do site" className="flex flex-col">
-              {pages.map(({ href, label, tagline }) => (
+              {PAGES.map(({ href, label, tagline }) => (
                 <Popover.Close
                   key={href}
                   nativeButton={false}

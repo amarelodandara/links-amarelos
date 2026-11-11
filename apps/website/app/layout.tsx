@@ -7,6 +7,7 @@ import {
 import "./globals.css";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
+import { GeistSerif } from "geist/font/serif";
 import {
   GeistPixelSquare,
   GeistPixelGrid,
@@ -44,6 +45,8 @@ const redacted = Redacted({
   weight: ["400"],
 });
 
+const THEME_SCRIPT = `try{var t=localStorage.getItem("theme");if(t==="light"||t==="dark")document.documentElement.dataset.theme=t}catch(e){}`;
+
 export const metadata = {
   metadataBase: new URL("https://linksamarelos.com"),
   title: {
@@ -77,8 +80,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="pt-BR"
-      className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistPixelSquare.variable} ${GeistPixelGrid.variable} ${GeistPixelCircle.variable} ${GeistPixelTriangle.variable} ${GeistPixelLine.variable} ${unbounded.variable} ${redacted.variable} h-full antialiased`}
+      className={`${inter.variable} ${GeistSans.variable} ${GeistMono.variable} ${GeistSerif.variable} ${GeistPixelSquare.variable} ${GeistPixelGrid.variable} ${GeistPixelCircle.variable} ${GeistPixelTriangle.variable} ${GeistPixelLine.variable} ${unbounded.variable} ${redacted.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* A saved theme choice, applied before paint. Without one, CSS follows the OS. */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
       <body className="min-h-full flex flex-col">
         {/* Shared delay group: moving between two icon buttons opens the second
             tooltip instantly instead of waiting out the hover delay again. */}
@@ -88,6 +96,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               Pular para o conteúdo
             </a>
 
+            {/* The home is the network: its HUD carries the logo and support link. */}
+            <HideOnRoutes routes={["/"]}>
             <nav
               aria-label="Navegação principal"
               className="relative border-b border-(--sun) bg-sun-lighter py-3 px-6 flex justify-between items-center [padding-left:max(1.5rem,env(safe-area-inset-left))] [padding-right:max(1.5rem,env(safe-area-inset-right))]"
@@ -126,6 +136,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                 </HideOnRoutes>
               </div>
             </nav>
+            </HideOnRoutes>
             {/* Skip-link target. tabIndex=-1 so focus actually lands here rather
             than staying on the link and reading from the top again. */}
             <div
@@ -136,7 +147,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               {children}
             </div>
 
-            <SiteFooter />
+            <HideOnRoutes routes={["/"]}>
+              <SiteFooter />
+            </HideOnRoutes>
 
             <AgentationWidget />
             <Toaster />

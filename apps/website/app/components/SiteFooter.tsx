@@ -4,18 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import LogoOdometer from "./LogoOdometer";
 import ExternalLinkPill from "./ExternalLinkPill";
+import { PAGES } from "../lib/pages";
 
 // Routes that drop the "Páginas" column, so the page doesn't offer a way out to
 // every other route. Columns are spread with justify-between rather than a
 // fixed grid, so removing one redistributes the rest instead of leaving a hole.
 const NO_PAGE_LINKS = ["/manifesto"];
-
-const PAGES = [
-  { href: "/sobre", label: "Sobre" },
-  { href: "/manifesto", label: "Manifesto" },
-  { href: "/realizacoes", label: "Realizações" },
-  { href: "/apoio", label: "Apoio" },
-];
 
 const LINK_CLASS =
   "w-fit rounded-sm font-sans text-sm lowercase [touch-action:manipulation] transition-colors hover:text-brand-black focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sun-dark focus-visible:ring-offset-2";
