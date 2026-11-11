@@ -1,94 +1,111 @@
 "use client";
 
-import type { ReactNode, Ref } from "react";
+import type { MouseEvent, ReactNode } from "react";
 import Link from "next/link";
-import Button from "../Button";
 import LogoOdometer from "../LogoOdometer";
+import { PAGES } from "../../lib/pages";
+import type { HudLook } from "./hubDials";
 
 type HudProps = {
-  /** The status line's text node: the scene writes coordinates into it every frame. */
-  statusRef: Ref<HTMLSpanElement>;
+  /** Colors from the "navbar & footer" dials. */
+  look: HudLook;
+  /** Where the window in focus leads. */
+  status: string;
+  atHub: boolean;
+  /** Brings the hub back to the center. */
+  onHome: () => void;
   onToggleTheme: () => void;
 };
 
 /** A keycap, Fez / Watch Dogs style. */
 function Key({ children }: { children: ReactNode }) {
   return (
-    <kbd className="inline-grid min-w-7 place-items-center rounded-sm border-2 border-(--rede-ink) px-1.5 py-0.5 font-geist-mono text-[11px] leading-none text-(--rede-ink)">
+    <kbd className="inline-grid min-w-6 place-items-center rounded-sm border border-current px-1 py-0.5 font-geist-mono text-[10px] leading-none">
       {children}
     </kbd>
   );
 }
 
-const PANEL = "rounded-md border-2 border-(--rede-ink) bg-(--rede-hud) backdrop-blur-sm";
+/** One line of cells, split by vertical rules, edge to edge. Colors come from the dials. */
+const BAR = "fixed inset-x-0 z-20 flex h-11 items-stretch divide-x font-geist-mono text-xs whitespace-nowrap";
+const CELL = "flex items-center gap-2 px-4";
+const FOCUS = "focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-current";
 
 /**
- * The front layer: fixed chrome that never moves with the camera. Logo,
- * theme and support at the top; controls legend and status at the bottom.
+ * Fixed chrome above and below every window: it never moves with the scene.
+ * The navbar holds the logo, the pages, theme and support; the footer holds
+ * the controls and where the window in focus leads.
  */
-export default function Hud({ statusRef, onToggleTheme }: HudProps) {
+export default function Hud({ look, status, atHub, onHome, onToggleTheme }: HudProps) {
+  const LINK = `${CELL} ${look.hover} ${FOCUS}`;
+  function onLogo(e: MouseEvent<HTMLAnchorElement>) {
+    // Already home: the logo brings the hub window back to the center instead.
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+    e.preventDefault();
+    if (!atHub) onHome();
+  }
+
   return (
     <>
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-4 md:p-6">
-        <Link
-          href="/"
-          aria-label="links amarelos — página inicial"
-          className={`${PANEL} pointer-events-auto px-3 py-2 text-(--rede-ink) focus-visible:outline-2 focus-visible:outline-(--rede-accent)`}
-        >
+      <header className={`${BAR} ${look.bar} top-0 border-b`}>
+        <Link href="/" onClick={onLogo} aria-label="links amarelos — página inicial" className={`${LINK} flex-1 md:flex-none`}>
           <LogoOdometer interactive />
         </Link>
-        <div className="pointer-events-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onToggleTheme}
-            className={`${PANEL} grid size-11 place-items-center text-(--rede-ink) focus-visible:outline-2 focus-visible:outline-(--rede-accent)`}
-          >
-            <span className="rede-light-only">
-              <span className="sr-only">tema escuro</span>
-              <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-                <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="currentColor" />
-              </svg>
-            </span>
-            <span className="rede-dark-only">
-              <span className="sr-only">tema claro</span>
-              <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
-                <circle cx="12" cy="12" r="5" fill="currentColor" />
-                <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                  <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-                </g>
-              </svg>
-            </span>
-          </button>
+        <nav aria-label="Páginas" className={`hidden flex-1 items-stretch divide-x ${look.rules} md:flex`}>
+          {PAGES.map((page) => (
+            <Link key={page.href} href={page.href} className={LINK}>
+              {page.label}
+            </Link>
+          ))}
+          <span aria-hidden="true" className="flex-1" />
+        </nav>
+        {/* Without the page links (phones), the logo cell stretches to fill the line. */}
+        <button type="button" onClick={onToggleTheme} className={`${LINK} cursor-pointer`}>
           <span className="rede-light-only">
-            <Button variant="primary" href="/apoio" className="text-sm">
-              Apoie
-            </Button>
+            <span className="sr-only">tema escuro</span>
+            <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
+              <path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z" fill="currentColor" />
+            </svg>
           </span>
           <span className="rede-dark-only">
-            <Button variant="primary-inverted" href="/apoio" className="text-sm">
-              Apoie
-            </Button>
+            <span className="sr-only">tema claro</span>
+            <svg viewBox="0 0 24 24" className="size-4" aria-hidden="true">
+              <circle cx="12" cy="12" r="5" fill="currentColor" />
+              <g stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
+              </g>
+            </svg>
           </span>
-        </div>
+        </button>
+        <Link
+          href="/apoio"
+          className={`${CELL} ${look.support} font-semibold uppercase tracking-widest hover:brightness-110 ${FOCUS}`}
+        >
+          Apoie
+        </Link>
       </header>
 
-      <footer className="pointer-events-none fixed inset-x-0 bottom-0 z-20 flex items-end justify-between gap-4 p-4 md:p-6">
-        <dl
-          aria-label="controles"
-          className={`${PANEL} hidden gap-x-3 gap-y-2 px-3 py-2.5 font-sans text-xs text-(--rede-ink) [@media(pointer:fine)]:grid [grid-template-columns:auto_auto]`}
-        >
-          <dt><Key>arrastar</Key></dt>
-          <dd className="self-center">mover</dd>
-          <dt><Key>rolar</Key></dt>
-          <dd className="self-center">zoom</dd>
-          <dt><Key>tab</Key></dt>
-          <dd className="self-center">estações</dd>
-          <dt><Key>esc</Key></dt>
-          <dd className="self-center">voltar</dd>
+      <footer className={`${BAR} ${look.bar} bottom-0 border-t`}>
+        <dl aria-label="controles" className={`hidden items-stretch divide-x ${look.rules} [@media(pointer:fine)]:flex`}>
+          <div className={CELL}>
+            <dt><Key>clicar</Key></dt>
+            <dd>abrir janela</dd>
+          </div>
+          <div className={CELL}>
+            <dt><Key>tab</Key></dt>
+            <dd>janelas</dd>
+          </div>
+          <div className={CELL}>
+            <dt><Key>esc</Key></dt>
+            <dd>início</dd>
+          </div>
         </dl>
-        <p className={`${PANEL} ml-auto px-3 py-2 font-geist-mono text-[11px] text-(--rede-ink)`}>
-          <span ref={statusRef}>x 0 · y 0 · zoom 1.00</span>
+        <p className={`${CELL} min-w-0 flex-1 justify-end`}>
+          <span aria-live="polite" className="truncate">
+            {status}
+          </span>
         </p>
+        <p className={`${CELL} shrink-0`}>© {new Date().getFullYear()} amarelo dandara</p>
       </footer>
     </>
   );

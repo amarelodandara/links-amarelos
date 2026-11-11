@@ -72,6 +72,13 @@
     --font-inter: var(--font-inter);
     --font-unbounded: var(--font-unbounded);
     --font-redacted: var(--font-redacted);
+    /* A terminal caret: on, then off, no fade. */
+    --animate-blink: blink 1s steps(1) infinite;
+    @keyframes blink {
+        50% {
+            opacity: 0;
+        }
+    }
 }
 
 body {
@@ -248,16 +255,15 @@ body {
 .rede {
     --rede-bg: var(--sun);
     --rede-ink: var(--pen);
-    --rede-muted: color-mix(in oklab, var(--pen) 62%, transparent);
     --rede-field: var(--pen);
-    --rede-line-paginas: var(--pen);
-    --rede-line-edicoes: var(--source);
-    --rede-line-redes: var(--paint);
-    --rede-station: var(--paint);
-    --rede-panel: var(--paint);
-    --rede-panel-ink: var(--pen);
+    --rede-window: var(--sunray);
+    --rede-window-ink: var(--pen);
+    --rede-thread: var(--pen);
+    --rede-thread-far: color-mix(in oklab, var(--pen) 45%, transparent);
     --rede-accent: var(--source);
-    --rede-hud: color-mix(in oklab, var(--paint) 90%, transparent);
+    /* Marker on paper, behind words that open a recommendation. */
+    --rede-highlight: var(--sunshine);
+    --rede-highlight-hover: var(--sun);
     color-scheme: light;
     background: var(--rede-bg);
     color: var(--rede-ink);
@@ -265,32 +271,28 @@ body {
 :root[data-theme="dark"] .rede {
     --rede-bg: var(--terminal);
     --rede-ink: var(--paint);
-    --rede-muted: color-mix(in oklab, var(--paint) 65%, transparent);
     --rede-field: var(--source);
-    --rede-line-paginas: var(--paint);
-    --rede-line-edicoes: var(--sun);
-    --rede-line-redes: var(--source);
-    --rede-station: var(--pen);
-    --rede-panel: var(--pen);
-    --rede-panel-ink: var(--paint);
+    --rede-window: var(--pen);
+    --rede-window-ink: var(--paint);
+    --rede-thread: var(--paint);
+    --rede-thread-far: color-mix(in oklab, var(--paint) 40%, transparent);
     --rede-accent: var(--sun);
-    --rede-hud: color-mix(in oklab, var(--pen) 88%, transparent);
+    --rede-highlight: var(--source);
+    --rede-highlight-hover: var(--pencil);
     color-scheme: dark;
 }
 @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) .rede {
         --rede-bg: var(--terminal);
         --rede-ink: var(--paint);
-        --rede-muted: color-mix(in oklab, var(--paint) 65%, transparent);
         --rede-field: var(--source);
-        --rede-line-paginas: var(--paint);
-        --rede-line-edicoes: var(--sun);
-        --rede-line-redes: var(--source);
-        --rede-station: var(--pen);
-        --rede-panel: var(--pen);
-        --rede-panel-ink: var(--paint);
+        --rede-window: var(--pen);
+        --rede-window-ink: var(--paint);
+        --rede-thread: var(--paint);
+        --rede-thread-far: color-mix(in oklab, var(--paint) 40%, transparent);
         --rede-accent: var(--sun);
-        --rede-hud: color-mix(in oklab, var(--pen) 88%, transparent);
+        --rede-highlight: var(--source);
+        --rede-highlight-hover: var(--pencil);
         color-scheme: dark;
     }
 }
@@ -304,93 +306,29 @@ body {
     :root:not([data-theme]) .rede .rede-light-only { display: none; }
 }
 
-/* Depth: the field sits far back, lines on the plane, stations lifted off it.
-   The tilt rotates all three together, so they slide against each other. */
-.rede-tilt {
+/* The windows: anchored at the viewport center, each placed by the scene's
+   transform (which centers it on its own point), hidden until placed. */
+.rede-stage {
     position: absolute;
-    inset: 0;
+    left: 50%;
+    top: 50%;
     transform-style: preserve-3d;
 }
-.rede-field {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    /* scale(1 + depth / perspective) undoes the shrink of sitting 600px back. */
-    transform: translateZ(-600px) scale(1.43);
-}
-.rede-world {
+.rede-window {
     position: absolute;
     left: 0;
     top: 0;
     transform-origin: 0 0;
-    transform-style: preserve-3d;
+    opacity: 0;
+    backface-visibility: hidden;
 }
-.rede-station {
-    position: absolute;
-    transform: translate(-50%, -50%) translateZ(40px);
-    transition: transform 0.25s cubic-bezier(0.23, 1, 0.32, 1);
-}
-.rede-station[data-selected] {
-    transform: translate(-50%, -50%) translateZ(110px);
-}
-.rede-station:focus-visible {
-    outline: none;
-}
-.rede-station:focus-visible .rede-station-body {
+.rede-window-open:focus-visible {
     outline: 4px solid var(--rede-accent);
-    outline-offset: 6px;
+    outline-offset: -4px;
 }
 @media (hover: hover) and (pointer: fine) {
-    .rede-station:hover .rede-station-body {
-        transform: scale(1.06);
-    }
-}
-.rede-station-body {
-    transition: transform 0.16s ease-out;
-}
-.rede-station[data-selected] .rede-station-body {
-    outline: 4px solid var(--rede-accent);
-    outline-offset: 6px;
-}
-
-/* The detail panel: a side sheet on wide screens, a bottom sheet on phones. */
-.rede-panel {
-    position: fixed;
-    z-index: 30;
-    right: 24px;
-    top: 50%;
-    width: min(380px, calc(100vw - 48px));
-    max-height: calc(100dvh - 160px);
-    overflow: auto;
-    transform: translateY(-50%);
-    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.2s ease-out;
-}
-.rede-panel[data-starting-style],
-.rede-panel[data-ending-style] {
-    opacity: 0;
-    transform: translateY(-50%) translateX(24px);
-}
-@media (max-width: 640px) {
-    .rede-panel {
-        right: 12px;
-        left: 12px;
-        top: auto;
-        bottom: 12px;
-        width: auto;
-        max-height: 60dvh;
-        transform: none;
-    }
-    .rede-panel[data-starting-style],
-    .rede-panel[data-ending-style] {
-        transform: translateY(24px);
+    .rede-window-open:hover {
+        background: color-mix(in oklab, var(--rede-accent) 14%, transparent);
     }
 }
 
-@media (prefers-reduced-motion: reduce) {
-    .rede-station,
-    .rede-station-body,
-    .rede-panel {
-        transition: none;
-    }
-}

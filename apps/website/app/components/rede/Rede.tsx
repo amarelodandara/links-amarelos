@@ -1,139 +1,170 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { NODES, nodeById, nodeHref, nodeTitle } from "./graph";
-import type { RedeNode } from "./graph";
-import { FOCUS_ZOOM, clampCamera, easeOut, mix, overview, worldTransform, zoomAt } from "./camera";
-import type { Camera, Viewport } from "./camera";
-import { drawField } from "./field";
-import type { FieldStyle } from "./field";
-import Lines from "./Lines";
-import Station from "./Station";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { EDGES, HUB_ID, NODES, nodeById, nodePath } from "./graph";
+import { LAYERS, PERSPECTIVE, SHOWN, approach, center, curve, exitPoint, layout, poseTransform, quad } from "./scene";
+import type { Curve, Placement, Pose, Pt, Viewport } from "./scene";
+import Window from "./Window";
 import Hud from "./Hud";
-import Panel from "./Panel";
-import Boot from "./Boot";
+import Floats, { SLOTS } from "./Float";
+import { RedeContext } from "./context";
+import type { Extra, RedeApi } from "./context";
+import Field from "./Field";
+import { DialRoot } from "dialkit";
+import "dialkit/styles.css";
+import { HubLookContext, useHubDials, useHudDials, useSceneDials } from "./hubDials";
 
 /**
- * The home: a network you walk around, three layers deep.
- * - back: the field (dots and pixel glyphs), on a canvas pushed back in z;
- * - middle: metro lines on the plane and stations lifted off it;
- * - front: the HUD and the detail panel, fixed to the screen.
+ * The home: floating windows, three layers deep. The window in focus sits
+ * flat at the center; its neighbors hang around it, turned to face it; the
+ * rest float far back, small and out of focus. Opening a window brings it to
+ * the center and the others fall into place by how many hops away they are.
  *
- * The camera lives in refs and is written straight to the DOM every frame,
- * so dragging never re-renders React. Only the selection is state.
+ * Poses live in refs and are written straight to the DOM every frame, along
+ * with the threads between windows. Only the focus is React state.
  */
 
-const PERSPECTIVE = 1400;
-/** Max tilt toward the pointer, in degrees. */
-const TILT = 4;
-const FLY_MS = 700;
-/** A press that moves less than this is a click, not a drag. */
-const DRAG_SLOP = 5;
-const PAN_STEP = 80;
-const BOOT_KEY = "rede-boot";
+/** Time constant of the glide toward a new layout, in ms. */
+const GLIDE_MS = 140;
+/** How far the scene slides under the pointer, in world px at the focus layer. */
+const PARALLAX = 18;
+/** The glyph field's share of that slide: it sits behind everything. */
+const FIELD_PARALLAX = 0.4;
+/** Navbar plus footer height, in px: the rings fit between them. */
+const BARS = 88;
+/** Thread width in screen px. */
+const THREAD = 1.5;
 const THEME_KEY = "theme";
-/** Width the side panel takes on wide screens, so a selected station sits beside it. */
-const PANEL_ROOM = 404;
 
-type Flight = { from: Camera; to: Camera; start: number };
-type Press = { id: number; x: number; y: number };
-
-function readSession(key: string): string | null {
+function saveTheme(value: string): void {
   try {
-    return window.sessionStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-function writeStorage(storage: "local" | "session", key: string, value: string): void {
-  try {
-    (storage === "local" ? window.localStorage : window.sessionStorage).setItem(key, value);
+    window.localStorage.setItem(THEME_KEY, value);
   } catch {
     // Private mode or blocked storage: the choice just won't persist.
   }
 }
 
-const subscribeNever = () => () => {};
+/** The part of the viewport the rings may use: between the navbar and the footer. */
+const room = (v: Viewport): Viewport => ({ width: v.width, height: Math.max(1, v.height - BARS) });
 
-/** First visit this session, and motion allowed. Read once: later writes don't re-show it. */
-function wantsBoot(): boolean {
-  return readSession(BOOT_KEY) === null && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+function place(line: SVGLineElement, cx: number, cy: number, p: Pt, q: Pt, alpha: number): void {
+  line.setAttribute("x1", (cx + p.x).toFixed(1));
+  line.setAttribute("y1", (cy + p.y).toFixed(1));
+  line.setAttribute("x2", (cx + q.x).toFixed(1));
+  line.setAttribute("y2", (cy + q.y).toFixed(1));
+  line.style.opacity = alpha.toFixed(3);
 }
 
+const INITIAL = layout(HUB_ID, { width: 1280, height: 800 });
+
 export default function Rede() {
-  const rootRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
-  const tiltRef = useRef<HTMLDivElement>(null);
-  const worldRef = useRef<HTMLDivElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const statusRef = useRef<HTMLSpanElement>(null);
+  const windows = useRef(new Map<string, HTMLElement>());
+  const sharp = useRef(new Map<string, SVGLineElement>());
+  const soft = useRef(new Map<string, SVGLineElement>());
 
-  const vp = useRef<Viewport>({ width: 1, height: 1 });
-  const cam = useRef<Camera>({ x: 0, y: 0, zoom: 1 });
-  const flight = useRef<Flight | null>(null);
-  const tilt = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
-  const presses = useRef(new Map<number, Press>());
-  const dragged = useRef(false);
-  const pinch = useRef(0);
+  const vp = useRef<Viewport>({ width: 1280, height: 800 });
+  const targets = useRef<Map<string, Placement>>(INITIAL);
+  const poses = useRef(new Map<string, Pose>());
+  const pointer = useRef({ x: 0, y: 0, tx: 0, ty: 0 });
   const reduced = useRef(false);
-  const stations = useRef(new Map<string, HTMLAnchorElement>());
-  const fieldStyle = useRef<FieldStyle>({ color: "#110a03", font: "monospace" });
 
-  const [selected, setSelected] = useState<string | null>(null);
-  const [shown, setShown] = useState<RedeNode | null>(null);
-  const [bootDone, setBootDone] = useState(false);
-  const selectedRef = useRef<string | null>(null);
+  const [focus, setFocus] = useState(HUB_ID);
+  const [placed, setPlaced] = useState(INITIAL);
+  const focusRef = useRef(HUB_ID);
+  const [extras, setExtras] = useState<readonly Extra[]>([]);
+  const extrasRef = useRef<readonly Extra[]>([]);
+  const portal = useRef<HTMLDivElement>(null);
 
-  /* ── Camera ─────────────────────────────────────────────────────────── */
-
-  const flyTo = useCallback((to: Camera) => {
-    const target = clampCamera(to);
-    if (reduced.current) {
-      cam.current = target;
-      flight.current = null;
-      return;
-    }
-    flight.current = { from: cam.current, to: target, start: performance.now() };
+  const setOpenExtras = useCallback((next: readonly Extra[]) => {
+    extrasRef.current = next;
+    setExtras(next);
   }, []);
-
-  /** Camera that frames a station, leaving room for the panel when one opens. */
-  const frame = useCallback((node: RedeNode, withPanel: boolean): Camera => {
-    const zoom = Math.max(cam.current.zoom, FOCUS_ZOOM);
-    const wide = vp.current.width > 640;
-    if (!withPanel) return { x: node.at.x, y: node.at.y, zoom };
-    return wide
-      ? { x: node.at.x + PANEL_ROOM / 2 / zoom, y: node.at.y, zoom }
-      : { x: node.at.x, y: node.at.y + (vp.current.height * 0.2) / zoom, zoom };
-  }, []);
-
-  const select = useCallback(
-    (id: string | null) => {
-      selectedRef.current = id;
-      setSelected(id);
-      const node = id === null ? undefined : nodeById(id);
-      if (node) {
-        setShown(node);
-        flyTo(frame(node, true));
-      } else {
-        flyTo(overview(vp.current));
-      }
+  const spawn = useCallback(
+    (id: Extra) => {
+      if (!extrasRef.current.includes(id)) setOpenExtras([...extrasRef.current, id]);
     },
-    [flyTo, frame],
+    [setOpenExtras],
   );
+  // Scene windows shown outside the visible layers (the about window, from the +).
+  const [revealed, setRevealed] = useState<ReadonlySet<string>>(new Set());
+  const revealedRef = useRef<ReadonlySet<string>>(new Set());
+  const setOpenRevealed = useCallback((next: ReadonlySet<string>) => {
+    revealedRef.current = next;
+    setRevealed(next);
+  }, []);
+  const toggleReveal = useCallback(
+    (id: string) => {
+      const next = new Set(revealedRef.current);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+        // Start it a little further back and transparent, so it glides into place.
+        const t = targets.current.get(id);
+        if (t) poses.current.set(id, { ...t.pose, z: t.pose.z - 400, opacity: 0 });
+      }
+      setOpenRevealed(next);
+    },
+    [setOpenRevealed],
+  );
+  // The camera's step back once the intro is done: eased toward `target` in the loop.
+  const dolly = useRef({ now: 0, target: 0 });
+  const zoom = useRef({ out: 0, ms: 1400 });
+  const finishIntro = useCallback(() => {
+    dolly.current.target = zoom.current.out;
+  }, []);
+  const api = useMemo(
+    (): RedeApi => ({ spawn, revealed, toggleReveal, finishIntro, portal }),
+    [spawn, revealed, toggleReveal, finishIntro],
+  );
+
+  // Extra windows (newsletter, podcast) live in the scene too, placed by slot.
+  const extraEls = useRef(new Map<Extra, HTMLElement>());
+  const registerExtra = useCallback((id: Extra, el: HTMLElement | null) => {
+    if (el) extraEls.current.set(id, el);
+    else extraEls.current.delete(id);
+  }, []);
+
+  // The main window's look, tuned live from a DialKit panel (development only).
+  const [replay, setReplay] = useState(0);
+  const hubLook = useHubDials(() => setReplay((n) => n + 1), replay);
+  const hudLook = useHudDials();
+  const scene = useSceneDials();
+  // The frame loops read the curve from refs, so a dial change needs no restart.
+  const bent = useRef<Curve>(scene.windows);
+  const fieldCurve = useRef<Curve>(scene.field);
+  useEffect(() => {
+    bent.current = scene.windows;
+    fieldCurve.current = scene.field;
+    zoom.current = { out: scene.zoomOut, ms: scene.zoomMs };
+    // Already zoomed out: follow the dial live.
+    if (dolly.current.target > 0) dolly.current.target = scene.zoomOut;
+  }, [scene.windows, scene.field, scene.zoomOut, scene.zoomMs]);
+  const moved = useRef(false);
+
+  const open = useCallback((id: string) => {
+    if (!nodeById(id) || id === focusRef.current) return;
+    focusRef.current = id;
+    moved.current = true;
+    targets.current = layout(id, room(vp.current));
+    setPlaced(targets.current);
+    setFocus(id);
+  }, []);
+
+  // After a move, keyboard focus follows into the new center window.
+  useEffect(() => {
+    if (!moved.current) return;
+    document.getElementById(`janela-${focus}`)?.focus({ preventScroll: true });
+  }, [focus]);
 
   /* ── Frame loop ─────────────────────────────────────────────────────── */
 
   useEffect(() => {
-    const view = viewRef.current;
-    const maybeCanvas = canvasRef.current;
-    const root = rootRef.current;
-    if (!view || !maybeCanvas || !root) return;
-    // Typed binding: the hoisted resize() below doesn't see the narrowing above.
-    const canvas: HTMLCanvasElement = maybeCanvas;
-    const maybeCtx = canvas.getContext("2d");
-    if (!maybeCtx) return;
-    const ctx: CanvasRenderingContext2D = maybeCtx;
+    const maybeView = viewRef.current;
+    if (!maybeView) return;
+    // Typed binding: the hoisted functions below don't see the narrowing above.
+    const view: HTMLDivElement = maybeView;
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     reduced.current = motion.matches;
@@ -142,58 +173,85 @@ export default function Rede() {
     };
     motion.addEventListener("change", onMotion);
 
-    function readStyle(el: HTMLElement) {
-      const css = getComputedStyle(el);
-      fieldStyle.current = {
-        color: css.getPropertyValue("--rede-field").trim() || "#110a03",
-        font: css.getPropertyValue("--font-geist-pixel-square").trim() || "monospace",
-      };
-    }
-    readStyle(root);
-    const themeWatch = new MutationObserver(() => readStyle(root));
-    themeWatch.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
-    const scheme = window.matchMedia("(prefers-color-scheme: dark)");
-    const onScheme = () => readStyle(root);
-    scheme.addEventListener("change", onScheme);
-
-    function resize(el: HTMLElement) {
-      const r = el.getBoundingClientRect();
+    function resize() {
+      const r = view.getBoundingClientRect();
       vp.current = { width: r.width, height: r.height };
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = Math.round(r.width * dpr);
-      canvas.height = Math.round(r.height * dpr);
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      targets.current = layout(focusRef.current, room(vp.current));
+      setPlaced(targets.current);
     }
-    resize(view);
-    cam.current = overview(vp.current);
-    const observer = new ResizeObserver(() => resize(view));
+    resize();
+    const observer = new ResizeObserver(resize);
     observer.observe(view);
 
+    // The page opens straight on the map: every window starts where it rests.
+    for (const [id, t] of targets.current) poses.current.set(id, t.pose);
+
     let raf = 0;
-    const started = performance.now();
+    let last = performance.now();
     function tick(now: number) {
-      const f = flight.current;
-      if (f) {
-        const t = Math.min(1, (now - f.start) / FLY_MS);
-        cam.current = mix(f.from, f.to, easeOut(t));
-        if (t >= 1) flight.current = null;
+      const dt = Math.min(64, now - last);
+      last = now;
+      const k = reduced.current ? 1 : 1 - Math.exp(-dt / GLIDE_MS);
+      const pt = pointer.current;
+      pt.x += (pt.tx - pt.x) * (reduced.current ? 1 : 1 - Math.exp(-dt / 220));
+      pt.y += (pt.ty - pt.y) * (reduced.current ? 1 : 1 - Math.exp(-dt / 220));
+      // The zoom eases out over about `ms` (three time constants).
+      const dl = dolly.current;
+      const zk = reduced.current || zoom.current.ms <= 0 ? 1 : 1 - Math.exp((-dt * 3) / zoom.current.ms);
+      dl.now += (dl.target - dl.now) * zk;
+
+      /** A pose as the camera sees it: slid by the pointer, bent onto the curve, pushed back by the zoom. */
+      const seen = (p: Pose): Pose => {
+        const bentPose = curve({ ...p, x: p.x - pt.x * PARALLAX, y: p.y - pt.y * PARALLAX }, bent.current);
+        return { ...bentPose, z: bentPose.z - dl.now };
+      };
+
+
+      const quads = new Map<string, { q: Pt[]; c: Pt; pose: Pose }>();
+      for (const [id, t] of targets.current) {
+        const prev = poses.current.get(id) ?? t.pose;
+        const next = approach(prev, t.pose, k);
+        poses.current.set(id, next);
+        const shown = seen(next);
+        const el = windows.current.get(id);
+        if (!el) continue;
+        el.style.transform = poseTransform(shown);
+        el.style.opacity = next.opacity.toFixed(3);
+        el.style.filter = next.blur > 0.05 ? `blur(${next.blur.toFixed(2)}px)` : "none";
+        quads.set(id, { q: quad(shown, el.offsetWidth, el.offsetHeight), c: center(shown), pose: next });
       }
-      const tl = tilt.current;
-      tl.x += (tl.tx - tl.x) * 0.08;
-      tl.y += (tl.ty - tl.y) * 0.08;
 
-      const c = cam.current;
-      const world = worldRef.current;
-      if (world) world.style.transform = worldTransform(c, vp.current);
-      const tiltEl = tiltRef.current;
-      if (tiltEl) tiltEl.style.transform = `rotateX(${tl.y.toFixed(3)}deg) rotateY(${tl.x.toFixed(3)}deg)`;
-      drawField(ctx, vp.current, c, reduced.current ? 0 : (now - started) / 1000, fieldStyle.current);
+      for (const [id, el] of extraEls.current) {
+        const slot = SLOTS[id];
+        // Keep it on screen: its center no further out than the viewport allows.
+        const maxX = Math.max(0, vp.current.width / 2 - el.offsetWidth / 2 - 16);
+        const x = Math.max(-maxX, Math.min(maxX, slot.x));
+        const flat: Pose = { x, y: slot.y, z: 0, turn: 0, tilt: 0, scale: 1, blur: 0, opacity: 1 };
+        el.style.transform = poseTransform(seen(flat));
+      }
 
-      const status = statusRef.current;
-      if (status) {
-        const sel = selectedRef.current === null ? undefined : nodeById(selectedRef.current);
-        const where = sel ? ` · ${sel.kind === "page" ? nodeHref(sel) : nodeTitle(sel)}` : "";
-        status.textContent = `x ${Math.round(c.x)} · y ${Math.round(c.y)} · zoom ${c.zoom.toFixed(2)}${where}`;
+      const cx = vp.current.width / 2;
+      const cy = vp.current.height / 2;
+      for (const [a, b] of EDGES) {
+        const key = `${a}~${b}`;
+        const A = quads.get(a);
+        const B = quads.get(b);
+        const lineSharp = sharp.current.get(key);
+        const lineSoft = soft.current.get(key);
+        if (!lineSharp || !lineSoft) continue;
+        // A thread to a hidden layer's window is hidden with it.
+        if (!A || !B) {
+          lineSharp.style.opacity = "0";
+          lineSoft.style.opacity = "0";
+          continue;
+        }
+        const p = exitPoint(A.c, B.c, A.q);
+        const q = exitPoint(B.c, A.c, B.q);
+        // Crossfade a sharp thread into a soft grey one as either end drifts out of focus.
+        const haze = Math.min(1, Math.max(A.pose.blur, B.pose.blur) / LAYERS.far.blur);
+        const fade = Math.min(A.pose.opacity, B.pose.opacity) / LAYERS.focus.opacity;
+        place(lineSharp, cx, cy, p, q, (1 - haze) * fade);
+        place(lineSoft, cx, cy, p, q, haze * Math.min(1, fade * 1.6));
       }
       raf = requestAnimationFrame(tick);
     }
@@ -202,144 +260,33 @@ export default function Rede() {
     return () => {
       cancelAnimationFrame(raf);
       observer.disconnect();
-      themeWatch.disconnect();
-      scheme.removeEventListener("change", onScheme);
       motion.removeEventListener("change", onMotion);
     };
   }, []);
 
-  /* ── Boot, once per session ─────────────────────────────────────────── */
-
-  // Server and hydration render no boot; the client then decides from storage.
-  const shouldBoot = useSyncExternalStore(subscribeNever, wantsBoot, () => false);
-  const booting = shouldBoot && !bootDone;
+  /* ── Input ──────────────────────────────────────────────────────────── */
 
   useEffect(() => {
-    // Start zoomed out, so the network arrives as the log clears.
-    if (shouldBoot) cam.current = { ...cam.current, zoom: cam.current.zoom * 0.55 };
-  }, [shouldBoot]);
-
-  const bootEnded = useRef(false);
-  const endBoot = useCallback(() => {
-    // Skipping and the timer can both call this; only the first counts.
-    if (bootEnded.current) return;
-    bootEnded.current = true;
-    writeStorage("session", BOOT_KEY, "1");
-    flyTo(overview(vp.current));
-    setBootDone(true);
-  }, [flyTo]);
-
-  /* ── Input: drag, pinch, wheel, keys, tilt ──────────────────────────── */
-
-  useEffect(() => {
-    const view = viewRef.current;
-    if (!view) return;
-    const el: HTMLDivElement = view;
-
-    function onWheel(e: WheelEvent) {
-      e.preventDefault();
-      flight.current = null;
-      const r = el.getBoundingClientRect();
-      const factor = Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0015));
-      cam.current = zoomAt(cam.current, vp.current, { x: e.clientX - r.left, y: e.clientY - r.top }, factor);
-    }
-
     function onKey(e: KeyboardEvent) {
-      const target = e.target;
-      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return;
-      const c = cam.current;
-      const step = PAN_STEP / c.zoom;
-      const center = { x: vp.current.width / 2, y: vp.current.height / 2 };
-      switch (e.key) {
-        case "ArrowLeft":
-          flyTo({ ...c, x: c.x - step });
-          break;
-        case "ArrowRight":
-          flyTo({ ...c, x: c.x + step });
-          break;
-        case "ArrowUp":
-          flyTo({ ...c, y: c.y - step });
-          break;
-        case "ArrowDown":
-          flyTo({ ...c, y: c.y + step });
-          break;
-        case "+":
-        case "=":
-          flyTo(zoomAt(c, vp.current, center, 1.25));
-          break;
-        case "-":
-          flyTo(zoomAt(c, vp.current, center, 0.8));
-          break;
-        case "0":
-          flyTo(overview(vp.current));
-          break;
-        case "Escape":
-          if (selectedRef.current !== null) select(null);
-          return;
-        default:
-          return;
-      }
-      e.preventDefault();
+      if (e.key !== "Escape") return;
+      // Revealed windows close first; then Esc brings the hub back.
+      if (revealedRef.current.size > 0) setOpenRevealed(new Set());
+      else if (focusRef.current !== HUB_ID) open(HUB_ID);
     }
-
-    el.addEventListener("wheel", onWheel, { passive: false });
     window.addEventListener("keydown", onKey);
-    return () => {
-      el.removeEventListener("wheel", onWheel);
-      window.removeEventListener("keydown", onKey);
-    };
-  }, [flyTo, select]);
-
-  function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    presses.current.set(e.pointerId, { id: e.pointerId, x: e.clientX, y: e.clientY });
-    dragged.current = false;
-    pinch.current = 0;
-  }
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open, setOpenRevealed]);
 
   function onPointerMove(e: React.PointerEvent<HTMLDivElement>) {
+    if (e.pointerType !== "mouse") return;
     const r = e.currentTarget.getBoundingClientRect();
-    if (e.pointerType === "mouse" && !reduced.current) {
-      tilt.current.tx = ((e.clientX - r.left) / r.width - 0.5) * 2 * TILT;
-      tilt.current.ty = -((e.clientY - r.top) / r.height - 0.5) * 2 * TILT;
-    }
-    const prev = presses.current.get(e.pointerId);
-    if (!prev) return;
-    const all = [...presses.current.values()];
-
-    if (all.length >= 2) {
-      const other = all.find((p) => p.id !== e.pointerId);
-      if (!other) return;
-      const dist = Math.hypot(e.clientX - other.x, e.clientY - other.y);
-      if (pinch.current > 0) {
-        const mid = { x: (e.clientX + other.x) / 2 - r.left, y: (e.clientY + other.y) / 2 - r.top };
-        cam.current = zoomAt(cam.current, vp.current, mid, dist / pinch.current);
-      }
-      pinch.current = dist;
-      dragged.current = true;
-    } else {
-      const dx = e.clientX - prev.x;
-      const dy = e.clientY - prev.y;
-      if (!dragged.current && Math.hypot(dx, dy) < DRAG_SLOP) return;
-      if (!dragged.current) {
-        dragged.current = true;
-        flight.current = null;
-        // Capture only once it's a drag, so a plain click still lands on the station.
-        e.currentTarget.setPointerCapture(e.pointerId);
-      }
-      const c = cam.current;
-      cam.current = clampCamera({ ...c, x: c.x - dx / c.zoom, y: c.y - dy / c.zoom });
-    }
-    presses.current.set(e.pointerId, { id: e.pointerId, x: e.clientX, y: e.clientY });
-  }
-
-  function onPointerEnd(e: React.PointerEvent<HTMLDivElement>) {
-    presses.current.delete(e.pointerId);
-    pinch.current = 0;
+    pointer.current.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+    pointer.current.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
   }
 
   function onPointerLeave() {
-    tilt.current.tx = 0;
-    tilt.current.ty = 0;
+    pointer.current.tx = 0;
+    pointer.current.ty = 0;
   }
 
   /* ── Theme ──────────────────────────────────────────────────────────── */
@@ -350,71 +297,78 @@ export default function Rede() {
       html.dataset.theme ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const next = current === "dark" ? "light" : "dark";
     html.dataset.theme = next;
-    writeStorage("local", THEME_KEY, next);
+    saveTheme(next);
   }
 
-  const register = useCallback((id: string, el: HTMLAnchorElement | null) => {
-    if (el) stations.current.set(id, el);
-    else stations.current.delete(id);
+  const register = useCallback((id: string, el: HTMLElement | null) => {
+    if (el) windows.current.set(id, el);
+    else windows.current.delete(id);
   }, []);
 
-  const focusFly = useCallback(
-    (id: string) => {
-      const node = nodeById(id);
-      if (node) flyTo(frame(node, selectedRef.current !== null));
-    },
-    [flyTo, frame],
-  );
+  const focused = nodeById(focus);
 
   return (
-    <div ref={rootRef} className="rede relative h-dvh w-full overflow-hidden">
-      <div
-        ref={viewRef}
-        className="absolute inset-0 cursor-grab touch-none select-none active:cursor-grabbing"
-        style={{ perspective: PERSPECTIVE }}
-        onPointerDown={onPointerDown}
-        onPointerMove={onPointerMove}
-        onPointerUp={onPointerEnd}
-        onPointerCancel={onPointerEnd}
-        onPointerLeave={onPointerLeave}
-        onClickCapture={(e) => {
-          // A drag that ends over a station must not open it.
-          if (dragged.current) {
-            e.preventDefault();
-            e.stopPropagation();
-            dragged.current = false;
-          }
-        }}
-      >
-        <div ref={tiltRef} className="rede-tilt">
-          <canvas ref={canvasRef} aria-hidden="true" className="rede-field" />
-          <div ref={worldRef} className="rede-world">
-            <Lines />
-            <nav aria-label="Rede de páginas, edições e redes">
-              {NODES.map((node) => (
-                <Station
-                  key={node.id}
-                  node={node}
-                  selected={selected === node.id}
-                  onSelect={select}
-                  onFocusVisible={focusFly}
-                  register={register}
-                />
-              ))}
+    <RedeContext value={api}>
+      <HubLookContext value={hubLook}>
+        <div className="rede relative h-dvh w-full overflow-hidden">
+          <div
+            ref={viewRef}
+            className="absolute inset-0"
+            style={{ perspective: PERSPECTIVE }}
+            onPointerMove={onPointerMove}
+            onPointerLeave={onPointerLeave}
+          >
+            <Field pointer={pointer} slide={PARALLAX * FIELD_PARALLAX} curve={fieldCurve} dolly={dolly} />
+            <svg aria-hidden="true" className="absolute inset-0 size-full">
+              <defs>
+                <filter id="rede-haze" x="-10%" y="-10%" width="120%" height="120%">
+                  <feGaussianBlur stdDeviation="1.2" />
+                </filter>
+              </defs>
+              {EDGES.map(([a, b]) => {
+                const key = `${a}~${b}`;
+                return (
+                  <g key={key}>
+                    <line
+                      ref={(el) => {
+                        if (el) soft.current.set(key, el);
+                        else soft.current.delete(key);
+                      }}
+                      stroke="var(--rede-thread-far)"
+                      strokeWidth={THREAD * 1.6}
+                      filter="url(#rede-haze)"
+                      style={{ opacity: 0 }}
+                    />
+                    <line
+                      ref={(el) => {
+                        if (el) sharp.current.set(key, el);
+                        else sharp.current.delete(key);
+                      }}
+                      stroke="var(--rede-thread)"
+                      strokeWidth={THREAD}
+                      style={{ opacity: 0 }}
+                    />
+                  </g>
+                );
+              })}
+            </svg>
+            <nav aria-label="Janelas: páginas, edições e redes" className="rede-stage">
+              {NODES.map((node) => {
+                const layer = placed.get(node.id)?.layer ?? "far";
+                // The hub always shows: it's what the + and the threads lead back to.
+                if (!SHOWN.has(layer) && !revealed.has(node.id) && node.id !== HUB_ID) return null;
+                return <Window key={node.id} node={node} layer={layer} onOpen={open} register={register} />;
+              })}
             </nav>
+            <Floats open={extras} register={registerExtra} />
           </div>
-        </div>
-      </div>
 
-      <Hud statusRef={statusRef} onToggleTheme={toggleTheme} />
-      <Panel
-        node={shown}
-        open={selected !== null}
-        onClose={() => select(null)}
-        returnFocus={() => (shown ? (stations.current.get(shown.id) ?? null) : null)}
-        container={rootRef}
-      />
-      {booting && <Boot onDone={endBoot} />}
-    </div>
+
+          <div ref={portal} />
+          <Hud look={hudLook} status={focused ? nodePath(focused) : ""} atHub={focus === HUB_ID} onHome={() => open(HUB_ID)} onToggleTheme={toggleTheme} />
+        </div>
+        <DialRoot position="top-right" />
+      </HubLookContext>
+    </RedeContext>
   );
 }

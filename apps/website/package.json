@@ -14,6 +14,7 @@
     "@links/brand": "*",
     "@links/content": "*",
     "@vercel/analytics": "^2.0.1",
+    "dialkit": "^2.2.0",
     "geist": "^1.9.2",
     "next": "16.2.9",
     "react": "19.2.4",

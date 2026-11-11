@@ -8,6 +8,9 @@ import { NODES } from "./graph";
  * The boot log: one terminal line per thing the network loads, typed out over
  * the HUD, then gone. Built only from data (routes, hosts, status codes), so
  * it carries no copy of its own. Any key or click skips it.
+ *
+ * Not mounted anywhere: the home opens straight on the map. Kept for a 404
+ * or similar route.
  */
 
 type BootLine = { at: string; text: string };
